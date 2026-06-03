@@ -8,9 +8,10 @@ import {
 import { gsap } from 'gsap'
 
 @Component({
-  selector: 'app-ambient-background',
-  templateUrl: './ambient-background.component.html',
-  styleUrls: ['./ambient-background.component.scss'],
+    selector: 'app-ambient-background',
+    templateUrl: './ambient-background.component.html',
+    styleUrls: ['./ambient-background.component.scss'],
+    standalone: true,
 })
 export class AmbientBackgroundComponent implements AfterViewInit, OnDestroy {
   @ViewChild('ambientSvg', { static: true }) svgRef!: ElementRef<SVGElement>

@@ -1,15 +1,23 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core'
-import { Router } from '@angular/router'
+import { Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { Subject } from 'rxjs'
 import { SupabaseService } from 'src/app/services/supabase.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { TeamService } from 'src/app/services/team.service'
 import { UserService } from 'src/app/services/user.service'
+import { NgClass, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-toolbar',
-  templateUrl: './toolbar.component.html',
-  styleUrls: ['./toolbar.component.scss'],
+    selector: 'app-toolbar',
+    templateUrl: './toolbar.component.html',
+    styleUrls: ['./toolbar.component.scss'],
+    standalone: true,
+    imports: [
+        NgClass,
+        RouterLink,
+        RouterLinkActive,
+        NgIf,
+    ],
 })
 export class ToolbarComponent implements OnInit, OnDestroy {
   dropdownVisible = false

@@ -12,11 +12,15 @@ import { UserModel } from 'src/app/models/user.model'
 import { RosterModel } from 'src/app/models/roster.model'
 import { StandingsTeamModel } from 'src/app/models/standings.model'
 import { LeagueModel } from 'src/app/models/league.model'
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    standalone: true,
+    imports: [NgIf, FormsModule]
 })
 export class HomeComponent implements OnInit, OnDestroy {
   loading = false

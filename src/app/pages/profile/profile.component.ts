@@ -6,11 +6,15 @@ import { ToastService } from 'src/app/services/toast.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { UserModel } from 'src/app/models/user.model'
 import { LeagueModel } from 'src/app/models/league.model'
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.scss'],
+    standalone: true,
+    imports: [LoaderComponent, NgFor],
 })
 export class ProfileComponent implements OnInit {
   @Input() mode: 'my' | 'selected' = 'selected'

@@ -3,12 +3,15 @@ import { PlayerModel } from 'src/app/models/player.model';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { TEAM_COLORS } from 'src/app/constants/team-colors';
 import { zoomModalAnimation } from 'src/app/animations/zoom-modal.animation';
+import { NgStyle } from '@angular/common';
 
 @Component({
-  selector: 'app-player-modal',
-  templateUrl: './player-modal.component.html',
-  styleUrls: ['./player-modal.component.scss'],
-  animations: [zoomModalAnimation]
+    selector: 'app-player-modal',
+    templateUrl: './player-modal.component.html',
+    styleUrls: ['./player-modal.component.scss'],
+    animations: [zoomModalAnimation],
+    standalone: true,
+    imports: [NgStyle]
 })
 export class PlayerModalComponent {
   @Input() startPos!: { top: number, left: number, width: number, height: number };

@@ -5,12 +5,15 @@ import { MatchupDetailInput } from 'src/app/models/matchup-detail-input.interfac
 import { Player } from 'src/app/models/player.interface'
 import { PlayerModel } from 'src/app/models/player.model'
 import { PlayerService } from 'src/app/services/player.service'
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-matchup-modal',
-  templateUrl: './matchup-modal.component.html',
-  styleUrls: ['./matchup-modal.component.scss'],
-  animations: [zoomModalAnimation]
+    selector: 'app-matchup-modal',
+    templateUrl: './matchup-modal.component.html',
+    styleUrls: ['./matchup-modal.component.scss'],
+    animations: [zoomModalAnimation],
+    standalone: true,
+    imports: [NgIf, NgFor]
 })
 export class MatchupModalComponent implements OnChanges {
   @Input() matchupDetail!: MatchupDetailInput

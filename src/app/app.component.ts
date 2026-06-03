@@ -3,11 +3,24 @@ import { LeagueService } from './services/league.service'
 import { UserService } from './services/user.service'
 import { TeamService } from './services/team.service'
 import { PlayerService } from './services/player.service'
+import { AmbientBackgroundComponent } from './components/ambient-background/ambient-background.component';
+import { ToolbarComponent } from './components/toolbar/toolbar.component';
+import { ToastComponent } from './components/toast/toast.component';
+import { RouterOutlet } from '@angular/router';
+import { FooterComponent } from './components/footer/footer.component';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    standalone: true,
+    imports: [
+        AmbientBackgroundComponent,
+        ToolbarComponent,
+        ToastComponent,
+        RouterOutlet,
+        FooterComponent,
+    ],
 })
 export class AppComponent implements OnDestroy {
   title = 'XOMPER'

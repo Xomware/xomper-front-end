@@ -12,11 +12,24 @@ import { Router } from '@angular/router'
 import { UserService } from 'src/app/services/user.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { PlayerService } from 'src/app/services/player.service'
+import { NgStyle, NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { PlayerModalComponent } from '../../components/player-modal/player-modal.component';
 
 @Component({
-  selector: 'app-team',
-  templateUrl: './team.component.html',
-  styleUrls: ['./team.component.scss'],
+    selector: 'app-team',
+    templateUrl: './team.component.html',
+    styleUrls: ['./team.component.scss'],
+    standalone: true,
+    imports: [
+        NgStyle,
+        LoaderComponent,
+        NgClass,
+        NgIf,
+        NgFor,
+        NgTemplateOutlet,
+        PlayerModalComponent,
+    ],
 })
 export class TeamComponent implements OnInit {
   @Input() mode: 'my' | 'selected' = 'selected'

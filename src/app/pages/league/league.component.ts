@@ -20,11 +20,25 @@ import { RosterModel } from 'src/app/models/roster.model'
 import { StandingsTeamModel } from 'src/app/models/standings.model'
 import { MatchupDetailInput } from 'src/app/models/matchup-detail-input.interface'
 import { PlayoffBracketMatch } from 'src/app/models/playoff-bracket.interface'
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { NgClass, NgIf, NgFor, KeyValuePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatchupModalComponent } from '../../components/matchup-modal/matchup-modal.component';
 
 @Component({
-  selector: 'app-league',
-  templateUrl: './league.component.html',
-  styleUrls: ['./league.component.scss'],
+    selector: 'app-league',
+    templateUrl: './league.component.html',
+    styleUrls: ['./league.component.scss'],
+    standalone: true,
+    imports: [
+        LoaderComponent,
+        NgClass,
+        NgIf,
+        NgFor,
+        FormsModule,
+        MatchupModalComponent,
+        KeyValuePipe,
+    ],
 })
 export class LeagueComponent implements OnInit, OnDestroy {
   @Input() mode: 'my' | 'selected' = 'selected'

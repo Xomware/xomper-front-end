@@ -4,11 +4,20 @@ import { take } from 'rxjs'
 import { ToastService } from 'src/app/services/toast.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { UserService } from 'src/app/services/user.service'
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { FormsModule } from '@angular/forms';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-search',
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.scss'],
+    selector: 'app-search',
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.scss'],
+    standalone: true,
+    imports: [
+        LoaderComponent,
+        FormsModule,
+        NgIf,
+    ],
 })
 export class SearchComponent {
   loading = false

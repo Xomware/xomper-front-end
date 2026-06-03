@@ -10,9 +10,8 @@ describe('MatchupModalComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [MatchupModalComponent],
-      imports: [HttpClientTestingModule, BrowserAnimationsModule],
-    })
+    imports: [HttpClientTestingModule, BrowserAnimationsModule, MatchupModalComponent],
+})
     fixture = TestBed.createComponent(MatchupModalComponent)
     component = fixture.componentInstance
     component.matchupDetail = {

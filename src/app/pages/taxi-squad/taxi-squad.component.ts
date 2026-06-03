@@ -7,11 +7,25 @@ import { TaxiSquadPlayerModel } from 'src/app/models/taxi-squad-player.model'
 import { LeagueModel } from 'src/app/models/league.model'
 import { SupabaseService } from 'src/app/services/supabase.service'
 import { TEAM_COLORS } from 'src/app/constants/team-colors'
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgStyle, NgTemplateOutlet } from '@angular/common';
+import { TaxiSquadPlayerModalComponent } from '../../components/taxi-squad-player-modal/taxi-squad-player-modal.component';
 
 @Component({
-  selector: 'app-taxi-squad',
-  templateUrl: './taxi-squad.component.html',
-  styleUrls: ['./taxi-squad.component.scss'],
+    selector: 'app-taxi-squad',
+    templateUrl: './taxi-squad.component.html',
+    styleUrls: ['./taxi-squad.component.scss'],
+    standalone: true,
+    imports: [
+        LoaderComponent,
+        NgIf,
+        NgFor,
+        NgSwitch,
+        NgSwitchCase,
+        NgStyle,
+        NgTemplateOutlet,
+        TaxiSquadPlayerModalComponent,
+    ],
 })
 export class TaxiSquadComponent implements OnInit {
   league!: LeagueModel

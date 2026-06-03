@@ -5,11 +5,15 @@ import { SupabaseService } from 'src/app/services/supabase.service'
 import { UserService } from 'src/app/services/user.service'
 import { ToastService } from 'src/app/services/toast.service'
 import { UserModel } from 'src/app/models/user.model'
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-link-sleeper',
-  templateUrl: './link-sleeper.component.html',
-  styleUrls: ['./link-sleeper.component.scss']
+    selector: 'app-link-sleeper',
+    templateUrl: './link-sleeper.component.html',
+    styleUrls: ['./link-sleeper.component.scss'],
+    standalone: true,
+    imports: [NgIf, FormsModule]
 })
 export class LinkSleeperComponent implements OnInit, OnDestroy {
   sleeperUsername = ''

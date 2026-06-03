@@ -5,6 +5,9 @@ import { MatchupDetailInput } from 'src/app/models/matchup-detail-input.interfac
 import { LeagueService } from 'src/app/services/league.service'
 import { LeagueHistoryService, MatchupHistoryRecord } from 'src/app/services/league-history.service'
 import { ToastService } from 'src/app/services/toast.service'
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { NgIf, NgFor } from '@angular/common';
+import { MatchupModalComponent } from '../../components/matchup-modal/matchup-modal.component';
 
 interface WeekMatchups {
   week: number
@@ -12,9 +15,11 @@ interface WeekMatchups {
 }
 
 @Component({
-  selector: 'app-matchup-history',
-  templateUrl: './matchup-history.component.html',
-  styleUrls: ['./matchup-history.component.scss']
+    selector: 'app-matchup-history',
+    templateUrl: './matchup-history.component.html',
+    styleUrls: ['./matchup-history.component.scss'],
+    standalone: true,
+    imports: [LoaderComponent, NgIf, NgFor, MatchupModalComponent]
 })
 export class MatchupHistoryComponent implements OnInit {
   loading = false

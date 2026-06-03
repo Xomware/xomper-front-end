@@ -43,12 +43,11 @@ describe('TaxiSquadPlayerModalComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TaxiSquadPlayerModalComponent],
-      imports: [HttpClientTestingModule, BrowserAnimationsModule],
-      providers: [
+    imports: [HttpClientTestingModule, BrowserAnimationsModule, TaxiSquadPlayerModalComponent],
+    providers: [
         { provide: SupabaseService, useValue: mockSupabaseService },
-      ],
-    })
+    ],
+})
     fixture = TestBed.createComponent(TaxiSquadPlayerModalComponent)
     component = fixture.componentInstance
     component.player = mockTaxiPlayer

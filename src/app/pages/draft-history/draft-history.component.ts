@@ -5,6 +5,8 @@ import { LeagueService } from 'src/app/services/league.service'
 import { LeagueHistoryService, DraftHistoryRecord } from 'src/app/services/league-history.service'
 import { ToastService } from 'src/app/services/toast.service'
 import { TEAM_COLORS } from 'src/app/constants/team-colors'
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { NgIf, NgFor, NgStyle, NgClass } from '@angular/common';
 
 interface DraftRound {
   round: number
@@ -12,9 +14,11 @@ interface DraftRound {
 }
 
 @Component({
-  selector: 'app-draft-history',
-  templateUrl: './draft-history.component.html',
-  styleUrls: ['./draft-history.component.scss']
+    selector: 'app-draft-history',
+    templateUrl: './draft-history.component.html',
+    styleUrls: ['./draft-history.component.scss'],
+    standalone: true,
+    imports: [LoaderComponent, NgIf, NgFor, NgStyle, NgClass]
 })
 export class DraftHistoryComponent implements OnInit {
   loading = false

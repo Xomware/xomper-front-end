@@ -24,9 +24,8 @@ describe('PlayerModalComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [PlayerModalComponent],
-      imports: [BrowserAnimationsModule],
-    })
+    imports: [BrowserAnimationsModule, PlayerModalComponent],
+})
     fixture = TestBed.createComponent(PlayerModalComponent)
     component = fixture.componentInstance
     component.player = mockPlayer

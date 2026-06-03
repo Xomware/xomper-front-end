@@ -15,12 +15,15 @@ import { SupabaseService } from 'src/app/services/supabase.service'
 import { TaxiSquadService } from 'src/app/services/taxi-squad.service'
 import { ToastService } from 'src/app/services/toast.service'
 import { environment } from 'src/environments/environment'
+import { NgStyle, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-taxi-squad-player-modal',
-  templateUrl: './taxi-squad-player-modal.component.html',
-  styleUrls: ['./taxi-squad-player-modal.component.scss'],
-  animations: [zoomModalAnimation],
+    selector: 'app-taxi-squad-player-modal',
+    templateUrl: './taxi-squad-player-modal.component.html',
+    styleUrls: ['./taxi-squad-player-modal.component.scss'],
+    animations: [zoomModalAnimation],
+    standalone: true,
+    imports: [NgStyle, NgIf],
 })
 export class TaxiSquadPlayerModalComponent {
   @Input() startPos!: {
