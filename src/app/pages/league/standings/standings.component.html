@@ -1,0 +1,141 @@
+<!-- Toggle Buttons (League vs Divisions) -->
+<div class="switch-container">
+  <div class="view-buttons">
+    <button
+      class="view-button"
+      [ngClass]="{ selected: viewMode === 'league' }"
+      (click)="viewMode = 'league'"
+    >
+      League
+    </button>
+    <button
+      *ngIf="standings[0]?.hasDivision()"
+      class="view-button"
+      [ngClass]="{ selected: viewMode === 'division' }"
+      (click)="viewMode = 'division'"
+    >
+      Divisions
+    </button>
+  </div>
+</div>
+
+<!-- Standings -->
+<div class="standings">
+  <!-- League View -->
+  <ng-container *ngIf="viewMode === 'league'">
+    <div class="standings-header">
+      <span>#</span>
+      <span>Team</span>
+      <span>User</span>
+      <span>Wins</span>
+      <span>Losses</span>
+      <span>Streak</span>
+      <span>FPTS For</span>
+      <span>FPTS Against</span>
+      <span></span>
+    </div>
+
+    <div
+      class="standings-row"
+      *ngFor="let team of standings; let i = index"
+      [ngClass]="{ 'playoff-divider': i + 1 === leaguePlayoffTeams }"
+    >
+      <span
+        class="rank-number"
+        [ngClass]="{ gold: i === 0, silver: i === 1, bronze: i === 2 }"
+      >
+        {{ i + 1 }}
+      </span>
+      <div class="team-info">
+        <img [src]="team.avatar" class="team-pic" alt="Team Avatar" />
+        <span class="team-name">{{ team.teamName }}</span>
+      </div>
+      <span
+        class="user-name clickable"
+        title="View Profile"
+        (click)="goToUserProfile(team.user.user_id)"
+      >
+        {{ team.userName }}
+      </span>
+      <span>{{ team.wins }}</span>
+      <span>{{ team.losses }}</span>
+      <span
+        [ngClass]="{
+          'win-streak': team.streak.type === 'win',
+          'loss-streak': team.streak.type === 'loss'
+        }"
+      >
+        {{ team.streak.type === 'win' ? 'W' : 'L' }}{{ team.streak.total }}
+      </span>
+      <span>{{ team.fpts.toFixed(2) }}</span>
+      <span>{{ team.fptsAgainst.toFixed(2) }}</span>
+      <button class="team-more-btn" (click)="selectCurrentTeam(team)">
+        More
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- Division View -->
+  <ng-container *ngIf="viewMode === 'division'">
+    <div *ngFor="let division of standingsByDivision | keyvalue">
+      <div class="division-header">
+        <img
+          [src]="division.value[0].divisionAvatar || 'assets/img/nfl.png'"
+          class="division-pic"
+          alt="{{ division.key }}"
+        />
+        <h2 class="division-title">{{ division.key }}</h2>
+      </div>
+
+      <div class="standings-header">
+        <span>#</span>
+        <span>Team</span>
+        <span>User</span>
+        <span>Wins</span>
+        <span>Losses</span>
+        <span>Streak</span>
+        <span>FPTS For</span>
+        <span>FPTS Against</span>
+        <span></span>
+      </div>
+
+      <div
+        class="standings-row"
+        *ngFor="let team of division.value; let i = index"
+      >
+        <span
+          class="rank-number"
+          [ngClass]="{ gold: i === 0, silver: i === 1, bronze: i === 2 }"
+        >
+          {{ i + 1 }}
+        </span>
+        <div class="team-info">
+          <img [src]="team.avatar" class="team-pic" alt="Team Avatar" />
+          <span class="team-name">{{ team.teamName }}</span>
+        </div>
+        <span
+          class="user-name clickable"
+          title="View Profile"
+          (click)="goToUserProfile(team.user.user_id)"
+        >
+          {{ team.userName }}
+        </span>
+        <span>{{ team.wins }}</span>
+        <span>{{ team.losses }}</span>
+        <span
+          [ngClass]="{
+            'win-streak': team.streak.type === 'win',
+            'loss-streak': team.streak.type === 'loss'
+          }"
+        >
+          {{ team.streak.type === 'win' ? 'W' : 'L' }}{{ team.streak.total }}
+        </span>
+        <span>{{ team.fpts.toFixed(2) }}</span>
+        <span>{{ team.fptsAgainst.toFixed(2) }}</span>
+        <button class="team-more-btn" (click)="selectCurrentTeam(team)">
+          More
+        </button>
+      </div>
+    </div>
+  </ng-container>
+</div>

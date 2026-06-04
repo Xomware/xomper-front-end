@@ -1,0 +1,54 @@
+<app-loader [loading]="loading"></app-loader>
+
+<div class="bracket-container" *ngIf="playoffsLoaded">
+  <!-- Winners Bracket -->
+  <h2 class="bracket-title">Winners Bracket</h2>
+  <div class="bracket">
+    <div class="bracket-round" *ngFor="let roundData of bracketRounds">
+      <div class="round-label">Round {{ roundData.round }}</div>
+      <div class="round-matches">
+        <div
+          class="bracket-match"
+          *ngFor="let match of roundData.matches"
+          [class.championship]="match.p === 1"
+        >
+          <div class="match-label" *ngIf="getBracketMatchLabel(match)">
+            {{ getBracketMatchLabel(match) }}
+          </div>
+          <div class="bracket-team" [class.winner]="match.w === match.t1" [class.loser]="match.w && match.w !== match.t1">
+            <img [src]="getTeamAvatar(match.t1)" class="bracket-team-pic" alt="" />
+            <span class="bracket-team-name">{{ getTeamName(match.t1) }}</span>
+            <span class="bracket-seed" *ngIf="roundData.round === 1 && match.t1">{{ match.t1 }}</span>
+          </div>
+          <div class="bracket-team" [class.winner]="match.w === match.t2" [class.loser]="match.w && match.w !== match.t2">
+            <img [src]="getTeamAvatar(match.t2)" class="bracket-team-pic" alt="" />
+            <span class="bracket-team-name">{{ getTeamName(match.t2) }}</span>
+            <span class="bracket-seed" *ngIf="roundData.round === 1 && match.t2">{{ match.t2 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Losers Bracket -->
+  <div *ngIf="loserRounds.length > 0">
+    <h2 class="bracket-title consolation">Consolation Bracket</h2>
+    <div class="bracket">
+      <div class="bracket-round" *ngFor="let roundData of loserRounds">
+        <div class="round-label">Round {{ roundData.round }}</div>
+        <div class="round-matches">
+          <div class="bracket-match" *ngFor="let match of roundData.matches">
+            <div class="bracket-team" [class.winner]="match.w === match.t1" [class.loser]="match.w && match.w !== match.t1">
+              <img [src]="getTeamAvatar(match.t1)" class="bracket-team-pic" alt="" />
+              <span class="bracket-team-name">{{ getTeamName(match.t1) }}</span>
+            </div>
+            <div class="bracket-team" [class.winner]="match.w === match.t2" [class.loser]="match.w && match.w !== match.t2">
+              <img [src]="getTeamAvatar(match.t2)" class="bracket-team-pic" alt="" />
+              <span class="bracket-team-name">{{ getTeamName(match.t2) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

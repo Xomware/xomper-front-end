@@ -3,7 +3,6 @@ import { Routes, RouterModule } from '@angular/router'
 
 import { HomeComponent } from './pages/home/home.component'
 import { SearchComponent } from './pages/search/search.component'
-import { MyLeagueComponent } from './pages/my-league/my-league.component'
 import { LeagueComponent } from './pages/league/league.component'
 import { MyProfileComponent } from './pages/my-profile/my-profile.component'
 import { ProfileComponent } from './pages/profile/profile.component'
@@ -28,8 +27,80 @@ const routes: Routes = [
   { path: 'selected-league', component: LeagueComponent },
   { path: 'selected-team', component: SelectedTeamComponent },
 
-  // Flat authenticated routes (s1 — new shell destinations)
-  { path: 'league', component: MyLeagueComponent, canActivate: [AuthGuard] },
+  // League with nested child routes (s3)
+  {
+    path: 'league',
+    component: LeagueComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: '', redirectTo: 'standings', pathMatch: 'full' },
+      {
+        path: 'standings',
+        loadComponent: () =>
+          import('./pages/league/standings/standings.component').then(
+            (m) => m.StandingsComponent,
+          ),
+      },
+      {
+        path: 'matchups',
+        loadComponent: () =>
+          import('./pages/league/matchups/matchups.component').then(
+            (m) => m.MatchupsComponent,
+          ),
+      },
+      {
+        path: 'playoffs',
+        loadComponent: () =>
+          import('./pages/league/playoffs/playoffs.component').then(
+            (m) => m.PlayoffsComponent,
+          ),
+      },
+      {
+        path: 'world-cup',
+        loadComponent: () =>
+          import('./pages/league/world-cup/world-cup.component').then(
+            (m) => m.WorldCupComponent,
+          ),
+      },
+      {
+        path: 'rulebook',
+        loadComponent: () =>
+          import('./pages/league/rules/rulebook/rulebook.component').then(
+            (m) => m.RulebookComponent,
+          ),
+      },
+      {
+        path: 'scoring',
+        loadComponent: () =>
+          import('./pages/league/rules/scoring/scoring.component').then(
+            (m) => m.ScoringComponent,
+          ),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./pages/league/rules/league-settings/league-settings.component').then(
+            (m) => m.LeagueSettingsComponent,
+          ),
+      },
+      {
+        path: 'payouts',
+        loadComponent: () =>
+          import('./pages/league/rules/payouts/payouts.component').then(
+            (m) => m.PayoutsComponent,
+          ),
+      },
+      {
+        path: 'rule-proposals',
+        loadComponent: () =>
+          import('./pages/league/rules/rule-proposals/rule-proposals.component').then(
+            (m) => m.RuleProposalsComponent,
+          ),
+      },
+    ],
+  },
+
+  // Other authenticated flat routes
   { path: 'team', component: MyTeamComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: MyProfileComponent, canActivate: [AuthGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] },

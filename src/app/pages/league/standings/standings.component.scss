@@ -1,0 +1,238 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+
+// View Toggle Buttons
+.switch-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-lg;
+}
+
+.view-buttons {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.view-button {
+  background-color: rgba($dark-navy, 0.6);
+  color: $text-secondary;
+  border: 1px solid $surface-light;
+  border-radius: $radius-xl;
+  padding: 10px 24px;
+  margin: 0;
+  cursor: pointer;
+  font-size: $text-sm;
+  font-family: $font-body;
+  transition: all $transition-base;
+
+  &:hover:not(.selected) {
+    background-color: rgba($surface-light, 0.3);
+    color: $text-primary;
+  }
+
+  &.selected {
+    background: $red-accent;
+    color: white;
+    border-color: $accent-red;
+  }
+}
+
+// Standings Table
+.standings {
+  margin-top: $spacing-md;
+  display: flex;
+  flex-direction: column;
+}
+
+.standings-header,
+.standings-row {
+  display: grid;
+  grid-template-columns: 50px 2fr 1.5fr 0.7fr 0.7fr 0.8fr 1fr 1fr 90px;
+  gap: $spacing-sm;
+  align-items: center;
+  padding: 12px $spacing-md;
+
+  span,
+  .team-info,
+  .team-name,
+  .user-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+}
+
+.standings-header {
+  font-weight: 600;
+  font-size: $text-sm;
+  color: $text-secondary;
+  border-bottom: 2px solid $surface-light;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.standings-row {
+  background-color: rgba($dark-navy, 0.4);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-xs;
+  transition: transform $transition-base, background-color $transition-base;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateX(4px);
+    background-color: rgba($surface-light, 0.2);
+  }
+
+  .rank-number {
+    text-align: center;
+    font-weight: 700;
+    font-size: $text-lg;
+    font-family: $font-mono;
+
+    &.gold {
+      color: $champion-gold;
+      text-shadow: 0 0 10px rgba($champion-gold, 0.5);
+    }
+    &.silver {
+      color: silver;
+    }
+    &.bronze {
+      color: #cd7f32;
+    }
+  }
+}
+
+.team-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  min-width: 0;
+}
+
+.team-pic {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  object-fit: cover;
+  border: 2px solid $surface-light;
+  flex-shrink: 0;
+}
+
+.team-name {
+  font-size: $text-sm;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.user-name {
+  font-size: $text-sm;
+  color: $text-secondary;
+
+  &.clickable {
+    color: $steel-blue;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+      color: lighten($steel-blue, 15%);
+      text-decoration: underline;
+    }
+  }
+}
+
+.standings-row.playoff-divider {
+  border-bottom: 3px solid $accent-red;
+  margin-bottom: $spacing-sm;
+}
+
+.team-more-btn {
+  background: $steel-blue;
+  color: white;
+  border: none;
+  border-radius: $radius-xl;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: $text-sm;
+  margin: 0;
+  transition: all $transition-base;
+
+  &:hover {
+    background-color: darken($steel-blue, 10%);
+    transform: scale(1.05);
+  }
+}
+
+.win-streak {
+  color: $success-green !important;
+  font-weight: 700;
+  font-family: $font-mono;
+}
+
+.loss-streak {
+  color: $error-red !important;
+  font-weight: 700;
+  font-family: $font-mono;
+}
+
+// Division View
+.division-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  margin-top: $spacing-xl;
+  margin-bottom: $spacing-md;
+}
+
+.division-pic {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-full;
+  object-fit: cover;
+  border: 2px solid $champion-gold;
+}
+
+.division-title {
+  font-family: $font-display;
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
+  color: $champion-gold;
+}
+
+// Mobile
+@media (max-width: 768px) {
+  .standings-header,
+  .standings-row {
+    grid-template-columns: 30px 1.5fr 0.5fr 0.5fr 50px;
+    font-size: $text-xs;
+    padding: 8px $spacing-xs;
+    gap: $spacing-xs;
+
+    span:nth-child(3),
+    span:nth-child(6),
+    span:nth-child(7),
+    span:nth-child(8) {
+      display: none;
+    }
+
+    .team-info {
+      gap: $spacing-xs;
+    }
+  }
+
+  .team-pic {
+    width: 28px;
+    height: 28px;
+  }
+
+  .rank-number {
+    font-size: $text-sm !important;
+  }
+
+  .team-more-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+}

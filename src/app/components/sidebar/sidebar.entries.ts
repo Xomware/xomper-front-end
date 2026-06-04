@@ -1,6 +1,6 @@
 /**
  * Sidebar entry data table — mirrors iOS TrayDestination order.
- * Update route targets here as later stubs (s3–s9) build each destination.
+ * s3: all 9 league destinations now point at flat child routes under /league/...
  * Admin entries are filtered by ShellLayoutComponent based on SupabaseService.isAdmin.
  */
 
@@ -35,22 +35,17 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         label: 'Standings',
         icon: '🏆',
-        route: '/league',
-        // s3 splits to /league/standings
+        route: '/league/standings',
       },
       {
         label: 'Matchups',
         icon: '⚔️',
-        route: '/league',
-        queryParams: { tab: 'matchups' },
-        // s3 splits to /league/matchups
+        route: '/league/matchups',
       },
       {
         label: 'Playoffs',
         icon: '🎯',
-        route: '/league',
-        queryParams: { tab: 'playoffs' },
-        // s3 splits
+        route: '/league/playoffs',
       },
       {
         label: 'Draft History',
@@ -61,9 +56,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         label: 'World Cup',
         icon: '🌍',
-        route: '/league',
-        queryParams: { tab: 'worldcup' },
-        // s3 splits
+        route: '/league/world-cup',
       },
     ],
   },
@@ -94,43 +87,32 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         label: 'Rulebook',
         icon: '📖',
-        route: '/league',
-        queryParams: { tab: 'rules' },
-        // s3 splits
+        route: '/league/rulebook',
       },
       {
         label: 'Scoring',
         icon: '⚡',
-        route: '/league',
-        queryParams: { tab: 'rules' },
-        // s3 splits
+        route: '/league/scoring',
       },
       {
         label: 'League Settings',
         icon: '⚙️',
-        route: '/league',
-        queryParams: { tab: 'rules' },
-        // s3 splits
+        route: '/league/settings',
       },
       {
         label: 'Payouts',
         icon: '💰',
-        route: '/league',
-        queryParams: { tab: 'rules' },
-        // s3 splits
+        route: '/league/payouts',
       },
       {
         label: 'Rule Proposals',
         icon: '🗳️',
-        route: '/league',
-        queryParams: { tab: 'rules' },
-        // s3 splits
+        route: '/league/rule-proposals',
       },
       {
         label: 'Draft Order',
         icon: '🎲',
         route: '/league',
-        queryParams: { tab: 'rules' },
         // TODO(s9): builds the component
         placeholder: true,
       },

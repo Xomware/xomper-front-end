@@ -1,0 +1,18 @@
+<div class="rules-section">
+  <h2 class="rules-section-title">Scoring Settings</h2>
+  <div class="scoring-grid">
+    <div class="scoring-category" *ngFor="let category of scoringCategories">
+      <h3 class="scoring-category-name">{{ category.name }}</h3>
+      <div class="scoring-row" *ngFor="let setting of category.settings">
+        <span class="scoring-label">{{ setting.label }}</span>
+        <span
+          class="scoring-value"
+          [class.positive]="setting.value > 0"
+          [class.negative]="setting.value < 0"
+        >
+          {{ setting.value > 0 ? '+' : '' }}{{ setting.value }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,140 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+
+.bracket-container {
+  padding: $spacing-md 0;
+}
+
+.bracket-title {
+  font-family: $font-display;
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+  color: $champion-gold;
+  text-align: center;
+  margin-bottom: $spacing-lg;
+
+  &.consolation {
+    color: $text-secondary;
+    margin-top: $spacing-2xl;
+  }
+}
+
+.bracket {
+  display: flex;
+  gap: $spacing-lg;
+  overflow-x: auto;
+  padding: $spacing-md;
+  align-items: flex-start;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  min-width: 220px;
+}
+
+.round-label {
+  font-family: $font-display;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  color: $text-secondary;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: $spacing-sm;
+}
+
+.round-matches {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  justify-content: space-around;
+  min-height: 100%;
+}
+
+.bracket-match {
+  background: rgba($dark-navy, 0.6);
+  border: 1px solid rgba($surface-light, 0.3);
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &.championship {
+    border-color: rgba($champion-gold, 0.5);
+    box-shadow: 0 0 12px rgba($champion-gold, 0.15);
+  }
+}
+
+.match-label {
+  text-align: center;
+  font-family: $font-display;
+  font-size: $text-sm;
+  letter-spacing: 0.05em;
+  color: $champion-gold;
+  padding: 4px;
+  background: rgba($champion-gold, 0.1);
+}
+
+.bracket-team {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: 10px $spacing-md;
+  transition: background-color $transition-fast;
+
+  &:first-of-type {
+    border-bottom: 1px solid rgba($surface-light, 0.2);
+  }
+
+  &.winner {
+    background: rgba($success-green, 0.12);
+
+    .bracket-team-name {
+      color: $success-green;
+      font-weight: 700;
+    }
+  }
+
+  &.loser {
+    opacity: 0.6;
+  }
+}
+
+.bracket-team-pic {
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-full;
+  object-fit: cover;
+  border: 1px solid $surface-light;
+  flex-shrink: 0;
+}
+
+.bracket-team-name {
+  font-size: $text-sm;
+  font-weight: 500;
+  color: $text-primary;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bracket-seed {
+  font-size: $text-xs;
+  font-family: $font-mono;
+  color: $text-muted;
+  background: rgba($surface-light, 0.2);
+  padding: 2px 6px;
+  border-radius: $radius-sm;
+}
+
+// Mobile
+@media (max-width: 768px) {
+  .bracket {
+    gap: $spacing-md;
+    padding: $spacing-sm;
+  }
+
+  .bracket-round {
+    min-width: 180px;
+  }
+}

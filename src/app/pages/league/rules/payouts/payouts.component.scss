@@ -1,0 +1,50 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+
+.rules-section {
+  margin-bottom: $spacing-xl;
+}
+
+.rules-section-title {
+  font-family: $font-display;
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  color: $champion-gold;
+  margin: 0 0 $spacing-md;
+}
+
+.payouts-content {
+  font-size: $text-sm;
+  color: $text-secondary;
+  line-height: 1.7;
+
+  strong {
+    color: $text-primary;
+  }
+}
+
+:host ::ng-deep .rules-table {
+  width: 100%;
+  margin: $spacing-xs 0;
+  border-collapse: collapse;
+  font-size: $text-xs;
+
+  th {
+    text-align: left;
+    padding: 6px 10px;
+    background: rgba($surface-light, 0.08);
+    color: $champion-gold;
+    font-weight: 600;
+    border-bottom: 1px solid rgba($surface-light, 0.15);
+  }
+
+  td {
+    padding: 5px 10px;
+    border-bottom: 1px solid rgba($surface-light, 0.06);
+    color: $text-secondary;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
