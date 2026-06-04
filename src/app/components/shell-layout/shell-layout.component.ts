@@ -53,14 +53,7 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    const profile = this.supabase.getProfile()
-    // Admin if role field is set; fall back to false while profile loads
-    // The whitelisted_users table has a role field; profile table doesn't surface it
-    // directly here. Use SupabaseService.getWhitelistedUser check via a simple pattern:
-    // for now, read from profile if role were present, else check email-based heuristic.
-    // The real admin gate will use the whitelisted_users.role column via s7.
-    // For s1 purposes: hide Admin section for everyone (safest default).
-    return false
+    return this.supabase.isAdmin
   }
 
   toggleDrawer(): void {

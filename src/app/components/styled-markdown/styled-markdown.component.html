@@ -1,0 +1,40 @@
+<div class="styled-markdown">
+  <ng-container *ngFor="let block of blocks">
+    <ng-container [ngSwitch]="block.kind">
+
+      <!-- h1 — white title -->
+      <h1
+        *ngSwitchCase="'h1'"
+        class="md-h1"
+        [innerHTML]="block.safeHtml"
+      ></h1>
+
+      <!-- h2 — red bar + uppercase red text -->
+      <div *ngSwitchCase="'h2'" class="md-h2-wrapper">
+        <div class="md-h2-bar"></div>
+        <h2 class="md-h2" [innerHTML]="block.safeHtml"></h2>
+      </div>
+
+      <!-- h3 — gold subheader -->
+      <h3
+        *ngSwitchCase="'h3'"
+        class="md-h3"
+        [innerHTML]="block.safeHtml"
+      ></h3>
+
+      <!-- blockquote — gold left bar + italic emerald-tinted body -->
+      <div *ngSwitchCase="'quote'" class="md-quote">
+        <div class="md-quote__bar"></div>
+        <p class="md-quote__body" [innerHTML]="block.safeHtml"></p>
+      </div>
+
+      <!-- paragraph — body text with **bold** rendered inline -->
+      <p
+        *ngSwitchDefault
+        class="md-paragraph"
+        [innerHTML]="block.safeHtml"
+      ></p>
+
+    </ng-container>
+  </ng-container>
+</div>

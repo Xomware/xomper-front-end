@@ -127,7 +127,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: '🤖',
         route: '/ai-review',
         adminOnly: true,
-        placeholder: true, // TODO(s6): builds the component
       },
       {
         label: 'Admin',

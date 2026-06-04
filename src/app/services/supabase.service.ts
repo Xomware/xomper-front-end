@@ -55,8 +55,10 @@ export class SupabaseService {
 
       if (session?.user) {
         this.loadProfile(session.user.id)
+        this.loadWhitelistedUser(session.user.email ?? null)
       } else {
         this.currentProfile.next(null)
+        this._whitelistedUser.next(null)
       }
 
       if (!this.initialized.value) {
@@ -74,6 +76,7 @@ export class SupabaseService {
 
       if (session?.user) {
         this.loadProfile(session.user.id)
+        this.loadWhitelistedUser(session.user.email ?? null)
       }
     } catch {
       // Session init failed silently
@@ -92,6 +95,19 @@ export class SupabaseService {
         if (data && !error) {
           this.currentProfile.next(data as Profile)
         }
+      })
+  }
+
+  private loadWhitelistedUser(email: string | null): void {
+    if (!email) return
+    this.supabase
+      .from('whitelisted_users')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .eq('is_active', true)
+      .maybeSingle()
+      .then(({ data }) => {
+        this._whitelistedUser.next(data ? (data as WhitelistedUser) : null)
       })
   }
 
@@ -243,6 +259,20 @@ export class SupabaseService {
   isAuthenticated(): boolean {
     return !!this.currentUser.value
   }
+
+  /** True when the current whitelisted_users row has role = 'admin'. */
+  get isAdmin(): boolean {
+    const wu = this._whitelistedUser.value
+    return wu?.role === 'admin'
+  }
+
+  /** Observable that emits true/false as the whitelist row resolves. */
+  get isAdmin$() {
+    return this._whitelistedUser$.pipe(map(wu => wu?.role === 'admin'))
+  }
+
+  private _whitelistedUser = new BehaviorSubject<WhitelistedUser | null>(null)
+  private _whitelistedUser$ = this._whitelistedUser.asObservable()
 
   getUser(): User | null {
     return this.currentUser.value

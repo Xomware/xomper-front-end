@@ -113,9 +113,23 @@ const routes: Routes = [
   { path: 'profile', component: MyProfileComponent, canActivate: [AuthGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] },
 
-  // Placeholder redirects for stub destinations (s6/s7/s8 will replace these)
-  { path: 'ai-review', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'ai-review/:id', redirectTo: 'home', pathMatch: 'full' },
+  // AI Review hub (s6)
+  {
+    path: 'ai-review',
+    loadComponent: () =>
+      import('./pages/ai-review/list/ai-review-list.component').then(
+        (m) => m.AiReviewListComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'ai-review/:id',
+    loadComponent: () =>
+      import('./pages/ai-review/detail/ai-review-detail.component').then(
+        (m) => m.AiReviewDetailComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
   { path: 'admin', redirectTo: 'home', pathMatch: 'full' },
   { path: 'team-analyzer', redirectTo: 'team', pathMatch: 'full' },
 

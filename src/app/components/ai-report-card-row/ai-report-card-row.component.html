@@ -1,0 +1,23 @@
+<button
+  class="card-row"
+  type="button"
+  (click)="onClick()"
+  [attr.aria-label]="typeLabel + ' ' + formattedPeriod + ': ' + snippet"
+>
+  <div class="card-row__header">
+    <span
+      class="card-row__chip"
+      [ngStyle]="{ 'background-color': accentColor, color: '#1a1a1a' }"
+    >{{ typeLabel }}</span>
+    <span class="card-row__period">{{ formattedPeriod }}</span>
+    <span class="card-row__date">{{ relativeDate }}</span>
+  </div>
+
+  <p class="card-row__snippet">{{ snippet }}</p>
+
+  <div class="card-row__footer">
+    <svg class="card-row__chevron" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+      <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+    </svg>
+  </div>
+</button>
