@@ -63,13 +63,14 @@
 
 ## [2026-06-04 00:35] — Step 18: Commit + PR
 
-- **Action**: Staged all changes, committed, pushed, opened PR.
-- **Files changed**: see PR diff
+- **Action**: Staged all 43 files, committed (`eae4d5d`), pushed, opened PR #81.
+- **Files changed**: 43 files, 3516 insertions, 3005 deletions
 - **Result**: success
 
 ## Final Summary
 
 - Issue: #80
+- PR: #81 (https://github.com/Xomware/xomper-front-end/pull/81)
 - Branch: `feature/80-league-surface-split`
 - Build: clean (pre-existing budget warning only)
 - Test delta: zero regressions (7/12 failing on both baseline and s3 — pre-existing `HttpClient` DI misses in unrelated specs)
