@@ -1,0 +1,18 @@
+<div class="dialog-overlay" *ngIf="visible" (click)="cancel()">
+  <div class="dialog-box" (click)="$event.stopPropagation()">
+    <h3 class="dialog-title">{{ config.title }}</h3>
+    <p class="dialog-message">{{ config.message }}</p>
+    <div class="dialog-actions">
+      <button class="btn-cancel" (click)="cancel()">
+        {{ config.cancelLabel ?? 'Cancel' }}
+      </button>
+      <button
+        class="btn-confirm"
+        [class.destructive]="config.destructive"
+        (click)="confirm()"
+      >
+        {{ config.confirmLabel ?? 'Confirm' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
-import { Observable, forkJoin, of, EMPTY, expand, reduce, throwError } from 'rxjs'
+import { Observable, forkJoin, of, EMPTY, expand, reduce } from 'rxjs'
 import { map, catchError, take } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 import {
@@ -10,6 +10,16 @@ import {
   mapAiReport,
 } from '../models/ai-report.model'
 import { AiReportType } from '../models/ai-report-type.enum'
+import {
+  AiReviewTriggerOpts,
+  AiReviewTriggerResponse,
+  AiReviewTriggerResponseRaw,
+  AiReviewPreview,
+  AiReviewPreviewRaw,
+  AiReportRaw,
+  ReportFlagResponse,
+  ReportFlagResponseRaw,
+} from '../models/ai-review-trigger.model'
 
 export interface AiReportListResult {
   rows: AiReport[]
@@ -54,6 +64,116 @@ export class AiReviewService {
       Authorization: `Bearer ${this.apiAuthToken}`,
       'Content-Type': 'application/json',
     })
+  }
+
+  /**
+   * Public surface for admin components: fetch the latest report of a given type.
+   * Promotes the private fetchLatest — mirrors iOS XomperAPIClient.fetchLatestAIReport.
+   */
+  getLatest(type: AiReportType): Observable<AiReport | null> {
+    return this.fetchLatest(type)
+  }
+
+  /**
+   * Admin: trigger an AI Review report.
+   * Maps to one of four backend endpoints based on type.
+   * week/seasonsBack are omitted from the JSON body entirely when absent (not sent as null).
+   */
+  trigger(type: AiReportType, opts: AiReviewTriggerOpts): Observable<AiReviewTriggerResponse> {
+    const endpoint = this._triggerEndpoint(type)
+    const body: Record<string, unknown> = {
+      dry_run: opts.dryRun,
+      force: opts.force,
+    }
+    if (opts.week !== undefined) body['week'] = opts.week
+    if (opts.seasonsBack !== undefined) body['seasons_back'] = opts.seasonsBack
+
+    return this.http
+      .post<AiReviewTriggerResponseRaw>(endpoint, body, { headers: this.headers })
+      .pipe(
+        map((raw) => this._mapTriggerResponse(raw)),
+        catchError((err) => {
+          const message = err?.error?.message ?? err?.message ?? 'Trigger failed'
+          return of({
+            success: false,
+            report: null,
+            previews: [],
+            dryRun: opts.dryRun,
+            message,
+          })
+        }),
+      )
+  }
+
+  /**
+   * Admin: set a boolean flag on a report row.
+   * flag: 'do_not_broadcast' | 'redact'
+   * Mirrors iOS XomperAPIClient.setReportFlag.
+   */
+  setReportFlag(
+    report: AiReport,
+    flag: 'do_not_broadcast' | 'redact',
+    value: boolean,
+  ): Observable<ReportFlagResponse> {
+    // Derive leagueId and period from the report (period is the sk value).
+    const body = {
+      league_id: report.leagueId,
+      report_type: report.reportType,
+      period: report.period,
+      flag,
+      value,
+    }
+    return this.http
+      .post<ReportFlagResponseRaw>(`${this.apiUrl}/admin/reports-flag`, body, {
+        headers: this.headers,
+      })
+      .pipe(
+        map((raw): ReportFlagResponse => ({ success: raw.success, metadata: raw.metadata ?? {} })),
+      )
+  }
+
+  private _triggerEndpoint(type: AiReportType): string {
+    switch (type) {
+      case 'postDraft':   return `${this.apiUrl}/admin/ai-review-postdraft-trigger`
+      case 'preseason':   return `${this.apiUrl}/admin/ai-review-preseason-trigger`
+      case 'weekly':      return `${this.apiUrl}/admin/ai-review-weekly-trigger`
+      case 'weekPreview': return `${this.apiUrl}/admin/ai-review-week-preview-trigger`
+      default:            return `${this.apiUrl}/admin/ai-review-weekly-trigger`
+    }
+  }
+
+  private _mapTriggerResponse(raw: AiReviewTriggerResponseRaw): AiReviewTriggerResponse {
+    let report: AiReport | null = null
+    if (raw.report) {
+      const r = raw.report as AiReportRaw
+      const id = r.id ?? `${r.pk ?? ''}|${r.sk ?? ''}`
+      report = {
+        id,
+        leagueId: r.league_id,
+        reportType: r.report_type,
+        period: r.period,
+        bodyMarkdown: r.body_markdown,
+        metadata: r.metadata ?? {},
+        createdAt: r.created_at,
+        model: r.model ?? null,
+        promptVersion: r.prompt_version ?? null,
+      }
+    }
+    const previews: AiReviewPreview[] = (raw.previews ?? []).map((p: AiReviewPreviewRaw) => ({
+      userId: p.user_id,
+      displayName: p.display_name,
+      email: p.email,
+      subject: p.subject,
+      bodyHtml: p.body_html,
+      bodyMarkdown: p.body_markdown,
+    }))
+    return {
+      success: raw.success,
+      report,
+      previews,
+      dryRun: raw.dry_run ?? false,
+      message: raw.message,
+    }
   }
 
   private fetchLatest(type: AiReportType): Observable<AiReport | null> {

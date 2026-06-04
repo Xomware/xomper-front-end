@@ -1,0 +1,103 @@
+<div class="preview-screen">
+  <div class="back-row">
+    <button class="btn-back" (click)="goBack()">← AI Review</button>
+  </div>
+
+  <header class="page-header">
+    <h2 class="page-title">{{ type }} Preview</h2>
+  </header>
+
+  <!-- Report metadata card -->
+  <div class="report-card" *ngIf="!reportLoading && report">
+    <div class="report-meta">
+      <span class="meta-label">Period</span>
+      <span class="meta-value">{{ report.period }}</span>
+    </div>
+    <div class="report-meta">
+      <span class="meta-label">Created</span>
+      <span class="meta-value">{{ report.createdAt | date:'MMM d, y h:mm a' }}</span>
+    </div>
+
+    <!-- DNB lock row -->
+    <div class="dnb-row">
+      <div class="dnb-info">
+        <span class="dnb-label">Do Not Broadcast</span>
+        <span class="dnb-hint">Prevents broadcast when enabled</span>
+      </div>
+      <button
+        class="dnb-toggle"
+        [class.active]="dnbActive"
+        [disabled]="dnbInFlight"
+        (click)="toggleDnb()"
+      >
+        {{ dnbInFlight ? '…' : (dnbActive ? 'ON' : 'OFF') }}
+      </button>
+    </div>
+
+    <!-- Broadcast button -->
+    <button
+      class="btn-broadcast"
+      [disabled]="dnbActive || broadcastLoading"
+      (click)="requestBroadcast()"
+    >
+      {{ broadcastLoading ? 'Broadcasting…' : 'Broadcast to all members' }}
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="reportLoading">Loading report…</div>
+  <div class="error-state" *ngIf="reportError && !reportLoading">Failed to load report.</div>
+
+  <!-- Recipients list -->
+  <section class="section" *ngIf="previews.length > 0">
+    <h3 class="section-title">{{ previews.length }} recipient{{ previews.length === 1 ? '' : 's' }}</h3>
+    <ul class="recipients-list">
+      <li
+        class="recipient-row"
+        *ngFor="let preview of previews"
+        (click)="openPreview(preview)"
+      >
+        <div class="recipient-info">
+          <span class="recipient-name">{{ preview.displayName }}</span>
+          <span class="recipient-email">{{ preview.email }}</span>
+        </div>
+        <span class="recipient-subject">{{ preview.subject }}</span>
+        <span class="chevron">›</span>
+      </li>
+    </ul>
+  </section>
+
+  <div class="empty-state" *ngIf="!reportLoading && previews.length === 0">
+    No previews available. Run a dry-run trigger to generate previews.
+  </div>
+
+  <!-- Detail modal -->
+  <div class="modal-overlay" *ngIf="selectedPreview" (click)="closePreview()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div class="modal-name">{{ selectedPreview.displayName }}</div>
+          <div class="modal-email">{{ selectedPreview.email }}</div>
+        </div>
+        <button class="modal-close" (click)="closePreview()">✕</button>
+      </div>
+      <div class="modal-subject">{{ selectedPreview.subject }}</div>
+      <div
+        class="modal-body"
+        *ngIf="selectedPreview.bodyMarkdown"
+        [innerHTML]="selectedPreview.bodyMarkdown"
+      ></div>
+      <div
+        class="modal-body"
+        *ngIf="!selectedPreview.bodyMarkdown && selectedPreview.bodyHtml"
+        [innerHTML]="selectedPreview.bodyHtml"
+      ></div>
+    </div>
+  </div>
+
+  <!-- Confirm dialog -->
+  <app-confirm-dialog
+    [config]="broadcastConfirmConfig"
+    [visible]="showBroadcastConfirm"
+    (confirmed)="onBroadcastConfirmed($event)"
+  />
+</div>

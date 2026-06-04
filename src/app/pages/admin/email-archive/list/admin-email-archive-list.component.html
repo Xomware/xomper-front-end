@@ -1,0 +1,40 @@
+<div class="archive-list">
+  <header class="page-header">
+    <h2 class="page-title">Email Archive</h2>
+    <p class="page-subtitle">Browse and resend archived emails</p>
+  </header>
+
+  <div class="loading-state" *ngIf="loading">Loading archive…</div>
+  <div class="error-state" *ngIf="error && !loading">Failed to load archive.</div>
+
+  <div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+    No emails in the archive yet.
+  </div>
+
+  <ul class="rows-list" *ngIf="!loading && rows.length > 0">
+    <li
+      class="row-item"
+      *ngFor="let entry of rows"
+      (click)="navigateToDetail(entry)"
+    >
+      <div class="row-left">
+        <span class="row-template" *ngIf="entry.template">{{ entry.template }}</span>
+        <span class="row-template no-template" *ngIf="!entry.template">—</span>
+        <span class="row-subject">{{ entry.subject }}</span>
+      </div>
+      <div class="row-right">
+        <span class="row-recipient">{{ entry.recipientEmail }}</span>
+        <span class="row-date">{{ formatDate(entry.sentAt) }}</span>
+      </div>
+      <span class="chevron">›</span>
+    </li>
+  </ul>
+
+  <!-- Infinite scroll sentinel -->
+  <div #scrollSentinel class="scroll-sentinel"></div>
+
+  <div class="loading-more" *ngIf="loadingMore">Loading more…</div>
+  <div class="end-of-list" *ngIf="!loading && !loadingMore && !nextCursor && rows.length > 0">
+    All {{ rows.length }} emails loaded.
+  </div>
+</div>

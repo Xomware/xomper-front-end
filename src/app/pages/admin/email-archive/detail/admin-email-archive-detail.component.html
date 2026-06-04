@@ -1,0 +1,80 @@
+<div class="archive-detail">
+  <div class="back-row">
+    <button class="btn-back" (click)="goBack()">← Email Archive</button>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">Loading…</div>
+  <div class="error-state" *ngIf="error && !loading">Failed to load email.</div>
+
+  <ng-container *ngIf="!loading && entry">
+    <!-- Metadata card -->
+    <div class="meta-card">
+      <div class="meta-row">
+        <span class="meta-label">Subject</span>
+        <span class="meta-value">{{ entry.subject }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Recipient</span>
+        <span class="meta-value">{{ entry.recipientEmail }}</span>
+      </div>
+      <div class="meta-row" *ngIf="entry.template">
+        <span class="meta-label">Template</span>
+        <span class="meta-value template-chip">{{ entry.template }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Sent at</span>
+        <span class="meta-value">{{ formattedDate }}</span>
+      </div>
+      <div class="meta-row" *ngIf="entry.messageId">
+        <span class="meta-label">Message ID</span>
+        <span class="meta-value mono">{{ entry.messageId }}</span>
+      </div>
+    </div>
+
+    <!-- HTML body preview -->
+    <section class="section" *ngIf="safeHtml">
+      <h3 class="section-title">Email Preview</h3>
+      <div class="html-preview" [innerHTML]="safeHtml"></div>
+    </section>
+
+    <!-- Text body fallback -->
+    <section class="section" *ngIf="!safeHtml && entry.textBody">
+      <h3 class="section-title">Email Body (text)</h3>
+      <pre class="text-body">{{ entry.textBody }}</pre>
+    </section>
+
+    <!-- Resend form -->
+    <section class="section resend-section">
+      <h3 class="section-title">Resend</h3>
+      <form [formGroup]="resendForm" class="resend-form">
+        <div class="form-field">
+          <label class="field-label">Recipient email (override)</label>
+          <input
+            type="email"
+            formControlName="toEmail"
+            class="field-input"
+            placeholder="Leave as original or enter override"
+          />
+          <span class="field-hint">Defaults to original recipient: {{ entry.recipientEmail }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn-resend"
+          [disabled]="resendLoading"
+          (click)="requestResend()"
+        >
+          {{ resendLoading ? 'Resending…' : 'Resend Email' }}
+        </button>
+      </form>
+
+      <div class="success-msg" *ngIf="resendSuccess">{{ resendSuccess }}</div>
+      <div class="error-msg" *ngIf="resendError">{{ resendError }}</div>
+    </section>
+  </ng-container>
+
+  <app-confirm-dialog
+    [config]="resendConfirmConfig"
+    [visible]="showResendConfirm"
+    (confirmed)="onResendConfirmed($event)"
+  />
+</div>

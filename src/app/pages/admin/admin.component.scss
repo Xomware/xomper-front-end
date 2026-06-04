@@ -1,0 +1,70 @@
+.admin-shell {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  margin-bottom: 32px;
+}
+
+.admin-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #e8f5e9);
+  margin: 0 0 4px;
+}
+
+.admin-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #a5c8a5);
+  margin: 0;
+}
+
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 16px;
+  background: var(--color-surface-elevated, #1e2a1e);
+  border: 1px solid var(--color-border, #2d3f2d);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover:not(.disabled) {
+    background: var(--color-surface-hover, #243624);
+    border-color: var(--color-success-green, #4caf50);
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.tile-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.tile-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #e8f5e9);
+  line-height: 1.2;
+}
+
+.tile-subtitle {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #a5c8a5);
+  line-height: 1.4;
+}

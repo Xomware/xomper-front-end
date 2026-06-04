@@ -1,0 +1,66 @@
+<div class="test-email-screen">
+  <header class="page-header">
+    <h2 class="page-title">Test Email</h2>
+    <p class="page-subtitle">Send a test email to a whitelisted user</p>
+  </header>
+
+  <form [formGroup]="form" class="email-form" (ngSubmit)="requestSend()">
+
+    <!-- Kind picker -->
+    <div class="form-field">
+      <label class="field-label">Email Kind</label>
+      <select formControlName="kind" class="field-select">
+        <option *ngFor="let kind of allKinds" [value]="kind">
+          {{ getKindLabel(kind) }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Recipient picker -->
+    <div class="form-field">
+      <label class="field-label">Recipient</label>
+      <div class="loading-inline" *ngIf="recipientsLoading">Loading recipients…</div>
+      <select formControlName="recipientUserId" class="field-select" *ngIf="!recipientsLoading">
+        <option *ngFor="let r of recipients" [value]="r.userId">
+          {{ r.displayName }} {{ r.isAdmin ? '(you)' : '' }} — {{ r.email }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Report picker — only for AI Review kinds -->
+    <div class="form-field" *ngIf="showReportPicker">
+      <label class="field-label">Report</label>
+      <div class="loading-inline" *ngIf="reportsLoading">Loading reports…</div>
+      <select formControlName="reportId" class="field-select" *ngIf="!reportsLoading">
+        <option value="">— Select a report —</option>
+        <ng-container *ngFor="let type of aiReviewKindsForPicker">
+          <option
+            *ngIf="latestReports[type]"
+            [value]="latestReports[type]!.id"
+          >
+            {{ reportLabel(latestReports[type]!) }}
+          </option>
+        </ng-container>
+      </select>
+    </div>
+
+    <!-- Submit -->
+    <button
+      type="submit"
+      class="btn-send"
+      [disabled]="sending || !form.value.recipientUserId"
+    >
+      {{ sending ? 'Sending…' : 'Send Test Email' }}
+    </button>
+
+    <!-- Feedback -->
+    <div class="success-msg" *ngIf="sendSuccess">{{ sendSuccess }}</div>
+    <div class="error-msg" *ngIf="sendError">{{ sendError }}</div>
+  </form>
+
+  <app-confirm-dialog
+    [config]="confirmConfig"
+    [visible]="showConfirm"
+    (confirmed)="onConfirmed($event)"
+  />
+</div>

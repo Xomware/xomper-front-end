@@ -1,0 +1,127 @@
+<div class="ai-review-admin">
+  <header class="page-header">
+    <h2 class="page-title">AI Review</h2>
+    <p class="page-subtitle">Trigger reports and monitor activity</p>
+  </header>
+
+  <!-- Trigger cards -->
+  <section class="section">
+    <h3 class="section-title">Trigger</h3>
+    <div class="card-grid">
+      <div class="trigger-card" *ngFor="let card of cards">
+        <div class="card-header">
+          <span class="card-label">{{ card.label }}</span>
+          <span class="card-desc">{{ card.description }}</span>
+        </div>
+
+        <form [formGroup]="getForm(card.type)" class="card-form">
+          <label class="toggle-row">
+            <span>Dry Run</span>
+            <input type="checkbox" formControlName="dryRun" />
+          </label>
+          <label class="toggle-row">
+            <span>Force overwrite</span>
+            <input type="checkbox" formControlName="force" />
+          </label>
+
+          <div class="field-row" *ngIf="card.supportsWeek">
+            <label>Week override</label>
+            <input
+              type="number"
+              formControlName="week"
+              placeholder="(uses current)"
+              min="1"
+              max="18"
+            />
+          </div>
+
+          <div class="field-row" *ngIf="card.type === 'weekPreview'">
+            <label>Seasons back</label>
+            <input
+              type="number"
+              formControlName="seasonsBack"
+              placeholder="0"
+              min="0"
+              max="5"
+            />
+          </div>
+        </form>
+
+        <div class="card-footer">
+          <button
+            class="btn-run"
+            [disabled]="isLoading(card.type)"
+            (click)="runTrigger(card)"
+          >
+            {{ isLoading(card.type) ? 'Running…' : 'Run' }}
+          </button>
+
+          <div class="result" *ngIf="getResult(card.type) as result">
+            <span
+              class="result-badge"
+              [class.success]="result.success"
+              [class.error]="!result.success"
+            >
+              {{ result.success ? 'OK' : 'Error' }}
+            </span>
+            <span class="result-dry" *ngIf="result.dryRun"> — dry run</span>
+
+            <button
+              class="btn-preview"
+              *ngIf="getPreviews(card.type).length > 0"
+              (click)="viewPreviews(card.type)"
+            >
+              View {{ getPreviews(card.type).length }} preview{{
+                getPreviews(card.type).length === 1 ? '' : 's'
+              }}
+            </button>
+
+            <p class="result-msg" *ngIf="result.message">{{ result.message }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activity feed -->
+  <section class="section">
+    <div class="section-header-row">
+      <h3 class="section-title">Activity (last 7 days)</h3>
+      <div class="filter-row">
+        <div class="filter-group">
+          <button class="filter-btn" [class.active]="filterKind === 'all'" (click)="setFilterKind('all')">all</button>
+          <button class="filter-btn" [class.active]="filterKind === 'push'" (click)="setFilterKind('push')">push</button>
+          <button class="filter-btn" [class.active]="filterKind === 'email'" (click)="setFilterKind('email')">email</button>
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn" [class.active]="filterStatus === 'all'" (click)="setFilterStatus('all')">all</button>
+          <button class="filter-btn" [class.active]="filterStatus === 'success'" (click)="setFilterStatus('success')">success</button>
+          <button class="filter-btn" [class.active]="filterStatus === 'failure'" (click)="setFilterStatus('failure')">failure</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="activityLoading">Loading activity…</div>
+    <div class="error-state" *ngIf="activityError && !activityLoading">
+      Failed to load activity.
+    </div>
+
+    <div class="feed-empty" *ngIf="!activityLoading && !activityError && filteredFeed.length === 0">
+      No activity in the last 7 days.
+    </div>
+
+    <ul class="feed-list" *ngIf="!activityLoading && filteredFeed.length > 0">
+      <li class="feed-entry" *ngFor="let entry of filteredFeed">
+        <span class="entry-kind" [class.push]="entry.kind === 'push'" [class.email]="entry.kind === 'email'">
+          {{ entry.kind }}
+        </span>
+        <span class="entry-status" [class.ok]="entry.status === 'success'" [class.fail]="entry.status !== 'success'">
+          {{ entry.status }}
+        </span>
+        <span class="entry-label">{{ entry.subject ?? entry.title ?? entry.kind }}</span>
+        <span class="entry-time">{{ entryDate(entry) | date:'MMM d, h:mm a' }}</span>
+        <span class="entry-error" *ngIf="entry.error">{{ entry.error }}</span>
+      </li>
+    </ul>
+  </section>
+</div>

@@ -8,6 +8,7 @@ import { LeagueComponent } from './pages/league/league.component'
 import { MyProfileComponent } from './pages/my-profile/my-profile.component'
 import { ProfileComponent } from './pages/profile/profile.component'
 import { AuthGuard } from './guards/auth.guard'
+import { AdminGuard } from './guards/admin.guard'
 import { MyTeamComponent } from './pages/my-team/my-team.component'
 import { SelectedTeamComponent } from './pages/selected-team/selected-team.component'
 import { TaxiSquadComponent } from './pages/taxi-squad/taxi-squad.component'
@@ -130,7 +131,53 @@ const routes: Routes = [
       ),
     canActivate: [AuthGuard],
   },
-  { path: 'admin', redirectTo: 'home', pathMatch: 'full' },
+  // Admin portal (s7a — shell + AI Review + Test Email + Email Archive)
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./pages/admin/admin.component').then((m) => m.AdminComponent),
+    canActivate: [AuthGuard, AdminGuard],
+    children: [
+      {
+        path: 'ai-review',
+        loadComponent: () =>
+          import('./pages/admin/ai-review/admin-ai-review.component').then(
+            (m) => m.AdminAiReviewComponent,
+          ),
+      },
+      {
+        path: 'ai-review/preview/:type',
+        loadComponent: () =>
+          import('./pages/admin/ai-review/preview/admin-ai-review-preview.component').then(
+            (m) => m.AdminAiReviewPreviewComponent,
+          ),
+      },
+      {
+        path: 'test-email',
+        loadComponent: () =>
+          import('./pages/admin/test-email/admin-test-email.component').then(
+            (m) => m.AdminTestEmailComponent,
+          ),
+      },
+      {
+        path: 'email-archive',
+        loadComponent: () =>
+          import('./pages/admin/email-archive/list/admin-email-archive-list.component').then(
+            (m) => m.AdminEmailArchiveListComponent,
+          ),
+      },
+      {
+        path: 'email-archive/:id',
+        loadComponent: () =>
+          import('./pages/admin/email-archive/detail/admin-email-archive-detail.component').then(
+            (m) => m.AdminEmailArchiveDetailComponent,
+          ),
+      },
+      // PR 7b routes (placeholders — components ship in 7b)
+      // Registered now so the shell can navigate to them even before 7b merges.
+      // They will 404-redirect gracefully via the catch-all.
+    ],
+  },
   { path: 'team-analyzer', redirectTo: 'team', pathMatch: 'full' },
 
   // 302 redirects for my-* → flat routes (remove ~14 days post-s5 default flip)

@@ -1,0 +1,70 @@
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog-box {
+  background: var(--color-surface-elevated, #1e2a1e);
+  border: 1px solid var(--color-border, #2d3f2d);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: calc(100% - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dialog-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #e8f5e9);
+  margin: 0;
+}
+
+.dialog-message {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #a5c8a5);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.btn-cancel {
+  background: var(--color-surface, #132013);
+  color: var(--color-text-secondary, #a5c8a5);
+  border: 1px solid var(--color-border, #2d3f2d);
+}
+
+.btn-confirm {
+  background: var(--color-success-green, #4caf50);
+  color: #fff;
+
+  &.destructive {
+    background: var(--color-error-red, #e53935);
+  }
+}

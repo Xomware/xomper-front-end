@@ -1,0 +1,22 @@
+<div class="admin-shell">
+  <header class="admin-header">
+    <h1 class="admin-title">Admin</h1>
+    <p class="admin-subtitle">League management portal</p>
+  </header>
+
+  <div class="tile-grid">
+    <button
+      *ngFor="let tile of tiles"
+      class="tile"
+      [class.disabled]="tile.disabled"
+      [disabled]="tile.disabled ?? false"
+      (click)="navigate(tile)"
+    >
+      <span class="tile-icon">{{ tile.icon }}</span>
+      <span class="tile-label">{{ tile.label }}</span>
+      <span class="tile-subtitle">{{ tile.subtitle }}</span>
+    </button>
+  </div>
+
+  <router-outlet />
+</div>

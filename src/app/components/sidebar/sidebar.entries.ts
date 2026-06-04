@@ -133,7 +133,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         icon: '🔧',
         route: '/admin',
         adminOnly: true,
-        placeholder: true, // TODO(s7): builds the component
       },
     ],
   },
