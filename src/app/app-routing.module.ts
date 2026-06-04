@@ -13,6 +13,7 @@ import { SelectedTeamComponent } from './pages/selected-team/selected-team.compo
 import { TaxiSquadComponent } from './pages/taxi-squad/taxi-squad.component'
 import { DraftHistoryComponent } from './pages/draft-history/draft-history.component'
 import { MatchupHistoryComponent } from './pages/matchup-history/matchup-history.component'
+import { SettingsComponent } from './pages/settings/settings.component'
 
 import { LinkSleeperComponent } from './pages/link-sleeper/link-sleeper.component'
 
@@ -27,10 +28,23 @@ const routes: Routes = [
   { path: 'selected-league', component: LeagueComponent },
   { path: 'selected-team', component: SelectedTeamComponent },
 
-  // Authenticated - MY routes (whitelisted league)
-  { path: 'my-profile', component: MyProfileComponent, canActivate: [AuthGuard] },
-  { path: 'my-league', component: MyLeagueComponent, canActivate: [AuthGuard] },
-  { path: 'my-team', component: MyTeamComponent, canActivate: [AuthGuard] },
+  // Flat authenticated routes (s1 — new shell destinations)
+  { path: 'league', component: MyLeagueComponent, canActivate: [AuthGuard] },
+  { path: 'team', component: MyTeamComponent, canActivate: [AuthGuard] },
+  { path: 'profile', component: MyProfileComponent, canActivate: [AuthGuard] },
+  { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] },
+
+  // Placeholder redirects for stub destinations (s6/s7/s8 will replace these)
+  { path: 'ai-review', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'admin', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'team-analyzer', redirectTo: 'team', pathMatch: 'full' },
+
+  // 302 redirects for my-* → flat routes (remove ~14 days post-s5 default flip)
+  { path: 'my-profile', redirectTo: 'profile', pathMatch: 'full' },
+  { path: 'my-league', redirectTo: 'league', pathMatch: 'full' },
+  { path: 'my-team', redirectTo: 'team', pathMatch: 'full' },
+
+  // Authenticated - taxi squad and other non-redirected MY routes
   { path: 'taxi-squad', component: TaxiSquadComponent, canActivate: [AuthGuard] },
 
   // Account setup (authenticated)

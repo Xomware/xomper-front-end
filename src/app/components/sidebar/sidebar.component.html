@@ -1,0 +1,39 @@
+<nav class="sidebar" aria-label="Main navigation">
+  <!-- Profile chip -->
+  <a class="profile-chip" routerLink="/profile" (click)="onEntryClick()" aria-label="My profile">
+    <div class="avatar" [ngClass]="{ 'avatar--placeholder': !avatarUrl }">
+      <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Profile avatar" />
+      <span *ngIf="!avatarUrl" class="avatar-initials">{{ displayName[0]?.toUpperCase() }}</span>
+    </div>
+    <span class="profile-name">{{ displayName }}</span>
+  </a>
+
+  <!-- Sections -->
+  <div class="sections">
+    <div *ngFor="let section of visibleSections" class="section">
+      <div class="section-title">{{ section.title }}</div>
+      <ul>
+        <li *ngFor="let entry of visibleEntries(section)">
+          <a
+            class="entry"
+            [routerLink]="entry.route"
+            [queryParams]="entry.queryParams ?? {}"
+            routerLinkActive="entry--active"
+            (click)="onEntryClick()"
+          >
+            <span class="entry-icon" aria-hidden="true">{{ entry.icon }}</span>
+            <span class="entry-label">{{ entry.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Sticky footer — Settings -->
+  <div class="sidebar-footer">
+    <a class="entry" routerLink="/settings" routerLinkActive="entry--active" (click)="onEntryClick()">
+      <span class="entry-icon" aria-hidden="true">⚙️</span>
+      <span class="entry-label">Settings</span>
+    </a>
+  </div>
+</nav>

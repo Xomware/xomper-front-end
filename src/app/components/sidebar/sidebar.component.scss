@@ -1,0 +1,134 @@
+@import 'src/styles/variables';
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  min-width: 260px;
+  height: 100%;
+  background: var(--xomper-bg-card, $bg-card);
+  border-right: 1px solid $surface-light;
+  overflow-y: auto;
+  padding: $spacing-md 0;
+}
+
+// ---- Profile chip ----
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  margin: 0 $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  text-decoration: none;
+  color: var(--xomper-text-primary, $text-primary);
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $bg-card-hover;
+  }
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  overflow: hidden;
+  background: $bg-card-hover;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatar-initials {
+  font-size: $text-sm;
+  font-weight: 600;
+  color: var(--xomper-champion-gold, $champion-gold);
+}
+
+.profile-name {
+  font-size: $text-sm;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ---- Sections ----
+.sections {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 $spacing-sm;
+}
+
+.section {
+  margin-bottom: $spacing-md;
+}
+
+.section-title {
+  font-size: $text-xs;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--xomper-text-muted, $text-muted);
+  padding: $spacing-xs $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+// ---- Entries ----
+.entry {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  text-decoration: none;
+  color: var(--xomper-text-primary, $text-primary);
+  font-size: $text-sm;
+  transition: background $transition-fast, color $transition-fast;
+  width: 100%;
+
+  &:hover {
+    background: $bg-card-hover;
+    color: var(--xomper-champion-gold, $champion-gold);
+  }
+
+  &.entry--active {
+    background: $bg-card-hover;
+    color: var(--xomper-champion-gold, $champion-gold);
+    font-weight: 600;
+  }
+}
+
+.entry-icon {
+  font-size: $text-base;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.entry-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ---- Sticky footer ----
+.sidebar-footer {
+  border-top: 1px solid $surface-light;
+  padding: $spacing-sm;
+  margin-top: auto;
+}

@@ -1,0 +1,20 @@
+<div class="drawer-host" [class.drawer-host--open]="open" [attr.aria-hidden]="!open">
+  <!-- Scrim -->
+  <div
+    class="scrim"
+    [class.scrim--visible]="open"
+    (click)="onScrimClick()"
+    aria-label="Close navigation"
+    role="button"
+    tabindex="-1"
+  ></div>
+
+  <!-- Slide-in panel -->
+  <div class="drawer-panel" [class.drawer-panel--open]="open" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <app-sidebar
+      [sections]="sections"
+      [isAdmin]="isAdmin"
+      (entryActivated)="onEntryActivated()"
+    ></app-sidebar>
+  </div>
+</div>

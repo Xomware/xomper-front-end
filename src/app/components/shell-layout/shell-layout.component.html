@@ -1,0 +1,43 @@
+<div class="shell">
+  <!-- Desktop persistent sidebar rail -->
+  <app-sidebar
+    *ngIf="!isMobile"
+    [sections]="sections"
+    [isAdmin]="isAdmin"
+    class="shell__sidebar"
+  ></app-sidebar>
+
+  <!-- Main column -->
+  <div class="shell__main-col">
+    <!-- Mobile top bar with hamburger -->
+    <header *ngIf="isMobile" class="shell__topbar">
+      <button
+        class="hamburger"
+        (click)="toggleDrawer()"
+        aria-label="Open navigation menu"
+        [attr.aria-expanded]="drawerOpen"
+      >
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+      </button>
+      <span class="shell__topbar-title">XOMPER</span>
+    </header>
+
+    <main class="shell__content" id="main-content" role="main">
+      <app-toast></app-toast>
+      <router-outlet></router-outlet>
+    </main>
+
+    <app-footer></app-footer>
+  </div>
+
+  <!-- Mobile overlay drawer -->
+  <app-mobile-drawer
+    *ngIf="isMobile"
+    [open]="drawerOpen"
+    [sections]="sections"
+    [isAdmin]="isAdmin"
+    (closed)="closeDrawer()"
+  ></app-mobile-drawer>
+</div>

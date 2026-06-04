@@ -1,0 +1,76 @@
+@import 'src/styles/variables';
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--xomper-bg-dark, $bg-dark);
+
+  &__sidebar {
+    // sidebar component manages its own width (260px); this just ensures it is
+    // a flex item that doesn't shrink
+    flex-shrink: 0;
+  }
+
+  &__main-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0; // prevent flex blowout
+    overflow: hidden;
+  }
+
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-md;
+    padding-bottom: 120px;
+  }
+
+  // ---- Mobile top bar ----
+  &__topbar {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-sm $spacing-md;
+    background: var(--xomper-bg-card, $bg-card);
+    border-bottom: 1px solid $surface-light;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  &__topbar-title {
+    font-family: $font-display;
+    font-size: $text-xl;
+    color: var(--xomper-champion-gold, $champion-gold);
+    letter-spacing: 0.05em;
+  }
+}
+
+// ---- Hamburger button ----
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  padding: 6px;
+  margin: 0;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $bg-card-hover;
+  }
+
+  &__line {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--xomper-text-primary, $text-primary);
+    border-radius: 2px;
+  }
+}

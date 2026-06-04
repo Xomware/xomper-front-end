@@ -1,6 +1,6 @@
 # Plan: Web ↔ iOS Parity — s1 Shell + Nav Rewrite
 
-**Status**: Ready
+**Status**: Done
 **Created**: 2026-06-04
 **Last updated**: 2026-06-04 (open questions resolved, status → Ready)
 **Epic**: [`../PLAN.md`](../PLAN.md)
@@ -57,10 +57,10 @@ Replace `ToolbarComponent` with a new shell — desktop `SidebarComponent`, mobi
 
 ## Phase 0 pre-work
 
-- [ ] Open GitHub issue: "web-ios-parity s1: shell + nav rewrite". Apply `epic:web-ios-parity` label. Capture issue number `<N>`.
-- [ ] Branch name: `feature/<N>-shell-nav-rewrite` off `master`.
-- [ ] Confirm zero in-flight PRs touching `ToolbarComponent`, `AppRoutingModule`, `LeagueComponent`, `SearchComponent` (`gh pr list --search "toolbar OR app-routing OR LeagueComponent"`).
-- [ ] Confirm D-B standalone migration (PR #76) is on `master` — current `app.component.ts` already uses `standalone: true`, so this is verification not work.
+- [x] Open GitHub issue: "web-ios-parity s1: shell + nav rewrite". Apply `epic:web-ios-parity` label. Capture issue number `<N>`.
+- [x] Branch name: `feature/<N>-shell-nav-rewrite` off `master`.
+- [x] Confirm zero in-flight PRs touching `ToolbarComponent`, `AppRoutingModule`, `LeagueComponent`, `SearchComponent` (`gh pr list --search "toolbar OR app-routing OR LeagueComponent"`).
+- [x] Confirm D-B standalone migration (PR #76) is on `master` — current `app.component.ts` already uses `standalone: true`, so this is verification not work.
 
 ---
 
@@ -109,11 +109,11 @@ Sidebar must render entries even when their target is a placeholder — every iO
 
 ## Implementation steps
 
-- [ ] **Step 1 — Phase 0.** Open issue, capture `<N>`, create branch `feature/<N>-shell-nav-rewrite`. Confirm no conflicting in-flight PRs.
-- [ ] **Step 2 — CSS tokens.** Add `:root` custom-property declarations to `src/styles.scss` (just the four locked tokens, plus `--xomper-bg-card`, `--xomper-text-muted` for sidebar internals). No component styling changes; only token declarations.
-- [ ] **Step 3 — `FeatureFlagsService`.** Create `src/app/services/feature-flags.service.ts`. On construction: read `window.location.search` for `newShell=1`; if present, write `localStorage.xomperNewShell = '1'`. Expose `get newShellEnabled(): boolean`. Provided in root.
-- [ ] **Step 4 — `*xomperNewShell` directive.** Standalone structural directive in `src/app/directives/xomper-new-shell.directive.ts`. Accepts a boolean input; injects `FeatureFlagsService` and `TemplateRef` + `ViewContainerRef`. Renders the embedded view when `input === flag`. Allows both `*xomperNewShell="true"` (render when on) and `*xomperNewShell="false"` (render when off) so `app.component.html` can host both branches.
-- [ ] **Step 5 — `ShellLayoutComponent` + children.** Build standalone `<app-shell-layout>` that:
+- [x] **Step 1 — Phase 0.** Open issue #78, branch `feature/78-shell-nav-rewrite`. No conflicting in-flight PRs.
+- [x] **Step 2 — CSS tokens.** Add `:root` custom-property declarations to `src/styles.scss` (just the four locked tokens, plus `--xomper-bg-card`, `--xomper-text-muted` for sidebar internals). No component styling changes; only token declarations.
+- [x] **Step 3 — `FeatureFlagsService`.** Create `src/app/services/feature-flags.service.ts`. On construction: read `window.location.search` for `newShell=1`; if present, write `localStorage.xomperNewShell = '1'`. Expose `get newShellEnabled(): boolean`. Provided in root.
+- [x] **Step 4 — `*xomperNewShell` directive.** Standalone structural directive in `src/app/directives/xomper-new-shell.directive.ts`. Accepts a boolean input; injects `FeatureFlagsService` and `TemplateRef` + `ViewContainerRef`. Renders the embedded view when `input === flag`. Allows both `*xomperNewShell="true"` (render when on) and `*xomperNewShell="false"` (render when off) so `app.component.html` can host both branches.
+- [x] **Step 5 — `ShellLayoutComponent` + children.** Build standalone `<app-shell-layout>` that:
   - Uses Angular CDK `BreakpointObserver` (`Breakpoints.HandsetPortrait` / `'(max-width: 768px)'`).
   - Renders `<app-sidebar>` desktop or `<app-mobile-drawer>` mobile.
   - Hosts `<router-outlet>` in the main column.
@@ -121,15 +121,15 @@ Sidebar must render entries even when their target is a placeholder — every iO
   - Both chrome components receive `sections` config (Play / Team / League / Admin) as a `readonly` array; entries derived from a `SIDEBAR_ENTRIES` constant file `src/app/components/sidebar/sidebar.entries.ts` exporting the iOS `TrayDestination` order.
   - Profile chip in sidebar header pulls `displayName`, `email`, `avatarID` from `SupabaseService` (existing); avatar source matches iOS Sleeper-CDN pattern — flag as open question if Supabase profile lacks avatar URL.
   - Admin section visible only when `SupabaseService.isAdmin === true`.
-- [ ] **Step 6 — `/settings` placeholder.** Standalone `SettingsComponent` rendering a centered card with "Settings coming soon" and a back link to `/home`.
-- [ ] **Step 7 — `app-routing.module.ts`.** Add:
+- [x] **Step 6 — `/settings` placeholder.** Standalone `SettingsComponent` rendering a centered card with "Settings coming soon" and a back link to `/home`.
+- [x] **Step 7 — `app-routing.module.ts`.** Add:
   - Flat routes: `{ path: 'league', component: MyLeagueComponent, canActivate: [AuthGuard] }`, same for `team`, `profile`.
   - 302 redirects: `{ path: 'my-league', redirectTo: 'league', pathMatch: 'full' }` (same for `my-team`, `my-profile`).
   - `{ path: 'settings', component: SettingsComponent, canActivate: [AuthGuard] }`.
   - `{ path: 'team-analyzer', redirectTo: 'team', pathMatch: 'full' }`, `{ path: 'ai-review', redirectTo: 'home' }`, `{ path: 'admin', redirectTo: 'home' }` (placeholders).
   - **Do not** alter `selected-*` routes.
   - Time-box `provideRouter` migration: skip unless reviewers demand it; the structural-directive gate doesn't require it.
-- [ ] **Step 8 — Wire the gate.** Edit `app.component.html`:
+- [x] **Step 8 — Wire the gate.** Edit `app.component.html`:
   ```
   <ng-container *xomperNewShell="false">
     <app-toolbar></app-toolbar>
@@ -141,14 +141,14 @@ Sidebar must render entries even when their target is a placeholder — every iO
   </ng-container>
   ```
   Update `imports:` array in `app.component.ts` to add `XomperNewShellDirective` and `ShellLayoutComponent`.
-- [ ] **Step 9 — Build + manual smoke.** `npm run build` (verify no new bundle warnings beyond existing budget). `npm start`, then:
+- [x] **Step 9 — Build + manual smoke.** `npm run build` (verify no new bundle warnings beyond existing budget). `npm start`, then:
   1. Visit `/` — legacy toolbar renders.
   2. Visit `/?newShell=1` — new shell renders; sidebar shows Play/Team/League sections (+ Admin if logged in as admin).
   3. Click each sidebar entry — verify it routes to something (placeholder OK).
   4. Visit `/my-league` — verify 302 to `/league`.
   5. Resize to <768 px — sidebar collapses to hamburger; tap opens drawer, tap scrim closes.
   6. Visit `/settings` — placeholder renders.
-- [ ] **Step 10 — Pre-PR.** Run `/ultrareview` (D-A). Flip plan `Status: Ready`. Commit using `#<N>` prefix. Open PR with body `Closes #<N>` and link to this plan + epic plan.
+- [x] **Step 10 — Pre-PR.** Run `/ultrareview` (D-A). Flip plan `Status: Ready`. Commit using `#<N>` prefix. Open PR with body `Closes #<N>` and link to this plan + epic plan.
 
 ---
 

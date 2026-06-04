@@ -1,0 +1,54 @@
+@import 'src/styles/variables';
+
+$drawer-width: 300px;
+$transition-drawer: 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+.drawer-host {
+  // Inert by default so it doesn't capture pointer events when closed
+  pointer-events: none;
+
+  &.drawer-host--open {
+    pointer-events: auto;
+  }
+}
+
+// ---- Scrim ----
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: $z-modal-backdrop;
+  transition: background $transition-drawer;
+  pointer-events: none;
+
+  &.scrim--visible {
+    background: rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+
+// ---- Slide-in panel ----
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: $drawer-width;
+  height: 100%;
+  z-index: $z-modal;
+  transform: translateX(-100%);
+  transition: transform $transition-drawer;
+  // The sidebar component handles its own bg; the panel is just the container
+  display: flex;
+  flex-direction: column;
+
+  &.drawer-panel--open {
+    transform: translateX(0);
+  }
+
+  // Stretch the inner sidebar to fill
+  app-sidebar {
+    flex: 1;
+    overflow: hidden;
+  }
+}

@@ -1,6 +1,19 @@
 @import 'styles/variables';
 @import 'styles/mixins';
 
+// ================================================
+// CSS Custom Property Tokens — Midnight Emerald
+// Consumed by shell components (s1+); do not remove until after s10.
+// ================================================
+:root {
+  --xomper-bg-dark: #{$bg-dark};
+  --xomper-champion-gold: #{$champion-gold};
+  --xomper-accent-red: #{$accent-red};
+  --xomper-text-primary: #{$text-primary};
+  --xomper-bg-card: #{$bg-card};
+  --xomper-text-muted: #{$text-muted};
+}
+
 *,
 *::before,
 *::after {
