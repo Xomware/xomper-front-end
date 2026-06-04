@@ -1,0 +1,77 @@
+<div class="cron-settings">
+  <!-- Test-mode sticky banner -->
+  <div *ngIf="anyTestModeActive" class="test-mode-banner">
+    Test mode active — deliveries restricted to admin only
+  </div>
+
+  <div class="page-header">
+    <h2>Cron Settings</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="state-empty"><p>Loading…</p></div>
+
+  <!-- Table missing -->
+  <div *ngIf="!isLoading && tableMissing" class="state-empty state-warning">
+    <p class="state-title">Cron settings table not provisioned</p>
+    <p class="state-body">The <code>admin_cron_settings</code> table hasn't been created yet. Run the Supabase migration and refresh.</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!isLoading && error && !tableMissing" class="state-empty state-error">
+    <p>{{ error }}</p>
+    <button class="btn-secondary" (click)="load()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading && !tableMissing && !error && rows.length === 0" class="state-empty">
+    <p>No cron settings found.</p>
+  </div>
+
+  <!-- Rows -->
+  <ul *ngIf="!isLoading && !tableMissing && !error && rows.length > 0" class="row-list">
+    <li *ngFor="let row of rows" class="row-item">
+      <div class="row-info">
+        <span class="row-title">{{ displayTitle(row) }}</span>
+        <span class="row-key">{{ row.cronKey }}</span>
+      </div>
+      <div class="row-controls">
+        <!-- Pending spinner -->
+        <span *ngIf="isPending(row.cronKey)" class="spinner-sm"></span>
+
+        <ng-container *ngIf="!isPending(row.cronKey)">
+          <!-- Enabled toggle -->
+          <div class="toggle-group">
+            <span class="toggle-label" [class.toggle-label--off]="!row.enabled">Enabled</span>
+            <button
+              class="toggle"
+              [class.toggle--on]="row.enabled"
+              [class.toggle--off]="!row.enabled"
+              (click)="toggleEnabled(row)"
+              title="{{ row.enabled ? 'Disable' : 'Enable' }} cron"
+            ></button>
+          </div>
+
+          <!-- Test mode toggle (disabled when cron is off) -->
+          <div class="toggle-group" [class.toggle-group--disabled]="!row.enabled">
+            <span class="toggle-label" [class.toggle-label--off]="!row.testMode">Test</span>
+            <button
+              class="toggle"
+              [class.toggle--on]="row.testMode && row.enabled"
+              [class.toggle--off]="!row.testMode || !row.enabled"
+              [disabled]="!row.enabled"
+              (click)="toggleTestMode(row)"
+              title="Toggle test mode"
+            ></button>
+          </div>
+        </ng-container>
+      </div>
+    </li>
+  </ul>
+
+  <app-confirm-dialog
+    [config]="dialogConfig"
+    [visible]="showDialog"
+    (confirmed)="onDialogConfirmed($event)"
+  />
+</div>

@@ -1,0 +1,80 @@
+.leagues-list {
+  padding: 24px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.list-header {
+  margin-bottom: 24px;
+  h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+}
+
+.state-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: rgba(255,255,255,0.5);
+  &.state-error { color: #f87171; }
+}
+
+.btn-secondary {
+  margin-top: 12px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.row-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: rgba(255,255,255,0.09); }
+}
+
+.row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.row-name { font-weight: 600; font-size: 0.95rem; }
+.row-meta { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
+
+.row-chips {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.chip {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.chip-active   { background: rgba(16,185,129,0.2); color: #34d399; }
+  &.chip-inactive { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+  &.chip-tag      { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+}

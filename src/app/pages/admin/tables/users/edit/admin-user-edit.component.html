@@ -1,0 +1,62 @@
+<div class="user-edit">
+  <div class="edit-header">
+    <button class="btn-back" (click)="cancel()">← Back</button>
+    <h2>Edit User</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="state-loading"><p>Loading…</p></div>
+
+  <ng-container *ngIf="!isLoading && user">
+    <!-- Read-only labels -->
+    <div class="readonly-section">
+      <div class="readonly-row">
+        <span class="readonly-label">User ID</span>
+        <span class="readonly-value">{{ userId }}</span>
+      </div>
+      <div class="readonly-row">
+        <span class="readonly-label">Sleeper ID</span>
+        <span class="readonly-value">{{ sleeperUserId }}</span>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="edit-form">
+      <div class="field-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" autocomplete="off" />
+        <p *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')" class="field-error">Email is required.</p>
+        <p *ngIf="form.get('email')?.touched && form.get('email')?.hasError('adminEmail')" class="field-error">Invalid email format.</p>
+      </div>
+
+      <div class="field-group">
+        <label for="displayName">Display Name</label>
+        <input id="displayName" type="text" formControlName="displayName" autocomplete="off" />
+      </div>
+
+      <div class="field-group field-row">
+        <label for="isAdmin">Admin</label>
+        <input id="isAdmin" type="checkbox" formControlName="isAdmin" />
+      </div>
+
+      <div class="field-group field-row">
+        <label for="isActive">Active</label>
+        <input id="isActive" type="checkbox" formControlName="isActive" />
+      </div>
+
+      <p *ngIf="error" class="feedback-error">{{ error }}</p>
+      <p *ngIf="successMessage" class="feedback-success">{{ successMessage }}</p>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || isSaving">
+          <span *ngIf="isSaving" class="spinner-sm"></span>
+          <span *ngIf="!isSaving">Save</span>
+        </button>
+      </div>
+    </form>
+  </ng-container>
+
+  <div *ngIf="!isLoading && error && !user" class="state-loading">
+    <p class="error-text">{{ error }}</p>
+    <button class="btn-secondary" (click)="cancel()">Back</button>
+  </div>
+</div>

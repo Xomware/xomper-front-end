@@ -1,0 +1,101 @@
+<div class="announcement-edit">
+  <div class="edit-header">
+    <button class="btn-back" (click)="cancel()">← Back</button>
+    <h2>{{ isNew ? 'New Announcement' : 'Edit Announcement' }}</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="state-loading">
+    <p>Loading…</p>
+  </div>
+
+  <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="submit()" class="edit-form">
+
+    <!-- Title -->
+    <div class="field-group">
+      <label for="title">Title</label>
+      <input
+        id="title"
+        type="text"
+        formControlName="title"
+        placeholder="Announcement title"
+        autocomplete="off"
+      />
+      <p *ngIf="form.get('title')?.touched && form.get('title')?.hasError('required')" class="field-error">Title is required.</p>
+      <p *ngIf="form.get('title')?.touched && form.get('title')?.hasError('maxlength')" class="field-error">Max 200 characters.</p>
+    </div>
+
+    <!-- Body -->
+    <div class="field-group">
+      <label for="body">Body</label>
+      <p class="field-hint">Supports <strong>**bold**</strong> and [links](url)</p>
+      <textarea
+        id="body"
+        formControlName="body"
+        rows="5"
+        placeholder="Announcement body…"
+      ></textarea>
+      <p *ngIf="form.get('body')?.touched && form.get('body')?.hasError('required')" class="field-error">Body is required.</p>
+    </div>
+
+    <!-- Priority -->
+    <div class="field-group">
+      <label>Priority</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" formControlName="priority" value="info" />
+          Info
+        </label>
+        <label class="radio-label">
+          <input type="radio" formControlName="priority" value="critical" />
+          Critical
+        </label>
+      </div>
+    </div>
+
+    <!-- Active toggle -->
+    <div class="field-group field-row">
+      <label for="isActive">Active</label>
+      <input id="isActive" type="checkbox" formControlName="isActive" />
+    </div>
+
+    <!-- Display order -->
+    <div class="field-group">
+      <label for="displayOrder">Display Order</label>
+      <input
+        id="displayOrder"
+        type="number"
+        formControlName="displayOrder"
+        min="0"
+      />
+    </div>
+
+    <!-- Expiry -->
+    <div class="field-group field-row">
+      <label for="hasExpiry">Has Expiry</label>
+      <input id="hasExpiry" type="checkbox" formControlName="hasExpiry" />
+    </div>
+
+    <div *ngIf="hasExpiryCtrl.value" class="field-group">
+      <label for="expiresAt">Expires At</label>
+      <input
+        id="expiresAt"
+        type="datetime-local"
+        formControlName="expiresAt"
+      />
+      <p *ngIf="form.get('expiresAt')?.touched && form.get('expiresAt')?.hasError('required')" class="field-error">Expiry date is required when Has Expiry is on.</p>
+    </div>
+
+    <!-- Feedback -->
+    <p *ngIf="error" class="feedback-error">{{ error }}</p>
+    <p *ngIf="successMessage" class="feedback-success">{{ successMessage }}</p>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || isSaving">
+        <span *ngIf="isSaving" class="spinner-sm"></span>
+        <span *ngIf="!isSaving">{{ isNew ? 'Create' : 'Save' }}</span>
+      </button>
+    </div>
+  </form>
+</div>

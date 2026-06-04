@@ -1,0 +1,43 @@
+.logs-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 24px;
+}
+
+.placeholder-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 360px;
+}
+
+.terminal-icon {
+  font-size: 3rem;
+  line-height: 1;
+  color: rgba(255,255,255,0.3);
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: rgba(255,255,255,0.7);
+}
+
+p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+}
+
+.console-link {
+  font-size: 0.85rem;
+  color: #10b981;
+  text-decoration: none;
+  margin-top: 4px;
+  &:hover { text-decoration: underline; }
+}

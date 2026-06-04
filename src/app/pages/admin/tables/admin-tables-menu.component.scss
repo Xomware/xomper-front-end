@@ -1,0 +1,56 @@
+.tables-menu {
+  padding: 24px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.menu-header {
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.tile {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px 20px;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.tile-label {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.tile-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.tile-badge {
+  font-size: 0.7rem;
+  color: #10b981;
+  margin-top: 4px;
+}

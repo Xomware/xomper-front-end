@@ -1,0 +1,84 @@
+<div class="audit-detail">
+  <div class="detail-header">
+    <button class="btn-back" (click)="back()">← Back</button>
+    <h2>Audit Entry</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="state-loading"><p>Loading…</p></div>
+
+  <div *ngIf="!isLoading && error" class="state-loading state-error">
+    <p>{{ error }}</p>
+    <button class="btn-secondary" (click)="back()">Back</button>
+  </div>
+
+  <div *ngIf="!isLoading && notFound && !error" class="state-loading">
+    <p>Entry not found.</p>
+    <button class="btn-secondary" (click)="back()">Back</button>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !notFound && entry">
+    <!-- Header card -->
+    <div class="header-card">
+      <div class="header-action">{{ actionDisplay(entry.action) }}</div>
+      <div class="header-meta">
+        <span class="meta-label">Actor</span>
+        <span class="meta-value">{{ entry.actorUserId }}</span>
+      </div>
+      <div class="header-meta" *ngIf="entry.targetTable">
+        <span class="meta-label">Table</span>
+        <span class="meta-value">{{ entry.targetTable }}</span>
+      </div>
+      <div class="header-meta" *ngIf="entry.targetId">
+        <span class="meta-label">Target ID</span>
+        <span class="meta-value mono">{{ entry.targetId }}</span>
+      </div>
+      <div class="header-meta">
+        <span class="meta-label">Time</span>
+        <span class="meta-value">{{ formatDate(entry.createdAt) }}</span>
+      </div>
+      <div class="header-meta">
+        <span class="meta-label">Entry ID</span>
+        <span class="meta-value mono">{{ entry.id }}</span>
+      </div>
+    </div>
+
+    <!-- Before block -->
+    <div class="json-block" *ngIf="entry.before !== null">
+      <button class="block-toggle" (click)="toggleBlock('before')">
+        <span class="block-label">Before</span>
+        <span class="block-caret">{{ collapsed.before ? '▸' : '▾' }}</span>
+      </button>
+      <pre *ngIf="!collapsed.before" class="json-pre">{{ prettyJson(entry.before) }}</pre>
+    </div>
+    <div class="json-block json-block--absent" *ngIf="entry.before === null">
+      <span class="block-label">Before</span>
+      <span class="absent-label">none</span>
+    </div>
+
+    <!-- After block -->
+    <div class="json-block" *ngIf="entry.after !== null">
+      <button class="block-toggle" (click)="toggleBlock('after')">
+        <span class="block-label">After</span>
+        <span class="block-caret">{{ collapsed.after ? '▸' : '▾' }}</span>
+      </button>
+      <pre *ngIf="!collapsed.after" class="json-pre">{{ prettyJson(entry.after) }}</pre>
+    </div>
+    <div class="json-block json-block--absent" *ngIf="entry.after === null">
+      <span class="block-label">After</span>
+      <span class="absent-label">none</span>
+    </div>
+
+    <!-- Metadata block -->
+    <div class="json-block" *ngIf="entry.metadata !== null">
+      <button class="block-toggle" (click)="toggleBlock('metadata')">
+        <span class="block-label">Metadata</span>
+        <span class="block-caret">{{ collapsed.metadata ? '▸' : '▾' }}</span>
+      </button>
+      <pre *ngIf="!collapsed.metadata" class="json-pre">{{ prettyJson(entry.metadata) }}</pre>
+    </div>
+    <div class="json-block json-block--absent" *ngIf="entry.metadata === null">
+      <span class="block-label">Metadata</span>
+      <span class="absent-label">none</span>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,95 @@
+.audit-feed {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.feed-header {
+  margin-bottom: 24px;
+  h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+}
+
+.state-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: rgba(255,255,255,0.5);
+
+  &.state-warning { color: #f59e0b; }
+  &.state-error   { color: #ef4444; }
+
+  .state-title { font-weight: 600; margin-bottom: 8px; }
+  .state-body  { font-size: 0.875rem; }
+  .state-sub   { font-size: 0.875rem; margin-top: 4px; }
+}
+
+.btn-secondary {
+  margin-top: 12px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.row-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row-item {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  &:hover { background: rgba(255,255,255,0.09); }
+}
+
+.row-action {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.row-meta {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.row-date {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+}
+
+.sentinel {
+  height: 1px;
+  margin-top: 20px;
+}
+
+.load-more-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

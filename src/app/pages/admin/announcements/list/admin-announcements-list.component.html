@@ -1,0 +1,65 @@
+<div class="announcements-list">
+  <div class="list-header">
+    <h2>Announcements</h2>
+    <button class="btn-primary" (click)="navigateNew()">+ New</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="state-empty">
+    <p>Loading…</p>
+  </div>
+
+  <!-- Table missing (migration pending) -->
+  <div *ngIf="!isLoading && tableMissing" class="state-empty state-warning">
+    <p class="state-title">Table not provisioned</p>
+    <p class="state-body">The <code>league_announcements</code> table hasn't been created yet. Run the Supabase migration and refresh.</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!isLoading && error && !tableMissing" class="state-empty state-error">
+    <p>{{ error }}</p>
+    <button class="btn-secondary" (click)="load()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading && !tableMissing && !error && rows.length === 0" class="state-empty">
+    <p>No announcements yet.</p>
+    <p class="state-sub">Tap "+ New" to create the first one.</p>
+  </div>
+
+  <!-- List -->
+  <ul *ngIf="!isLoading && !tableMissing && !error && rows.length > 0" class="row-list">
+    <li *ngFor="let row of rows" class="row-item">
+      <button class="row-body" (click)="navigateEdit(row.id)">
+        <div class="row-chips">
+          <span class="chip" [class.chip-critical]="row.priority === 'critical'" [class.chip-info]="row.priority === 'info'">
+            {{ priorityLabel(row.priority) }}
+          </span>
+          <span class="chip" [class.chip-active]="row.isActive" [class.chip-inactive]="!row.isActive">
+            {{ row.isActive ? 'Active' : 'Inactive' }}
+          </span>
+          <span *ngIf="isExpired(row)" class="chip chip-expired">Expired</span>
+          <span *ngIf="row.expiresAt && !isExpired(row)" class="chip chip-expiry">{{ expiryLabel(row) }}</span>
+        </div>
+        <p class="row-title">{{ row.title }}</p>
+        <p class="row-body-text">{{ row.body }}</p>
+        <p class="row-meta">Order: {{ row.displayOrder }}</p>
+      </button>
+      <button
+        class="btn-delete"
+        [disabled]="pendingDeleteId === row.id"
+        (click)="confirmDelete(row)"
+        title="Delete"
+      >
+        <span *ngIf="pendingDeleteId === row.id" class="spinner-sm"></span>
+        <span *ngIf="pendingDeleteId !== row.id">Delete</span>
+      </button>
+    </li>
+  </ul>
+
+  <app-confirm-dialog
+    [config]="deleteDialogConfig"
+    [visible]="showDeleteDialog"
+    (confirmed)="onDeleteConfirmed($event)"
+  />
+</div>

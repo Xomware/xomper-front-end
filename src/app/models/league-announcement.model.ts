@@ -31,6 +31,30 @@ export interface AnnouncementsListResponse {
   rows: LeagueAnnouncementRaw[]
 }
 
+/** Admin list — includes inactive + expired rows. */
+export interface AdminAnnouncementsListResponse {
+  Success?: boolean
+  count?: number
+  rows: LeagueAnnouncementRaw[]
+  table_missing?: boolean
+}
+
+/** Response shape for create / update / delete mutations. */
+export interface AnnouncementMutationResponse {
+  Success?: boolean
+  row: LeagueAnnouncementRaw
+}
+
+/** Input for create — all required fields. */
+export interface AnnouncementCreateInput {
+  title: string
+  body: string
+  priority: 'critical' | 'info'
+  is_active: boolean
+  display_order: number
+  expires_at?: string | null
+}
+
 export function mapAnnouncement(raw: LeagueAnnouncementRaw): LeagueAnnouncement {
   return {
     id: raw.id,

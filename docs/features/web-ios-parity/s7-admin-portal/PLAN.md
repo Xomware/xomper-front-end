@@ -2,7 +2,7 @@
 
 **Status**: In Progress (PR 7a complete, 7b pending)
 **Created**: 2026-06-04
-**Last updated**: 2026-06-04 (PR 7a shipped: issue #86, branch feature/86-admin-portal-a)
+**Last updated**: 2026-06-04 (PR 7b shipped: issue #88, branch feature/88-admin-portal-b)
 **Epic**: [`../PLAN.md`](../PLAN.md)
 **Brainstorm**: [`../BRAINSTORM.md`](../BRAINSTORM.md)
 
@@ -367,23 +367,23 @@ Sequenced. Steps 1–4 are Phase 0 / shared. Steps 5–17 are PR 7a. Steps 18–
 
 **PR 7b — CRUD + Ops**
 
-- [ ] 18. Extend `AnnouncementsService`: add `listAdmin()`, `getById()`, `create()`, `update()`, `softDelete()`.
-- [ ] 19. Build `AdminAnnouncementsListComponent` (chips, delete confirm, pending spinner).
-- [ ] 20. Build `AdminAnnouncementEditComponent` (Reactive Form, 3-state expiry diff).
-- [ ] 21. Wire `/admin/announcements` and `/admin/announcements/:id` (incl. `new` sentinel) routes.
-- [ ] 22. Add `TablesService` + `WhitelistedUser` (admin-scope) + `WhitelistedLeague` models.
-- [ ] 23. Build `AdminTablesMenuComponent`.
-- [ ] 24. Build `AdminTablesUsersComponent` + `AdminUserEditComponent` (email regex validator + diff-on-save).
-- [ ] 25. Build `AdminTablesLeaguesComponent` + `AdminLeagueEditComponent`.
-- [ ] 26. Wire `/admin/tables`, `/admin/tables/users`, `/admin/tables/users/:id`, `/admin/tables/leagues`, `/admin/tables/leagues/:id` routes.
-- [ ] 27. Add `AuditService` + `AuditEntry` model.
-- [ ] 28. Build `AdminAuditFeedComponent` (cursor pagination + tableMissing empty state).
-- [ ] 29. Build `AdminAuditDetailComponent` (3 collapsible JSON blocks; first-page fallback when store empty on direct nav).
-- [ ] 30. Wire `/admin/audit` and `/admin/audit/:id` routes.
-- [ ] 31. Add `CronService` + `CronSetting` model.
-- [ ] 32. Build `AdminCronSettingsComponent` (test-mode banner, per-row pending spinner).
-- [ ] 33. Wire `/admin/cron-settings` route.
-- [ ] 34. Build `AdminLogsComponent` placeholder + wire `/admin/logs` route.
+- [x] 18. Extend `AnnouncementsService`: add `listAdmin()`, `getById()`, `create()`, `update()`, `softDelete()`.
+- [x] 19. Build `AdminAnnouncementsListComponent` (chips, delete confirm, pending spinner).
+- [x] 20. Build `AdminAnnouncementEditComponent` (Reactive Form, 3-state expiry diff).
+- [x] 21. Wire `/admin/announcements` and `/admin/announcements/:id` (incl. `new` sentinel) routes.
+- [x] 22. Add `TablesService` + `WhitelistedUser` (admin-scope) + `WhitelistedLeague` models.
+- [x] 23. Build `AdminTablesMenuComponent`.
+- [x] 24. Build `AdminTablesUsersComponent` + `AdminUserEditComponent` (email regex validator + diff-on-save).
+- [x] 25. Build `AdminTablesLeaguesComponent` + `AdminLeagueEditComponent`.
+- [x] 26. Wire `/admin/tables`, `/admin/tables/users`, `/admin/tables/users/:id`, `/admin/tables/leagues`, `/admin/tables/leagues/:id` routes.
+- [x] 27. Add `AuditService` + `AuditEntry` model.
+- [x] 28. Build `AdminAuditFeedComponent` (cursor pagination + tableMissing empty state).
+- [x] 29. Build `AdminAuditDetailComponent` (3 collapsible JSON blocks; first-page fallback when store empty on direct nav).
+- [x] 30. Wire `/admin/audit` and `/admin/audit/:id` routes.
+- [x] 31. Add `CronService` + `CronSetting` model.
+- [x] 32. Build `AdminCronSettingsComponent` (test-mode banner, per-row pending spinner).
+- [x] 33. Wire `/admin/cron-settings` route.
+- [x] 34. Build `AdminLogsComponent` placeholder + wire `/admin/logs` route.
 - [ ] 34a. Run `/ultrareview` on PR 7b; open PR.
 - [ ] 35. Both PRs merged → mark `s7-admin-portal` sub-issue done on XomBoard.
 

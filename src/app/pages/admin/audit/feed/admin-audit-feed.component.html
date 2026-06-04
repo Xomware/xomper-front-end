@@ -1,0 +1,49 @@
+<div class="audit-feed">
+  <div class="feed-header">
+    <h2>Audit Log</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="state-empty">
+    <p>Loading…</p>
+  </div>
+
+  <!-- Table missing -->
+  <div *ngIf="!isLoading && tableMissing" class="state-empty state-warning">
+    <p class="state-title">Audit table not provisioned</p>
+    <p class="state-body">The <code>admin_audit</code> table hasn't been created yet. Run the Supabase migration and refresh.</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!isLoading && error && !tableMissing" class="state-empty state-error">
+    <p>{{ error }}</p>
+    <button class="btn-secondary" (click)="retry()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading && !tableMissing && !error && rows.length === 0" class="state-empty">
+    <p>No audit entries yet.</p>
+    <p class="state-sub">Admin actions will appear here once any mutation is made.</p>
+  </div>
+
+  <!-- Feed -->
+  <ul *ngIf="!isLoading && !tableMissing && !error && rows.length > 0" class="row-list">
+    <li *ngFor="let row of rows" class="row-item" (click)="navigateDetail(row)">
+      <div class="row-action">{{ actionDisplay(row) }}</div>
+      <div class="row-meta">
+        <span class="row-actor">{{ row.actorUserId }}</span>
+        <span class="row-target" *ngIf="row.targetTable">· {{ row.targetTable }}</span>
+        <span class="row-target" *ngIf="row.targetId">{{ row.targetId }}</span>
+      </div>
+      <div class="row-date">{{ formatDate(row.createdAt) }}</div>
+    </li>
+  </ul>
+
+  <!-- Infinite scroll sentinel -->
+  <div #sentinel class="sentinel" *ngIf="hasMore"></div>
+
+  <!-- Load-more spinner -->
+  <div *ngIf="isLoadingMore" class="load-more-spinner">
+    <span class="spinner"></span>
+  </div>
+</div>

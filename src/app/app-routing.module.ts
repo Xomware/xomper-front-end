@@ -173,9 +173,95 @@ const routes: Routes = [
             (m) => m.AdminEmailArchiveDetailComponent,
           ),
       },
-      // PR 7b routes (placeholders — components ship in 7b)
-      // Registered now so the shell can navigate to them even before 7b merges.
-      // They will 404-redirect gracefully via the catch-all.
+      // PR 7b — Announcements
+      {
+        path: 'announcements',
+        loadComponent: () =>
+          import('./pages/admin/announcements/list/admin-announcements-list.component').then(
+            (m) => m.AdminAnnouncementsListComponent,
+          ),
+      },
+      {
+        path: 'announcements/new',
+        loadComponent: () =>
+          import('./pages/admin/announcements/edit/admin-announcement-edit.component').then(
+            (m) => m.AdminAnnouncementEditComponent,
+          ),
+      },
+      {
+        path: 'announcements/:id',
+        loadComponent: () =>
+          import('./pages/admin/announcements/edit/admin-announcement-edit.component').then(
+            (m) => m.AdminAnnouncementEditComponent,
+          ),
+      },
+      // PR 7b — Tables
+      {
+        path: 'tables',
+        loadComponent: () =>
+          import('./pages/admin/tables/admin-tables-menu.component').then(
+            (m) => m.AdminTablesMenuComponent,
+          ),
+      },
+      {
+        path: 'tables/users',
+        loadComponent: () =>
+          import('./pages/admin/tables/users/list/admin-tables-users.component').then(
+            (m) => m.AdminTablesUsersComponent,
+          ),
+      },
+      {
+        path: 'tables/users/:id',
+        loadComponent: () =>
+          import('./pages/admin/tables/users/edit/admin-user-edit.component').then(
+            (m) => m.AdminUserEditComponent,
+          ),
+      },
+      {
+        path: 'tables/leagues',
+        loadComponent: () =>
+          import('./pages/admin/tables/leagues/list/admin-tables-leagues.component').then(
+            (m) => m.AdminTablesLeaguesComponent,
+          ),
+      },
+      {
+        path: 'tables/leagues/:id',
+        loadComponent: () =>
+          import('./pages/admin/tables/leagues/edit/admin-league-edit.component').then(
+            (m) => m.AdminLeagueEditComponent,
+          ),
+      },
+      // PR 7b — Audit
+      {
+        path: 'audit',
+        loadComponent: () =>
+          import('./pages/admin/audit/feed/admin-audit-feed.component').then(
+            (m) => m.AdminAuditFeedComponent,
+          ),
+      },
+      {
+        path: 'audit/:id',
+        loadComponent: () =>
+          import('./pages/admin/audit/detail/admin-audit-detail.component').then(
+            (m) => m.AdminAuditDetailComponent,
+          ),
+      },
+      // PR 7b — Cron Settings
+      {
+        path: 'cron-settings',
+        loadComponent: () =>
+          import('./pages/admin/cron-settings/admin-cron-settings.component').then(
+            (m) => m.AdminCronSettingsComponent,
+          ),
+      },
+      // PR 7b — Logs placeholder
+      {
+        path: 'logs',
+        loadComponent: () =>
+          import('./pages/admin/logs/admin-logs.component').then(
+            (m) => m.AdminLogsComponent,
+          ),
+      },
     ],
   },
   { path: 'team-analyzer', redirectTo: 'team', pathMatch: 'full' },

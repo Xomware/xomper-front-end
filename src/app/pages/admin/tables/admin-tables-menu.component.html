@@ -1,0 +1,17 @@
+<div class="tables-menu">
+  <div class="menu-header">
+    <h2>Tables</h2>
+  </div>
+  <div class="tile-grid">
+    <button
+      *ngFor="let tile of tiles"
+      class="tile"
+      [title]="tile.tooltip || ''"
+      (click)="navigate(tile)"
+    >
+      <span class="tile-label">{{ tile.label }}</span>
+      <span class="tile-subtitle">{{ tile.subtitle }}</span>
+      <span *ngIf="tile.tooltip" class="tile-badge">AI Review ↗</span>
+    </button>
+  </div>
+</div>

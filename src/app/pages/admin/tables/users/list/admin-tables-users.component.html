@@ -1,0 +1,35 @@
+<div class="users-list">
+  <div class="list-header">
+    <h2>Users</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="state-empty">
+    <p>Loading…</p>
+  </div>
+
+  <div *ngIf="!isLoading && error" class="state-empty state-error">
+    <p>{{ error }}</p>
+    <button class="btn-secondary" (click)="load()">Retry</button>
+  </div>
+
+  <div *ngIf="!isLoading && !error && users.length === 0" class="state-empty">
+    <p>No users found.</p>
+  </div>
+
+  <ul *ngIf="!isLoading && !error && users.length > 0" class="row-list">
+    <li *ngFor="let user of users" class="row-item" (click)="navigateEdit(user)">
+      <div class="row-info">
+        <span class="row-name">{{ displayLabel(user) }}</span>
+        <span class="row-email">{{ user.email }}</span>
+      </div>
+      <div class="row-chips">
+        <span class="chip" [class.chip-admin]="user.isAdmin" [class.chip-member]="!user.isAdmin">
+          {{ user.isAdmin ? 'Admin' : (user.role || 'Member') }}
+        </span>
+        <span class="chip" [class.chip-active]="user.isActive" [class.chip-inactive]="!user.isActive">
+          {{ user.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+    </li>
+  </ul>
+</div>

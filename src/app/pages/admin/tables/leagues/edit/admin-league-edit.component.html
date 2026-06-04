@@ -1,0 +1,61 @@
+<div class="league-edit">
+  <div class="edit-header">
+    <button class="btn-back" (click)="cancel()">← Back</button>
+    <h2>Edit League</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="state-loading"><p>Loading…</p></div>
+
+  <ng-container *ngIf="!isLoading && league">
+    <!-- Read-only labels -->
+    <div class="readonly-section">
+      <div class="readonly-row">
+        <span class="readonly-label">League ID</span>
+        <span class="readonly-value">{{ leagueId }}</span>
+      </div>
+      <div class="readonly-row">
+        <span class="readonly-label">Season</span>
+        <span class="readonly-value">{{ season }}</span>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="edit-form">
+      <div class="field-group">
+        <label for="leagueName">League Name</label>
+        <input id="leagueName" type="text" formControlName="leagueName" autocomplete="off" />
+        <p *ngIf="form.get('leagueName')?.touched && form.get('leagueName')?.hasError('required')" class="field-error">League name is required.</p>
+      </div>
+
+      <div class="field-group field-row">
+        <label for="isActive">Active</label>
+        <input id="isActive" type="checkbox" formControlName="isActive" />
+      </div>
+
+      <div class="field-group field-row">
+        <label for="isDynasty">Dynasty</label>
+        <input id="isDynasty" type="checkbox" formControlName="isDynasty" />
+      </div>
+
+      <div class="field-group field-row">
+        <label for="hasTaxi">Has Taxi Squad</label>
+        <input id="hasTaxi" type="checkbox" formControlName="hasTaxi" />
+      </div>
+
+      <p *ngIf="error" class="feedback-error">{{ error }}</p>
+      <p *ngIf="successMessage" class="feedback-success">{{ successMessage }}</p>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || isSaving">
+          <span *ngIf="isSaving" class="spinner-sm"></span>
+          <span *ngIf="!isSaving">Save</span>
+        </button>
+      </div>
+    </form>
+  </ng-container>
+
+  <div *ngIf="!isLoading && error && !league" class="state-loading">
+    <p class="error-text">{{ error }}</p>
+    <button class="btn-secondary" (click)="cancel()">Back</button>
+  </div>
+</div>
