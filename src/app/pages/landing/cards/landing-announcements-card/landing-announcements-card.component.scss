@@ -1,0 +1,82 @@
+@import 'styles/variables';
+
+.announcements-card {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.announcements-card__header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 0 $spacing-xs;
+}
+
+.announcements-card__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: $text-secondary;
+}
+
+.announcements-card__rows {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+// Individual row
+.announcement-row {
+  display: flex;
+  border-radius: $radius-lg;
+  background: $card-gradient;
+  overflow: hidden;
+
+  &__accent {
+    width: 3px;
+    background: #ef4444; // accentRed
+    flex-shrink: 0;
+  }
+
+  &__content {
+    padding: $spacing-md;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__critical-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ef4444;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: $text-sm;
+    font-weight: 600;
+    color: $text-primary;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__body {
+    font-size: $text-xs;
+    color: $text-secondary;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+}

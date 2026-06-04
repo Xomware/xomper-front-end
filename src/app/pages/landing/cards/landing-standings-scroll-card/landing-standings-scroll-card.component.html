@@ -1,0 +1,50 @@
+<div class="standings-scroll">
+  <div class="standings-scroll__header" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+      <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+    </svg>
+    <span class="standings-scroll__label">STANDINGS</span>
+  </div>
+
+  <!-- Offseason empty state — matches iOS offseasonEmptyState -->
+  <div *ngIf="!isRegularSeason" class="standings-scroll__empty-card" aria-label="Standings unlock once Week 1 kicks off.">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="standings-scroll__empty-icon" aria-hidden="true">
+      <path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/>
+    </svg>
+    <span class="standings-scroll__empty-text">Standings unlock once Week 1 kicks off.</span>
+  </div>
+
+  <!-- Loading placeholder when regular season but no data yet -->
+  <div *ngIf="isRegularSeason && standings.length === 0" class="standings-scroll__empty-card" aria-label="Loading standings…">
+    <span class="standings-scroll__empty-text">Loading standings…</span>
+  </div>
+
+  <!-- Horizontal chip scroller -->
+  <div *ngIf="isRegularSeason && standings.length > 0" class="standings-scroll__chips" role="list">
+    <button
+      *ngFor="let team of standings"
+      class="team-chip"
+      [class.team-chip--mine]="isMine(team)"
+      (click)="goToStandings(team)"
+      role="listitem"
+      [attr.aria-label]="team.teamName + ', ' + team.getRecord() + (isMine(team) ? ', your team' : '')"
+    >
+      <img
+        *ngIf="team.avatar"
+        [src]="team.avatar"
+        class="team-chip__avatar"
+        alt=""
+        aria-hidden="true"
+      />
+      <div *ngIf="!team.avatar" class="team-chip__avatar team-chip__avatar--fallback" aria-hidden="true">
+        {{ team.teamName.charAt(0) }}
+      </div>
+      <div class="team-chip__info">
+        <span class="team-chip__name">{{ team.teamName }}</span>
+        <span class="team-chip__record" [class.team-chip__record--mine]="isMine(team)">
+          {{ team.getRecord() }}
+        </span>
+      </div>
+    </button>
+  </div>
+</div>

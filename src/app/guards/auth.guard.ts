@@ -3,12 +3,12 @@ import { CanActivate, Router } from '@angular/router'
 import { SupabaseService } from '../services/supabase.service'
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
   constructor(
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
   ) {}
 
   canActivate(): boolean {
@@ -16,7 +16,8 @@ export class AuthGuard implements CanActivate {
       return true
     }
 
-    this.router.navigate(['/home'])
+    // s5: redirect unauthed users to /login (was /home pre-s5)
+    this.router.navigate(['/login'])
     return false
   }
 }

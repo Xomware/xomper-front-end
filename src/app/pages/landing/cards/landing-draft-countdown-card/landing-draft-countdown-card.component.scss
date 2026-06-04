@@ -1,0 +1,61 @@
+@import 'styles/variables';
+
+.draft-card {
+  padding: $spacing-md;
+  border-radius: $radius-lg;
+  background: $card-gradient;
+  border: 1px solid rgba($champion-gold, 0.3);
+  cursor: pointer;
+  transition: box-shadow $transition-base, transform $transition-base;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:hover {
+    box-shadow: 0 0 0 1px rgba($champion-gold, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+.draft-card__header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
+}
+
+.draft-card__icon {
+  color: $champion-gold;
+}
+
+.draft-card__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: $champion-gold;
+  flex: 1;
+}
+
+.draft-card__chevron {
+  color: $text-muted;
+}
+
+.draft-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $text-primary;
+  margin: 0 0 $spacing-xs 0;
+}
+
+.draft-card__start-time {
+  font-size: $text-xs;
+  color: $text-secondary;
+  margin: 0 0 $spacing-xs 0;
+}
+
+.draft-card__countdown {
+  font-size: $text-base;
+  font-weight: 700;
+  color: $champion-gold;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}

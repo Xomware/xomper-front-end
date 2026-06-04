@@ -1,0 +1,71 @@
+<div class="matchups-card">
+  <div class="matchups-card__header" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+    </svg>
+    <span class="matchups-card__label">
+      <ng-container *ngIf="isRegularSeason">WEEK {{ currentWeek }} MATCHUPS</ng-container>
+      <ng-container *ngIf="!isRegularSeason">MATCHUPS</ng-container>
+    </span>
+  </div>
+
+  <!-- Offseason empty state -->
+  <div *ngIf="!isRegularSeason" class="matchups-card__empty" aria-label="This week's matchups appear here once games begin.">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="matchups-card__empty-icon" aria-hidden="true">
+      <path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3c4.86-2.34 8-7 8-11.5C20 5.81 16.19 2 11.5 2zm1 14.5h-2v-2h2v2zm0-4h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2h-2c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z"/>
+    </svg>
+    <span class="matchups-card__empty-text">This week's matchups appear here once games begin.</span>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="isRegularSeason && isLoading && pairs.length === 0" class="matchups-card__empty" aria-label="Loading this week's matchups…">
+    <span class="matchups-card__empty-text">Loading this week's matchups…</span>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="isRegularSeason && loadError && pairs.length === 0" class="matchups-card__empty" [attr.aria-label]="'Could not load matchups: ' + loadError">
+    <span class="matchups-card__empty-text">Couldn't load matchups.</span>
+  </div>
+
+  <!-- No matchups scheduled -->
+  <div *ngIf="isRegularSeason && !isLoading && !loadError && pairs.length === 0" class="matchups-card__empty" [attr.aria-label]="'No matchups scheduled for Week ' + currentWeek">
+    <span class="matchups-card__empty-text">No matchups scheduled for Week {{ currentWeek }}.</span>
+  </div>
+
+  <!-- Matchup rows -->
+  <div *ngIf="isRegularSeason && pairs.length > 0" class="matchups-card__rows">
+    <div
+      *ngFor="let pair of pairs"
+      class="matchup-row"
+      [class.matchup-row--mine]="pair.teamAIsMine || pair.teamBIsMine"
+      [attr.aria-label]="pair.teamAName + ' ' + pointsLabel(pair.teamAPoints) + ' versus ' + pair.teamBName + ' ' + pointsLabel(pair.teamBPoints)"
+    >
+      <!-- Team A -->
+      <div class="matchup-row__team matchup-row__team--left">
+        <img *ngIf="pair.teamAAvatar" [src]="pair.teamAAvatar" class="matchup-row__avatar" alt="" aria-hidden="true" />
+        <div *ngIf="!pair.teamAAvatar" class="matchup-row__avatar matchup-row__avatar--fallback" aria-hidden="true">
+          {{ pair.teamAName.charAt(0) }}
+        </div>
+        <span class="matchup-row__team-name">{{ pair.teamAName }}</span>
+        <span class="matchup-row__points" [class.matchup-row__points--mine]="pair.teamAIsMine">
+          {{ pointsLabel(pair.teamAPoints) }}
+        </span>
+      </div>
+
+      <!-- VS -->
+      <span class="matchup-row__vs" aria-hidden="true">VS</span>
+
+      <!-- Team B -->
+      <div class="matchup-row__team matchup-row__team--right">
+        <span class="matchup-row__points" [class.matchup-row__points--mine]="pair.teamBIsMine">
+          {{ pointsLabel(pair.teamBPoints) }}
+        </span>
+        <span class="matchup-row__team-name matchup-row__team-name--right">{{ pair.teamBName }}</span>
+        <img *ngIf="pair.teamBAvatar" [src]="pair.teamBAvatar" class="matchup-row__avatar" alt="" aria-hidden="true" />
+        <div *ngIf="!pair.teamBAvatar" class="matchup-row__avatar matchup-row__avatar--fallback" aria-hidden="true">
+          {{ pair.teamBName.charAt(0) }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

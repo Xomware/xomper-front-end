@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core'
 import { Routes, RouterModule } from '@angular/router'
 
 import { HomeComponent } from './pages/home/home.component'
+import { LoginComponent } from './pages/login/login.component'
 import { SearchComponent } from './pages/search/search.component'
 import { LeagueComponent } from './pages/league/league.component'
 import { MyProfileComponent } from './pages/my-profile/my-profile.component'
@@ -19,7 +20,14 @@ import { LinkSleeperComponent } from './pages/link-sleeper/link-sleeper.componen
 const routes: Routes = [
   // Public
   { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
+
+  // Login — public, no guard. Authed users visiting /login get redirected
+  // to /home inside LoginComponent.ngOnInit.
+  { path: 'login', component: LoginComponent },
+
+  // Landing hub — auth-gated. AuthGuard redirects unauthed → /login.
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+
   { path: 'search', component: SearchComponent },
 
   // Guest accessible (view others)
@@ -107,6 +115,7 @@ const routes: Routes = [
 
   // Placeholder redirects for stub destinations (s6/s7/s8 will replace these)
   { path: 'ai-review', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'ai-review/:id', redirectTo: 'home', pathMatch: 'full' },
   { path: 'admin', redirectTo: 'home', pathMatch: 'full' },
   { path: 'team-analyzer', redirectTo: 'team', pathMatch: 'full' },
 
@@ -115,7 +124,7 @@ const routes: Routes = [
   { path: 'my-league', redirectTo: 'league', pathMatch: 'full' },
   { path: 'my-team', redirectTo: 'team', pathMatch: 'full' },
 
-  // Authenticated - taxi squad and other non-redirected MY routes
+  // Authenticated — taxi squad and other non-redirected MY routes
   { path: 'taxi-squad', component: TaxiSquadComponent, canActivate: [AuthGuard] },
 
   // Account setup (authenticated)
@@ -131,6 +140,6 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}

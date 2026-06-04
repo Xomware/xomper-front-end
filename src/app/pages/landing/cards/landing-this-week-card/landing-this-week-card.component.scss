@@ -1,0 +1,129 @@
+@import 'styles/variables';
+
+.matchups-card {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.matchups-card__header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 0 $spacing-xs;
+}
+
+.matchups-card__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: $text-secondary;
+}
+
+// Empty / loading states
+.matchups-card__empty {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: $radius-lg;
+  background: $card-gradient;
+}
+
+.matchups-card__empty-icon {
+  color: $text-muted;
+  flex-shrink: 0;
+}
+
+.matchups-card__empty-text {
+  font-size: $text-xs;
+  color: $text-secondary;
+}
+
+// Matchup rows
+.matchups-card__rows {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.matchup-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: $radius-lg;
+  background: $card-gradient;
+  border: 1px solid transparent;
+
+  &--mine {
+    border-color: rgba($champion-gold, 0.4);
+  }
+
+  &__team {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    flex: 1;
+    min-width: 0;
+
+    &--right {
+      flex-direction: row-reverse;
+    }
+  }
+
+  &__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+
+    &--fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: $surface-light;
+      color: $text-secondary;
+      font-size: $text-xs;
+      font-weight: 700;
+    }
+  }
+
+  &__team-name {
+    font-size: $text-xs;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+
+    &--right {
+      text-align: right;
+    }
+  }
+
+  &__points {
+    font-size: $text-base;
+    font-weight: 700;
+    color: $text-secondary;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+
+    &--mine {
+      color: $champion-gold;
+    }
+  }
+
+  &__vs {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: $text-muted;
+    flex-shrink: 0;
+  }
+}

@@ -1,0 +1,29 @@
+<!-- Collapses to zero height when empty — matches iOS EmptyView behavior -->
+<div *ngIf="announcements.length > 0" class="announcements-card">
+  <div class="announcements-card__header" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+      <path d="M18 11v-1c0-3.87-3.13-7-7-7S4 6.13 4 10v1l-2 2v1h18v-1l-2-2zm-7 11c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm1-13H10v2H8v2h8v-2h-2z"/>
+    </svg>
+    <span class="announcements-card__label">ANNOUNCEMENTS</span>
+  </div>
+
+  <div class="announcements-card__rows">
+    <div
+      *ngFor="let a of announcements"
+      class="announcement-row"
+      [class.announcement-row--critical]="isCritical(a)"
+      [attr.aria-label]="(isCritical(a) ? 'Critical: ' : '') + a.title + '. ' + a.body"
+    >
+      <div *ngIf="isCritical(a)" class="announcement-row__accent" aria-hidden="true"></div>
+
+      <div class="announcement-row__content">
+        <div class="announcement-row__title-row">
+          <span *ngIf="isCritical(a)" class="announcement-row__critical-badge">CRITICAL</span>
+          <span class="announcement-row__title">{{ a.title }}</span>
+        </div>
+        <!-- TODO(s10): replace with markdown pipe once library is added -->
+        <p class="announcement-row__body">{{ a.body }}</p>
+      </div>
+    </div>
+  </div>
+</div>

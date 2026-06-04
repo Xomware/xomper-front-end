@@ -1,0 +1,28 @@
+<!-- Hidden entirely when no upcoming draft — matches iOS Color.clear frame(height:0) -->
+<div
+  *ngIf="upcomingDraft"
+  class="draft-card"
+  role="button"
+  tabindex="0"
+  (click)="goToDraftHistory()"
+  (keydown.enter)="goToDraftHistory()"
+  [attr.aria-label]="'Upcoming draft: ' + draftLabel + '. ' + countdownText"
+>
+  <div class="draft-card__header">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="draft-card__icon" aria-hidden="true">
+      <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+    </svg>
+    <span class="draft-card__label">UPCOMING DRAFT</span>
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" class="draft-card__chevron" aria-hidden="true">
+      <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+    </svg>
+  </div>
+
+  <p class="draft-card__name">{{ draftLabel }}</p>
+
+  <p class="draft-card__start-time" *ngIf="startDate">
+    Starts {{ formattedStartDate }}
+  </p>
+
+  <p class="draft-card__countdown" *ngIf="countdownText">{{ countdownText }}</p>
+</div>

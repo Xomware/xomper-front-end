@@ -1,0 +1,125 @@
+@import 'styles/variables';
+
+.standings-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.standings-scroll__header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 0 $spacing-xs;
+}
+
+.standings-scroll__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: $text-secondary;
+}
+
+// Empty / loading card
+.standings-scroll__empty-card {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: $radius-lg;
+  background: $card-gradient;
+}
+
+.standings-scroll__empty-icon {
+  color: $text-muted;
+  flex-shrink: 0;
+}
+
+.standings-scroll__empty-text {
+  font-size: $text-xs;
+  color: $text-secondary;
+}
+
+// Horizontal chip scroller
+.standings-scroll__chips {
+  display: flex;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding: 2px $spacing-xs;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Team chip
+.team-chip {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  min-width: 140px;
+  border-radius: $radius-lg;
+  background: $card-gradient;
+  border: 1px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color $transition-base;
+  text-align: left;
+
+  &--mine {
+    border-color: rgba($champion-gold, 0.4);
+  }
+
+  &:hover {
+    border-color: rgba($champion-gold, 0.3);
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+
+    &--fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: $surface-light;
+      color: $text-secondary;
+      font-size: $text-xs;
+      font-weight: 700;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $text-xs;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__record {
+    font-size: 0.65rem;
+    color: $text-secondary;
+    font-variant-numeric: tabular-nums;
+
+    &--mine {
+      color: $champion-gold;
+    }
+  }
+}

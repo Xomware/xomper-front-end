@@ -1,0 +1,52 @@
+<!-- Loading skeleton -->
+<div class="headline-card headline-card--skeleton" *ngIf="isLoading" aria-busy="true">
+  <div class="skeleton-chip"></div>
+  <div class="skeleton-title"></div>
+  <div class="skeleton-body"></div>
+</div>
+
+<!-- Populated hero card — gold-bordered, matches iOS HeadlineAIReportCard -->
+<a
+  *ngIf="!isLoading && report"
+  class="headline-card headline-card--populated"
+  [routerLink]="['/ai-review', report.id]"
+  [attr.aria-label]="'Latest AI report: ' + displayTitle + '. Tap to read.'"
+>
+  <div class="headline-card__header">
+    <span class="headline-card__type-chip">{{ typeLabel }}</span>
+    <span class="headline-card__period">{{ report.period }}</span>
+  </div>
+
+  <p class="headline-card__title">{{ displayTitle }}</p>
+
+  <p class="headline-card__snippet" *ngIf="previewSnippet">
+    {{ previewSnippet }}
+  </p>
+
+  <div class="headline-card__read-more">
+    <span>Read report</span>
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+      <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+    </svg>
+  </div>
+</a>
+
+<!-- Cold-start placeholder — matches iOS HeadlineAIReportCard placeholderCard -->
+<div
+  *ngIf="!isLoading && !report"
+  class="headline-card headline-card--placeholder"
+  aria-label="AI reviews placeholder. First report drops after draft day."
+>
+  <div class="headline-card__header">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="headline-card__sparkle" aria-hidden="true">
+      <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+    </svg>
+    <span class="headline-card__placeholder-label">AI REVIEWS</span>
+  </div>
+
+  <p class="headline-card__placeholder-heading">First report drops after draft day</p>
+
+  <p class="headline-card__placeholder-body">
+    AI reviews land here once the season kicks off — check back after draft day.
+  </p>
+</div>
