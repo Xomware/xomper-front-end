@@ -1,51 +1,59 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .cron-settings {
   max-width: 800px;
   margin: 0 auto;
 }
 
 .test-mode-banner {
-  background: rgba(245, 158, 11, 0.15);
-  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
-  font-size: 0.85rem;
+  background: rgba($champion-gold, 0.1);
+  border-bottom: 1px solid rgba($champion-gold, 0.3);
+  color: $champion-gold;
+  font-size: $text-sm;
   font-weight: 600;
   text-align: center;
-  padding: 10px 16px;
+  padding: 10px $spacing-md;
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .page-header {
-  padding: 24px 24px 8px;
-  h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+  padding: $spacing-lg $spacing-lg $spacing-sm;
+  h2 { margin: 0; font-family: $font-display; font-size: 1.5rem; font-weight: 600; color: $text-primary; }
 }
 
 .state-empty {
   text-align: center;
-  padding: 48px 16px;
-  color: rgba(255,255,255,0.5);
+  padding: 48px $spacing-md;
+  color: $text-muted;
 
-  &.state-warning { color: #f59e0b; }
-  &.state-error   { color: #ef4444; }
+  &.state-warning { color: $champion-gold; }
+  &.state-error   { color: $error-red; }
 
-  .state-title { font-weight: 600; margin-bottom: 8px; }
-  .state-body  { font-size: 0.875rem; }
+  .state-title { font-weight: 600; margin-bottom: $spacing-sm; }
+  .state-body  { font-size: $text-sm; }
 }
 
 .btn-secondary {
   margin-top: 12px;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
-  padding: 8px 16px;
+  background: rgba($surface-light, 0.2);
+  color: $text-primary;
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-family: $font-body;
   cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: rgba($surface-light, 0.3); }
 }
 
 .row-list {
   list-style: none;
-  padding: 16px 24px;
+  padding: $spacing-md $spacing-lg;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -56,10 +64,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 16px;
-  gap: 16px;
+  @include xomper-card;
+  border: 1px solid rgba($surface-light, 0.2);
+  padding: $spacing-md;
+  gap: $spacing-md;
 }
 
 .row-info {
@@ -73,21 +81,22 @@
 .row-title {
   font-weight: 600;
   font-size: 0.95rem;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .row-key {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
-  font-family: monospace;
+  font-size: $text-xs;
+  color: $text-muted;
+  font-family: $font-mono;
 }
 
 .row-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: $spacing-md;
   flex-shrink: 0;
 }
 
@@ -105,8 +114,8 @@
 
 .toggle-label {
   font-size: 0.7rem;
-  color: rgba(255,255,255,0.6);
-  &.toggle-label--off { color: rgba(255,255,255,0.3); }
+  color: $text-secondary;
+  &.toggle-label--off { color: $text-muted; }
 }
 
 .toggle {
@@ -130,12 +139,12 @@
   }
 
   &.toggle--on {
-    background: #10b981;
+    background: $champion-gold;
     &::after { left: 23px; }
   }
 
   &.toggle--off {
-    background: rgba(255,255,255,0.2);
+    background: rgba($surface-light, 0.5);
     &::after { left: 3px; }
   }
 
@@ -145,8 +154,8 @@
 .spinner-sm {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-top-color: #10b981;
+  border: 2px solid rgba($surface-light, 0.4);
+  border-top-color: $champion-gold;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;

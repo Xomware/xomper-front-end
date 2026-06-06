@@ -130,13 +130,13 @@ Large diff, **low risk** — pure presentation, no `.ts`/`.html` logic touched. 
 - [ ] **5 — Sweep B2 Landing** (replace ad-hoc gold-border with `xomper-hero-card`) → smoke test.
 - [ ] **6 — Sweep B5 AI Review** → smoke test.
 - [ ] **7 — Build PR 1, `/ultrareview`, open PR** (`Closes #<issue-part-1>` or single issue w/ checklist).
-- [ ] **8 — Sweep B3 League sub-pages** → smoke test each route.
-- [ ] **9 — Sweep B4 Draft tabs** → smoke test.
-- [ ] **10 — Sweep B6 Admin** (heaviest — replace raw greys with tokens, apply card/chip mixins) → smoke test each sub-screen.
-- [ ] **11 — Sweep B7 Team Analyzer** (gold hexagon stroke) → smoke test.
-- [ ] **12 — Sweep B8 Search + misc** (incl. modals, toast, loader) → smoke test.
-- [ ] **13 — Full build** (`ng build`) — confirm no SCSS compile errors, no unused-import warnings.
-- [ ] **14 — `/ultrareview`, open PR 2.**
+- [x] **8 — Sweep B3 League sub-pages** → smoke test each route.
+- [x] **9 — Sweep B4 Draft tabs** → smoke test.
+- [x] **10 — Sweep B6 Admin** (heaviest — replace raw greys with tokens, apply card/chip mixins) → smoke test each sub-screen.
+- [x] **11 — Sweep B7 Team Analyzer** (gold hexagon stroke) → smoke test.
+- [x] **12 — Sweep B8 Search + misc** (incl. modals, toast, loader) → smoke test.
+- [x] **13 — Full build** (`ng build`) — confirm no SCSS compile errors, no unused-import warnings.
+- [x] **14 — `/ultrareview`, open PR 2.**
 
 ---
 

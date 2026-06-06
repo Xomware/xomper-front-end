@@ -1,10 +1,12 @@
-@use '../../../styles/variables' as v;
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+@import '../../../styles/theme';
 
 // Page shell
 .analyzer-page {
-  background: v.$bg-dark;
+  background: $bg-dark;
   min-height: 100%;
-  padding-bottom: v.$spacing-xl;
+  padding-bottom: $spacing-xl;
   position: relative;
 }
 
@@ -16,27 +18,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: v.$spacing-xl v.$spacing-md;
-  gap: v.$spacing-md;
+  padding: $spacing-xl $spacing-md;
+  gap: $spacing-md;
 }
 
 .state-msg {
-  font-size: v.$text-sm;
-  color: v.$text-secondary;
+  font-size: $text-sm;
+  color: $text-secondary;
   text-align: center;
 
   &--error {
-    color: v.$error-red;
+    color: $error-red;
   }
 }
 
 .retry-btn {
-  background: v.$champion-gold;
-  color: v.$bg-dark;
+  background: $champion-gold;
+  color: $bg-dark;
   border: none;
-  border-radius: v.$radius-full;
-  padding: v.$spacing-xs v.$spacing-md;
-  font-size: v.$text-sm;
+  border-radius: $radius-full;
+  padding: $spacing-xs $spacing-md;
+  font-size: $text-sm;
   font-weight: 700;
   cursor: pointer;
 }
@@ -46,9 +48,9 @@
 // ────────────────────────────────────────────────────────
 .tab-bar {
   display: flex;
-  background: v.$bg-dark;
-  border-bottom: 1px solid rgba(v.$surface-light, 0.3);
-  padding-top: v.$spacing-xs;
+  background: $bg-dark;
+  border-bottom: 1px solid rgba($surface-light, 0.3);
+  padding-top: $spacing-xs;
 }
 
 .tab-btn {
@@ -57,18 +59,18 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: v.$spacing-xs v.$spacing-sm v.$spacing-xs;
+  padding: $spacing-xs $spacing-sm $spacing-xs;
   background: none;
   border: none;
   cursor: pointer;
-  color: v.$text-secondary;
-  font-size: v.$text-sm;
+  color: $text-secondary;
+  font-size: $text-sm;
   font-weight: 400;
-  font-family: v.$font-body;
-  transition: color v.$transition-fast;
+  font-family: $font-body;
+  transition: color $transition-fast;
 
   &--active {
-    color: v.$champion-gold;
+    color: $champion-gold;
     font-weight: 700;
   }
 }
@@ -77,10 +79,10 @@
   height: 2px;
   width: 100%;
   background: transparent;
-  transition: background v.$transition-fast;
+  transition: background $transition-fast;
 
   &--visible {
-    background: v.$champion-gold;
+    background: $champion-gold;
   }
 }
 
@@ -90,34 +92,34 @@
 .tab-content {
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-md;
-  padding: v.$spacing-md 0;
+  gap: $spacing-md;
+  padding: $spacing-md 0;
 }
 
 // ────────────────────────────────────────────────────────
 // Shared text helpers
 // ────────────────────────────────────────────────────────
 .caption {
-  font-size: v.$text-sm;
-  color: v.$text-secondary;
-  padding: 0 v.$spacing-md;
+  font-size: $text-sm;
+  color: $text-secondary;
+  padding: 0 $spacing-md;
 }
 
 .section-label {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-secondary;
+  color: $text-secondary;
   flex-shrink: 0;
 }
 
 .section-eyebrow {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: v.$text-muted;
-  padding: 0 v.$spacing-md;
-  margin-top: v.$spacing-xs;
+  color: $text-muted;
+  padding: 0 $spacing-md;
+  margin-top: $spacing-xs;
 }
 
 .spacer {
@@ -130,18 +132,18 @@
 .legend {
   display: flex;
   align-items: center;
-  gap: v.$spacing-md;
+  gap: $spacing-md;
   flex-wrap: wrap;
-  padding: 0 v.$spacing-md;
+  padding: 0 $spacing-md;
 }
 
 .legend-chip {
   display: flex;
   align-items: center;
-  gap: v.$spacing-xs;
-  font-size: v.$text-xs;
+  gap: $spacing-xs;
+  font-size: $text-xs;
   font-weight: 500;
-  color: v.$text-primary;
+  color: $text-primary;
 
   &::before {
     content: '';
@@ -152,7 +154,7 @@
   }
 
   &--gold::before {
-    background: v.$champion-gold;
+    background: $champion-gold;
   }
 
   &--cyan::before {
@@ -171,26 +173,26 @@
 .opponent-row {
   display: flex;
   align-items: center;
-  gap: v.$spacing-sm;
-  padding: 0 v.$spacing-md;
+  gap: $spacing-sm;
+  padding: 0 $spacing-md;
 }
 
 .dropdown {
-  background: rgba(v.$surface-light, 0.4);
-  border: 1px solid rgba(v.$surface-light, 0.6);
-  border-radius: v.$radius-xl;
-  color: v.$text-primary;
-  font-size: v.$text-sm;
+  background: rgba($surface-light, 0.4);
+  border: 1px solid rgba($surface-light, 0.6);
+  border-radius: $radius-xl;
+  color: $text-primary;
+  font-size: $text-sm;
   font-weight: 600;
-  font-family: v.$font-body;
-  padding: v.$spacing-xs v.$spacing-md;
+  font-family: $font-body;
+  padding: $spacing-xs $spacing-md;
   cursor: pointer;
   outline: none;
   max-width: 240px;
 
   option {
-    background: v.$bg-card;
-    color: v.$text-primary;
+    background: $bg-card;
+    color: $text-primary;
   }
 }
 
@@ -198,23 +200,22 @@
 // League averages card
 // ────────────────────────────────────────────────────────
 .avg-card {
-  margin: 0 v.$spacing-md;
-  padding: v.$spacing-md;
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
-  border: 1px solid rgba(v.$champion-gold, 0.3);
+  @include xomper-card;
+  margin: 0 $spacing-md;
+  padding: $spacing-md;
+  border: 1px solid rgba($champion-gold, 0.3);
 }
 
 .avg-card-title {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
-  margin-bottom: v.$spacing-sm;
+  color: $champion-gold;
+  margin-bottom: $spacing-sm;
 }
 
 .avg-axes {
   display: flex;
-  gap: v.$spacing-md;
+  gap: $spacing-md;
   flex-wrap: wrap;
 }
 
@@ -227,23 +228,23 @@
 }
 
 .avg-axis-label {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 600;
-  color: v.$text-muted;
+  color: $text-muted;
   text-transform: uppercase;
 }
 
 .avg-axis-value {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$text-primary;
-  font-family: v.$font-mono;
+  color: $text-primary;
+  font-family: $font-mono;
 }
 
 .avg-divider {
   height: 1px;
-  background: rgba(v.$surface-light, 0.4);
-  margin: v.$spacing-sm 0;
+  background: rgba($surface-light, 0.4);
+  margin: $spacing-sm 0;
 }
 
 .avg-total-row {
@@ -252,92 +253,87 @@
 }
 
 .avg-total-label {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 600;
-  color: v.$text-secondary;
+  color: $text-secondary;
   flex: 1;
 }
 
 .avg-total-value {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
-  font-family: v.$font-mono;
+  color: $champion-gold;
+  font-family: $font-mono;
 }
 
 // ────────────────────────────────────────────────────────
 // League team rows
 // ────────────────────────────────────────────────────────
 .league-row {
-  margin: 0 v.$spacing-md;
-  padding: v.$spacing-md;
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
+  @include xomper-card;
+  margin: 0 $spacing-md;
+  padding: $spacing-md;
   border: 1px solid transparent;
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-xs;
+  gap: $spacing-xs;
 
   &--mine {
-    border-color: rgba(v.$champion-gold, 0.4);
+    border-color: rgba($champion-gold, 0.4);
   }
 }
 
 .league-row-header {
   display: flex;
   align-items: center;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
 }
 
 .rank {
-  font-size: v.$text-lg;
+  font-size: $text-lg;
   font-weight: 700;
-  color: v.$text-secondary;
-  font-family: v.$font-mono;
+  color: $text-secondary;
+  font-family: $font-mono;
   width: 28px;
   flex-shrink: 0;
 
   &--first {
-    color: v.$champion-gold;
+    color: $champion-gold;
   }
 }
 
 .team-name {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-primary;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
   &--mine {
-    color: v.$champion-gold;
+    color: $champion-gold;
     font-weight: 700;
   }
 }
 
 .you-badge {
-  font-size: v.$text-xs;
-  font-weight: 700;
-  color: v.$bg-dark;
-  background: v.$champion-gold;
-  padding: 2px v.$spacing-xs;
-  border-radius: v.$radius-full;
+  @include xomper-chip;
+  padding: 2px $spacing-xs;
   flex-shrink: 0;
 }
 
 .total-val {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$text-primary;
-  font-family: v.$font-mono;
+  color: $text-primary;
+  font-family: $font-mono;
   flex-shrink: 0;
 }
 
 // Per-axis bars in league tab
 .axis-bars {
   display: flex;
-  gap: v.$spacing-xs;
+  gap: $spacing-xs;
 }
 
 .axis-bar-col {
@@ -351,91 +347,89 @@
 .axis-bar-label {
   font-size: 10px;
   font-weight: 600;
-  color: v.$text-muted;
+  color: $text-muted;
   text-transform: uppercase;
   text-align: center;
 }
 
 .axis-bar-track {
   height: 6px;
-  background: rgba(v.$surface-light, 0.4);
-  border-radius: v.$radius-sm;
+  background: rgba($surface-light, 0.4);
+  border-radius: $radius-sm;
   overflow: hidden;
 }
 
 .axis-bar-fill {
   height: 100%;
-  background: v.$text-primary;
-  border-radius: v.$radius-sm;
-  transition: width v.$transition-base;
+  background: $text-primary;
+  border-radius: $radius-sm;
+  transition: width $transition-base;
 
-  &.delta--gold { background: v.$champion-gold; }
-  &.delta--red  { background: v.$error-red; }
+  &.delta--gold { background: $champion-gold; }
+  &.delta--red  { background: $error-red; }
 }
 
 .axis-bar-val {
   font-size: 10px;
   font-weight: 700;
-  color: v.$text-primary;
-  font-family: v.$font-mono;
+  color: $text-primary;
+  font-family: $font-mono;
   text-align: center;
 
-  &.delta--gold { color: v.$champion-gold; }
-  &.delta--red  { color: v.$error-red; }
+  &.delta--gold { color: $champion-gold; }
+  &.delta--red  { color: $error-red; }
 }
 
 // ────────────────────────────────────────────────────────
 // Trade tab
 // ────────────────────────────────────────────────────────
 .explainer-card {
-  margin: 0 v.$spacing-md;
-  padding: v.$spacing-md;
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
-  border: 1px solid rgba(v.$champion-gold, 0.3);
+  @include xomper-card;
+  margin: 0 $spacing-md;
+  padding: $spacing-md;
+  border: 1px solid rgba($champion-gold, 0.3);
 }
 
 .explainer-header {
   display: flex;
   align-items: center;
-  gap: v.$spacing-xs;
-  margin-bottom: v.$spacing-xs;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
 }
 
 .explainer-icon {
-  color: v.$champion-gold;
-  font-size: v.$text-lg;
+  color: $champion-gold;
+  font-size: $text-lg;
 }
 
 .explainer-title {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
+  color: $champion-gold;
 }
 
 .explainer-body {
-  font-size: v.$text-xs;
-  color: v.$text-secondary;
+  font-size: $text-xs;
+  color: $text-secondary;
   line-height: 1.5;
 }
 
 // Evaluation strip
 .eval-card {
-  margin: 0 v.$spacing-md;
-  padding: v.$spacing-md;
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
+  @include xomper-card;
+  margin: 0 $spacing-md;
+  padding: $spacing-md;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
 }
 
 .eval-values {
   display: flex;
   align-items: center;
   width: 100%;
-  gap: v.$spacing-md;
+  gap: $spacing-md;
 }
 
 .eval-col {
@@ -447,58 +441,57 @@
 }
 
 .eval-col-label {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 600;
-  color: v.$text-muted;
+  color: $text-muted;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .eval-col-val {
-  font-size: v.$text-xl;
+  font-size: $text-xl;
   font-weight: 700;
-  color: v.$champion-gold;
-  font-family: v.$font-mono;
+  color: $champion-gold;
+  font-family: $font-mono;
 }
 
 .eval-arrow {
-  font-size: v.$text-xl;
-  color: v.$text-muted;
+  font-size: $text-xl;
+  color: $text-muted;
 }
 
 .verdict-pill {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: v.$spacing-xs v.$spacing-md;
-  border-radius: v.$radius-full;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-full;
 
   &.verdict--empty {
-    background: rgba(v.$surface-light, 0.4);
-    color: v.$text-secondary;
+    background: rgba($surface-light, 0.4);
+    color: $text-secondary;
   }
 
   &.verdict--fair {
-    background: v.$success-green;
-    color: v.$bg-dark;
+    background: $success-green;
+    color: $bg-dark;
   }
 
   &.verdict--uneven {
-    background: rgba(v.$error-red, 0.85);
+    background: rgba($error-red, 0.85);
     color: #fff;
   }
 }
 
 // Trade side cards
 .side-card {
-  margin: 0 v.$spacing-md;
-  padding: v.$spacing-md;
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
+  @include xomper-card;
+  margin: 0 $spacing-md;
+  padding: $spacing-md;
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
 }
 
 .side-header {
@@ -514,44 +507,44 @@
 }
 
 .side-direction {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 600;
-  color: v.$text-muted;
+  color: $text-muted;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .side-team {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$text-primary;
+  color: $text-primary;
 }
 
 .side-val {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
-  font-family: v.$font-mono;
+  color: $champion-gold;
+  font-family: $font-mono;
 }
 
 .side-empty {
-  font-size: v.$text-xs;
-  color: v.$text-muted;
-  padding: v.$spacing-xs 0;
+  font-size: $text-xs;
+  color: $text-muted;
+  padding: $spacing-xs 0;
 }
 
 // Trade items (player / pick row)
 .trade-item {
   display: flex;
   align-items: center;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
   padding: 2px 0;
 }
 
 .trade-item-name {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-primary;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -559,76 +552,74 @@
 }
 
 .trade-item-badge {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
-  color: v.$text-secondary;
-  background: rgba(v.$surface-light, 0.4);
-  padding: 2px v.$spacing-xs;
-  border-radius: v.$radius-full;
+  color: $text-secondary;
+  background: rgba($surface-light, 0.4);
+  padding: 2px $spacing-xs;
+  border-radius: $radius-full;
   flex-shrink: 0;
 }
 
 .trade-item-val {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
-  font-family: v.$font-mono;
+  color: $champion-gold;
+  font-family: $font-mono;
   flex-shrink: 0;
 }
 
 .remove-btn {
   background: none;
   border: none;
-  color: v.$text-muted;
-  font-size: v.$text-sm;
+  color: $text-muted;
+  font-size: $text-sm;
   cursor: pointer;
   padding: 2px;
   line-height: 1;
   flex-shrink: 0;
 
   &:hover {
-    color: v.$error-red;
+    color: $error-red;
   }
 }
 
 // Side add buttons
 .side-actions {
   display: flex;
-  gap: v.$spacing-xs;
+  gap: $spacing-xs;
 }
 
 .add-btn {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
-  font-family: v.$font-body;
-  padding: v.$spacing-xs v.$spacing-md;
-  border-radius: v.$radius-full;
+  font-family: $font-body;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-full;
   cursor: pointer;
   border: none;
   min-height: 36px;
 
   &--primary {
-    background: v.$champion-gold;
-    color: v.$bg-dark;
+    background: $champion-gold;
+    color: $bg-dark;
   }
 
   &--outline {
-    background: rgba(v.$surface-light, 0.4);
-    color: v.$champion-gold;
-    border: 1px solid rgba(v.$champion-gold, 0.5);
+    background: rgba($surface-light, 0.4);
+    color: $champion-gold;
+    border: 1px solid rgba($champion-gold, 0.5);
   }
 }
 
 // Balance suggestions card
 .balance-card {
-  margin: 0 v.$spacing-md;
-  padding: v.$spacing-md;
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
-  border: 1px solid rgba(v.$champion-gold, 0.4);
+  @include xomper-hero-card;
+  margin: 0 $spacing-md;
+  padding: $spacing-md;
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
 }
 
 .balance-header {
@@ -638,20 +629,20 @@
 }
 
 .balance-title {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
+  color: $champion-gold;
 }
 
 .balance-subtitle {
-  font-size: v.$text-xs;
-  color: v.$text-muted;
+  font-size: $text-xs;
+  color: $text-muted;
 }
 
 .balance-item {
   display: flex;
   align-items: center;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
   padding: 4px 0;
   background: none;
   border: none;
@@ -660,7 +651,7 @@
   text-align: left;
 
   &:hover .balance-item-name {
-    color: v.$champion-gold;
+    color: $champion-gold;
   }
 }
 
@@ -671,28 +662,28 @@
 }
 
 .balance-item-name {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-primary;
-  transition: color v.$transition-fast;
+  color: $text-primary;
+  transition: color $transition-fast;
 }
 
 .balance-item-pos {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
-  color: v.$text-secondary;
+  color: $text-secondary;
 }
 
 .balance-item-val {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
-  font-family: v.$font-mono;
+  color: $champion-gold;
+  font-family: $font-mono;
 }
 
 .balance-item-plus {
-  color: v.$champion-gold;
-  font-size: v.$text-lg;
+  color: $champion-gold;
+  font-size: $text-lg;
   font-weight: 700;
 }
 
@@ -702,11 +693,11 @@
   margin: 0 auto;
   background: none;
   border: none;
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 600;
-  color: v.$error-red;
+  color: $error-red;
   cursor: pointer;
-  padding: v.$spacing-sm v.$spacing-md;
+  padding: $spacing-sm $spacing-md;
 
   &:hover {
     text-decoration: underline;
@@ -717,14 +708,14 @@
 .recs-section {
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-xs;
-  padding: 0 v.$spacing-md;
-  margin-top: v.$spacing-xs;
+  gap: $spacing-xs;
+  padding: 0 $spacing-md;
+  margin-top: $spacing-xs;
 }
 
 .recs-empty {
-  font-size: v.$text-xs;
-  color: v.$text-muted;
+  font-size: $text-xs;
+  color: $text-muted;
   line-height: 1.5;
 }
 
@@ -735,7 +726,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: v.$z-modal-backdrop;
+  z-index: $z-modal-backdrop;
 }
 
 .picker-modal {
@@ -745,10 +736,10 @@
   transform: translateX(-50%);
   width: min(480px, 100vw);
   max-height: 80vh;
-  background: v.$bg-card;
-  border-top-left-radius: v.$radius-xl;
-  border-top-right-radius: v.$radius-xl;
-  z-index: v.$z-modal;
+  background: $bg-card;
+  border-top-left-radius: $radius-xl;
+  border-top-right-radius: $radius-xl;
+  z-index: $z-modal;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -758,15 +749,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: v.$spacing-md;
-  border-bottom: 1px solid rgba(v.$surface-light, 0.4);
+  padding: $spacing-md;
+  border-bottom: 1px solid rgba($surface-light, 0.4);
   flex-shrink: 0;
 }
 
 .picker-title {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$text-primary;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -775,57 +766,57 @@
 .picker-close {
   background: none;
   border: none;
-  color: v.$text-muted;
-  font-size: v.$text-base;
+  color: $text-muted;
+  font-size: $text-base;
   cursor: pointer;
   padding: 4px;
   flex-shrink: 0;
 }
 
 .picker-note {
-  font-size: v.$text-xs;
-  color: v.$text-muted;
-  padding: v.$spacing-xs v.$spacing-md 0;
+  font-size: $text-xs;
+  color: $text-muted;
+  padding: $spacing-xs $spacing-md 0;
   flex-shrink: 0;
 }
 
 .picker-list {
   flex: 1;
   overflow-y: auto;
-  padding: v.$spacing-sm v.$spacing-md v.$spacing-md;
+  padding: $spacing-sm $spacing-md $spacing-md;
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-xs;
+  gap: $spacing-xs;
 }
 
 .picker-empty {
-  font-size: v.$text-sm;
-  color: v.$text-muted;
+  font-size: $text-sm;
+  color: $text-muted;
   text-align: center;
-  padding: v.$spacing-xl 0;
+  padding: $spacing-xl 0;
 }
 
 .picker-item {
   display: flex;
   align-items: center;
-  gap: v.$spacing-sm;
-  padding: v.$spacing-md;
-  background: v.$bg-dark;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: $bg-dark;
   border: none;
-  border-radius: v.$radius-md;
+  border-radius: $radius-md;
   cursor: pointer;
   width: 100%;
   text-align: left;
 
   &:hover {
-    background: v.$bg-card-hover;
+    background: $bg-card-hover;
   }
 }
 
 .picker-item-name {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-primary;
+  color: $text-primary;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -833,19 +824,19 @@
 }
 
 .picker-item-badge {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
-  color: v.$text-secondary;
-  background: rgba(v.$surface-light, 0.4);
-  padding: 2px v.$spacing-xs;
-  border-radius: v.$radius-full;
+  color: $text-secondary;
+  background: rgba($surface-light, 0.4);
+  padding: 2px $spacing-xs;
+  border-radius: $radius-full;
   flex-shrink: 0;
 }
 
 .picker-item-val {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
-  font-family: v.$font-mono;
+  color: $champion-gold;
+  font-family: $font-mono;
   flex-shrink: 0;
 }

@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .draft-live {
   min-height: 200px;
@@ -119,7 +120,7 @@
   font-family: $font-mono;
 
   &.active {
-    background: $gold-accent;
+    background: $champion-gold;
     color: $deep-navy;
   }
 
@@ -211,7 +212,7 @@
   flex-shrink: 0;
 
   .pick-made & {
-    background: $gold-accent;
+    background: $champion-gold;
     color: $deep-navy;
   }
 }

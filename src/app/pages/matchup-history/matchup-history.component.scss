@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .matchup-history-page {
   min-height: 100vh;
@@ -98,11 +99,9 @@
 
 // Empty State
 .empty-state {
+  @include xomper-card;
   text-align: center;
   padding: $spacing-2xl;
-  background: $card-gradient;
-  border-radius: $radius-lg;
-  border: 1px solid rgba($surface-light, 0.2);
 
   p {
     font-size: $text-lg;
@@ -125,10 +124,7 @@
 }
 
 .week-section {
-  background: $card-gradient;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-lg;
+  @include xomper-card;
   overflow: hidden;
   transition: all $transition-base;
 

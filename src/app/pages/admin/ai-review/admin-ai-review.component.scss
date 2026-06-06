@@ -1,23 +1,28 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .ai-review-admin {
-  padding: 24px;
+  padding: $spacing-lg;
   max-width: 900px;
   margin: 0 auto;
 }
 
 .page-header {
-  margin-bottom: 32px;
+  margin-bottom: $spacing-xl;
 }
 
 .page-title {
+  font-family: $font-display;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text-primary, #e8f5e9);
+  color: $text-primary;
   margin: 0 0 4px;
 }
 
 .page-subtitle {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-sm;
+  color: $text-secondary;
   margin: 0;
 }
 
@@ -26,12 +31,12 @@
 }
 
 .section-title {
-  font-size: 1rem;
+  font-size: $text-sm;
   font-weight: 600;
-  color: var(--color-text-secondary, #a5c8a5);
+  color: $text-secondary;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin: 0 0 16px;
+  margin: 0 0 $spacing-md;
 }
 
 .section-header-row {
@@ -40,23 +45,22 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: $spacing-md;
 }
 
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  gap: $spacing-md;
 }
 
 .trigger-card {
-  background: var(--color-surface-elevated, #1e2a1e);
-  border: 1px solid var(--color-border, #2d3f2d);
-  border-radius: 12px;
+  @include xomper-card;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $spacing-md;
+  border: 1px solid rgba($surface-light, 0.3);
 }
 
 .card-header {
@@ -68,12 +72,12 @@
 .card-label {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--color-text-primary, #e8f5e9);
+  color: $text-primary;
 }
 
 .card-desc {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-xs;
+  color: $text-secondary;
 }
 
 .card-form {
@@ -87,11 +91,11 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.8125rem;
-  color: var(--color-text-primary, #e8f5e9);
+  color: $text-primary;
   cursor: pointer;
 
   input[type="checkbox"] {
-    accent-color: var(--color-success-green, #4caf50);
+    accent-color: $champion-gold;
     width: 16px;
     height: 16px;
   }
@@ -103,22 +107,27 @@
   gap: 4px;
 
   label {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary, #a5c8a5);
+    font-size: $text-xs;
+    color: $text-secondary;
   }
 
   input {
-    background: var(--color-surface, #132013);
-    border: 1px solid var(--color-border, #2d3f2d);
-    border-radius: 6px;
-    color: var(--color-text-primary, #e8f5e9);
-    font-size: 0.875rem;
+    background: $bg-input;
+    border: 1px solid rgba($surface-light, 0.4);
+    border-radius: $radius-md;
+    color: $text-primary;
+    font-size: $text-sm;
     padding: 6px 10px;
     width: 100%;
     box-sizing: border-box;
 
     &::placeholder {
-      color: var(--color-text-muted, #6b8c6b);
+      color: $text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $champion-gold;
     }
   }
 }
@@ -126,24 +135,28 @@
 .card-footer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .btn-run {
-  background: var(--color-success-green, #4caf50);
-  color: #fff;
+  background: $champion-gold;
+  color: $deep-navy;
   border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: $radius-md;
+  padding: 8px $spacing-md;
+  font-size: $text-sm;
+  font-weight: 600;
   cursor: pointer;
   width: 100%;
-  transition: opacity 0.15s;
+  transition: filter $transition-fast;
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
   }
 }
 
@@ -155,36 +168,37 @@
 }
 
 .result-badge {
-  font-size: 0.75rem;
+  font-size: $text-xs;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-sm;
 
-  &.success { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
-  &.error { background: rgba(229, 57, 53, 0.2); color: #e53935; }
+  &.success { background: rgba($success-green, 0.2); color: $success-green; }
+  &.error { background: rgba($error-red, 0.2); color: $error-red; }
 }
 
 .result-dry {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-xs;
+  color: $text-secondary;
 }
 
 .btn-preview {
   background: none;
-  border: 1px solid var(--color-champion-gold, #ffc107);
-  color: var(--color-champion-gold, #ffc107);
-  border-radius: 6px;
+  border: 1px solid rgba($champion-gold, 0.5);
+  color: $champion-gold;
+  border-radius: $radius-md;
   padding: 4px 10px;
-  font-size: 0.75rem;
+  font-size: $text-xs;
   cursor: pointer;
   white-space: nowrap;
+  transition: background $transition-fast;
 
-  &:hover { background: rgba(255, 193, 7, 0.1); }
+  &:hover { background: rgba($champion-gold, 0.1); }
 }
 
 .result-msg {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-xs;
+  color: $text-secondary;
   margin: 0;
   width: 100%;
 }
@@ -192,7 +206,7 @@
 /* Activity feed */
 .filter-row {
   display: flex;
-  gap: 8px;
+  gap: $spacing-sm;
   flex-wrap: wrap;
 }
 
@@ -202,31 +216,32 @@
 }
 
 .filter-btn {
-  background: var(--color-surface, #132013);
-  border: 1px solid var(--color-border, #2d3f2d);
-  border-radius: 6px;
-  color: var(--color-text-secondary, #a5c8a5);
-  font-size: 0.75rem;
+  background: $bg-card;
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-md;
+  color: $text-secondary;
+  font-size: $text-xs;
   padding: 4px 10px;
   cursor: pointer;
   text-transform: capitalize;
+  transition: all $transition-fast;
 
   &.active {
-    background: var(--color-success-green, #4caf50);
-    border-color: var(--color-success-green, #4caf50);
-    color: #fff;
+    background: $champion-gold;
+    border-color: $champion-gold;
+    color: $deep-navy;
   }
 }
 
 .loading-state,
 .error-state,
 .feed-empty {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #a5c8a5);
-  padding: 16px 0;
+  font-size: $text-sm;
+  color: $text-secondary;
+  padding: $spacing-md 0;
 }
 
-.error-state { color: var(--color-error-red, #e53935); }
+.error-state { color: $error-red; }
 
 .feed-list {
   list-style: none;
@@ -234,59 +249,58 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .feed-entry {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--color-surface-elevated, #1e2a1e);
-  border: 1px solid var(--color-border, #2d3f2d);
-  border-radius: 8px;
+  @include xomper-card;
+  border: 1px solid rgba($surface-light, 0.2);
   padding: 10px 14px;
   font-size: 0.8125rem;
   flex-wrap: wrap;
 }
 
 .entry-kind {
-  font-size: 0.7rem;
+  font-size: $text-xs;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: $radius-sm;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
-  &.push { background: rgba(100, 181, 246, 0.15); color: #64b5f6; }
-  &.email { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+  &.push { background: rgba($steel-blue, 0.15); color: $steel-blue; }
+  &.email { background: rgba($champion-gold, 0.15); color: $champion-gold; }
 }
 
 .entry-status {
-  font-size: 0.7rem;
+  font-size: $text-xs;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: $radius-sm;
 
-  &.ok { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
-  &.fail { background: rgba(229, 57, 53, 0.15); color: #e53935; }
+  &.ok { background: rgba($success-green, 0.15); color: $success-green; }
+  &.fail { background: rgba($error-red, 0.15); color: $error-red; }
 }
 
 .entry-label {
   flex: 1;
-  color: var(--color-text-primary, #e8f5e9);
+  color: $text-primary;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .entry-time {
-  color: var(--color-text-secondary, #a5c8a5);
-  font-size: 0.75rem;
+  color: $text-secondary;
+  font-size: $text-xs;
   white-space: nowrap;
 }
 
 .entry-error {
   width: 100%;
-  font-size: 0.75rem;
-  color: var(--color-error-red, #e53935);
+  font-size: $text-xs;
+  color: $error-red;
 }

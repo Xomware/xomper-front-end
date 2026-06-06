@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .taxi-page {
   display: flex;
@@ -52,7 +53,7 @@
     transition: all $transition-base;
 
     &.active {
-      background: $gold-accent;
+      background: $champion-gold;
       color: $deep-navy;
       border-color: $champion-gold;
       font-weight: 600;
@@ -234,12 +235,12 @@
 // Clickable
 .clickable {
   cursor: pointer;
-  color: $steel-blue;
+  color: $text-secondary;
   text-decoration: none;
   transition: color $transition-fast;
 
   &:hover {
-    color: lighten($steel-blue, 15%);
+    color: $champion-gold;
     text-decoration: underline;
   }
 }

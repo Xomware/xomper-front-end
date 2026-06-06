@@ -1,25 +1,26 @@
-@use '../../../../styles/variables' as v;
+@import '../../../../styles/variables';
+@import '../../../../styles/mixins';
+@import '../../../../styles/theme';
 
 .breakdown-card {
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
-  padding: v.$spacing-md;
+  @include xomper-card;
+  padding: $spacing-md;
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-xs;
-  margin: 0 v.$spacing-md;
+  gap: $spacing-xs;
+  margin: 0 $spacing-md;
 }
 
 .breakdown-row {
   display: flex;
   align-items: center;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
 }
 
 .label {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-primary;
+  color: $text-primary;
   width: 52px;
   flex-shrink: 0;
 }
@@ -27,36 +28,36 @@
 .bar-track {
   flex: 1;
   height: 6px;
-  background: rgba(v.$surface-light, 0.4);
-  border-radius: v.$radius-sm;
+  background: rgba($surface-light, 0.4);
+  border-radius: $radius-sm;
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  background: v.$champion-gold;
-  border-radius: v.$radius-sm;
-  transition: width v.$transition-base;
+  background: $champion-gold;
+  border-radius: $radius-sm;
+  transition: width $transition-base;
 }
 
 .value {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
-  font-family: v.$font-mono;
+  font-family: $font-mono;
   width: 48px;
   text-align: right;
   flex-shrink: 0;
 }
 
 .my-value {
-  color: v.$text-primary;
+  color: $text-primary;
 
   &.delta--gold {
-    color: v.$champion-gold;
+    color: $champion-gold;
   }
 
   &.delta--red {
-    color: v.$error-red;
+    color: $error-red;
   }
 }
 
@@ -65,37 +66,37 @@
 }
 
 .avg-value {
-  color: v.$text-muted;
+  color: $text-muted;
 }
 
 .divider {
   height: 1px;
-  background: rgba(v.$surface-light, 0.4);
-  margin: v.$spacing-xs 0;
+  background: rgba($surface-light, 0.4);
+  margin: $spacing-xs 0;
 }
 
 .total-row {
   display: flex;
   align-items: center;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
 }
 
 .total-label {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-secondary;
+  color: $text-secondary;
   flex: 1;
 }
 
 .total-my {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$champion-gold;
-  font-family: v.$font-mono;
+  color: $champion-gold;
+  font-family: $font-mono;
 }
 
 .total-opp {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   color: #00ffff;
-  font-family: v.$font-mono;
+  font-family: $font-mono;
 }

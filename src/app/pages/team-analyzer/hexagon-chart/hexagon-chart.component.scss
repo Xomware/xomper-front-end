@@ -1,4 +1,5 @@
-@use '../../../../styles/variables' as v;
+@import '../../../../styles/variables';
+@import '../../../../styles/mixins';
 
 .hexagon-chart {
   display: block;
@@ -10,7 +11,7 @@
 
 // Grid rings
 .grid-ring {
-  stroke: rgba(v.$surface-light, 0.35);
+  stroke: rgba($surface-light, 0.35);
   stroke-width: 1;
 
   &--outer {
@@ -20,7 +21,7 @@
 
 // Axis lines
 .axis-line {
-  stroke: rgba(v.$surface-light, 0.25);
+  stroke: rgba($surface-light, 0.25);
   stroke-width: 1;
   fill: none;
 }
@@ -28,8 +29,8 @@
 // Polygons — primary (gold)
 .polygon {
   &--primary {
-    fill: rgba(v.$champion-gold, 0.28);
-    stroke: v.$champion-gold;
+    fill: rgba($champion-gold, 0.28);
+    stroke: $champion-gold;
     stroke-width: 2;
   }
 
@@ -52,7 +53,7 @@
 // Vertex dots
 .dot {
   &--primary {
-    fill: v.$champion-gold;
+    fill: $champion-gold;
   }
 
   &--comparison {
@@ -62,10 +63,10 @@
 
 // Axis labels
 .axis-label {
-  font-family: v.$font-body;
+  font-family: $font-body;
   font-size: 11px;
   font-weight: 700;
-  fill: v.$text-secondary;
+  fill: $text-secondary;
   letter-spacing: 0.02em;
   user-select: none;
 }

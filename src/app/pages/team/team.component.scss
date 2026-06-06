@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .team-page {
   display: flex;
@@ -21,13 +22,9 @@
 
 // Team Header
 .team-header {
-  background: $card-gradient;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-lg;
+  @include xomper-card;
   padding: $spacing-lg;
   margin-bottom: $spacing-lg;
-  box-shadow: $shadow-md;
 
   .team-header-row {
     display: flex;
@@ -55,10 +52,11 @@
 
   .user-name {
     font-size: $text-base;
-    color: $steel-blue;
+    color: $text-secondary;
     cursor: pointer;
-    
+
     &:hover {
+      color: $champion-gold;
       text-decoration: underline;
     }
   }
@@ -223,12 +221,12 @@
 // Clickable elements
 .clickable {
   cursor: pointer;
-  color: $steel-blue;
+  color: $text-secondary;
   text-decoration: none;
   transition: color $transition-fast;
 
   &:hover {
-    color: lighten($steel-blue, 15%);
+    color: $champion-gold;
     text-decoration: underline;
   }
 }

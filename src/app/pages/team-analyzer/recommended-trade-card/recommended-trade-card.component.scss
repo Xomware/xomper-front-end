@@ -1,18 +1,20 @@
-@use '../../../../styles/variables' as v;
+@import '../../../../styles/variables';
+@import '../../../../styles/mixins';
+@import '../../../../styles/theme';
 
 .rec-card {
-  background: v.$bg-card;
-  border-radius: v.$radius-lg;
-  border: 1px solid rgba(v.$champion-gold, 0.3);
-  padding: v.$spacing-md;
+  @include xomper-card;
+  border: 1px solid rgba($champion-gold, 0.3);
+  padding: $spacing-md;
   display: flex;
   flex-direction: column;
-  gap: v.$spacing-xs;
+  gap: $spacing-xs;
   cursor: pointer;
-  transition: background v.$transition-fast;
+  transition: background $transition-fast, border-color $transition-fast;
 
   &:hover {
-    background: v.$bg-card-hover;
+    background: $bg-card-hover;
+    border-color: rgba($champion-gold, 0.5);
   }
 }
 
@@ -20,25 +22,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: v.$spacing-sm;
+  gap: $spacing-sm;
 }
 
 .partner-name {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 700;
-  color: v.$text-primary;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .gap-pill {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
-  color: v.$bg-dark;
-  background: v.$success-green;
-  padding: 2px v.$spacing-xs;
-  border-radius: v.$radius-full;
+  color: $bg-dark;
+  background: $success-green;
+  padding: 2px $spacing-xs;
+  border-radius: $radius-full;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -46,8 +48,8 @@
 .rec-sides {
   display: flex;
   align-items: flex-start;
-  gap: v.$spacing-sm;
-  margin-top: v.$spacing-xs;
+  gap: $spacing-sm;
+  margin-top: $spacing-xs;
 }
 
 .rec-side {
@@ -58,45 +60,45 @@
 }
 
 .side-label {
-  font-size: v.$text-xs;
+  font-size: $text-xs;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 
   &.give-label {
-    color: v.$text-muted;
+    color: $text-muted;
   }
 
   &.receive-label {
-    color: v.$champion-gold;
+    color: $champion-gold;
   }
 }
 
 .player-name {
-  font-size: v.$text-sm;
+  font-size: $text-sm;
   font-weight: 600;
-  color: v.$text-primary;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .player-meta {
-  font-size: v.$text-xs;
-  color: v.$text-muted;
-  font-family: v.$font-mono;
+  font-size: $text-xs;
+  color: $text-muted;
+  font-family: $font-mono;
 }
 
 .arrows {
-  font-size: v.$text-lg;
-  color: v.$text-muted;
+  font-size: $text-lg;
+  color: $text-muted;
   align-self: center;
   flex-shrink: 0;
-  margin-top: v.$spacing-md;
+  margin-top: $spacing-md;
 }
 
 .tap-hint {
-  font-size: v.$text-xs;
-  color: v.$text-muted;
-  margin-top: v.$spacing-xs;
+  font-size: $text-xs;
+  color: $text-muted;
+  margin-top: $spacing-xs;
 }

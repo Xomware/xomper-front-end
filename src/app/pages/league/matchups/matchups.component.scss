@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 // Season Selector
 .season-selector {
@@ -11,14 +12,10 @@
 }
 
 .season-btn {
+  @include xomper-chip-outline;
   padding: 8px 20px;
   border-radius: $radius-xl;
-  border: 1px solid $surface-light;
-  background: transparent;
-  color: $text-secondary;
   font-size: $text-sm;
-  font-family: $font-body;
-  font-weight: 600;
   cursor: pointer;
   transition: all $transition-base;
 
@@ -38,8 +35,7 @@
 .empty-state {
   text-align: center;
   padding: $spacing-2xl;
-  background: rgba($dark-navy, 0.4);
-  border-radius: $radius-lg;
+  @include xomper-card;
   border: 1px solid rgba($surface-light, 0.2);
 
   p {
@@ -63,10 +59,8 @@
 }
 
 .week-section {
-  background: rgba($dark-navy, 0.4);
-  backdrop-filter: blur(10px);
+  @include xomper-card;
   border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-lg;
   overflow: hidden;
   transition: all $transition-base;
 

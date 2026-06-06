@@ -1,30 +1,36 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .users-list {
-  padding: 24px;
+  padding: $spacing-lg;
   max-width: 700px;
   margin: 0 auto;
 }
 
 .list-header {
-  margin-bottom: 24px;
-
-  h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+  margin-bottom: $spacing-lg;
+  h2 { margin: 0; font-family: $font-display; font-size: 1.5rem; font-weight: 600; color: $text-primary; }
 }
 
 .state-empty {
   text-align: center;
-  padding: 48px 16px;
-  color: rgba(255, 255, 255, 0.5);
-  &.state-error { color: #f87171; }
+  padding: 48px $spacing-md;
+  color: $text-muted;
+  &.state-error { color: $error-red; }
 }
 
 .btn-secondary {
   margin-top: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 8px 16px;
+  background: rgba($surface-light, 0.2);
+  color: $text-primary;
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-family: $font-body;
   cursor: pointer;
+  transition: background $transition-fast;
+  &:hover { background: rgba($surface-light, 0.3); }
 }
 
 .row-list {
@@ -33,20 +39,20 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .row-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 14px 16px;
+  @include xomper-card;
+  border: 1px solid rgba($surface-light, 0.15);
+  padding: 14px $spacing-md;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: border-color $transition-fast;
 
-  &:hover { background: rgba(255, 255, 255, 0.09); }
+  &:hover { border-color: rgba($champion-gold, 0.4); }
 }
 
 .row-info {
@@ -60,6 +66,7 @@
 .row-name {
   font-weight: 600;
   font-size: 0.95rem;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -67,7 +74,7 @@
 
 .row-email {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: $text-muted;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -81,14 +88,14 @@
 }
 
 .chip {
-  font-size: 0.72rem;
-  padding: 2px 8px;
+  font-size: $text-xs;
+  padding: 2px $spacing-sm;
   border-radius: 9999px;
   font-weight: 500;
   white-space: nowrap;
 
-  &.chip-admin    { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-  &.chip-member   { background: rgba(255, 255, 255, 0.08); color: rgba(255,255,255,0.6); }
-  &.chip-active   { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-  &.chip-inactive { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+  &.chip-admin    { background: rgba($champion-gold, 0.2); color: $champion-gold; }
+  &.chip-member   { background: rgba($surface-light, 0.3); color: $text-secondary; }
+  &.chip-active   { background: rgba($success-green, 0.15); color: $success-green; }
+  &.chip-inactive { background: rgba($surface-light, 0.2); color: $text-muted; }
 }

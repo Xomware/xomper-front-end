@@ -1,4 +1,6 @@
 @import 'src/styles/variables';
+@import 'src/styles/mixins';
+@import 'src/styles/theme';
 
 .settings-page {
   display: flex;
@@ -9,9 +11,7 @@
 }
 
 .settings-card {
-  background: var(--xomper-bg-card, $bg-card);
-  border: 1px solid $surface-light;
-  border-radius: $radius-lg;
+  @include xomper-card;
   padding: $spacing-2xl;
   text-align: center;
   max-width: 400px;
@@ -20,19 +20,19 @@
   &__title {
     font-family: $font-display;
     font-size: $text-3xl;
-    color: var(--xomper-champion-gold, $champion-gold);
+    color: $champion-gold;
     margin-bottom: $spacing-md;
   }
 
   &__body {
-    color: var(--xomper-text-muted, $text-muted);
+    color: $text-muted;
     font-size: $text-base;
     margin-bottom: $spacing-xl;
   }
 
   &__back {
     display: inline-block;
-    color: var(--xomper-champion-gold, $champion-gold);
+    color: $champion-gold;
     text-decoration: none;
     font-size: $text-sm;
     font-weight: 600;

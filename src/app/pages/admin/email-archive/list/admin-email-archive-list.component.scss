@@ -1,21 +1,26 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .archive-list {
-  padding: 24px;
+  padding: $spacing-lg;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.page-header { margin-bottom: 24px; }
+.page-header { margin-bottom: $spacing-lg; }
 
 .page-title {
+  font-family: $font-display;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-text-primary, #e8f5e9);
+  color: $text-primary;
   margin: 0 0 4px;
 }
 
 .page-subtitle {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-sm;
+  color: $text-secondary;
   margin: 0;
 }
 
@@ -24,13 +29,13 @@
 .empty-state,
 .loading-more,
 .end-of-list {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #a5c8a5);
-  padding: 16px 0;
+  font-size: $text-sm;
+  color: $text-secondary;
+  padding: $spacing-md 0;
   text-align: center;
 }
 
-.error-state { color: var(--color-error-red, #e53935); }
+.error-state { color: $error-red; }
 
 .rows-list {
   list-style: none;
@@ -38,21 +43,20 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .row-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: var(--color-surface-elevated, #1e2a1e);
-  border: 1px solid var(--color-border, #2d3f2d);
-  border-radius: 10px;
-  padding: 14px 16px;
+  gap: $spacing-md;
+  @include xomper-card;
+  border: 1px solid rgba($surface-light, 0.2);
+  padding: 14px $spacing-md;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: border-color $transition-fast;
 
-  &:hover { border-color: var(--color-success-green, #4caf50); }
+  &:hover { border-color: rgba($champion-gold, 0.4); }
 }
 
 .row-left {
@@ -64,24 +68,22 @@
 }
 
 .row-template {
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(76, 175, 80, 0.12);
-  color: var(--color-success-green, #4caf50);
+  @include xomper-chip;
+  font-size: $text-xs;
+  background: rgba($success-green, 0.12);
+  color: $success-green;
   width: fit-content;
-  letter-spacing: 0.03em;
 
   &.no-template {
     background: none;
-    color: var(--color-text-muted, #6b8c6b);
+    color: $text-muted;
+    border: none;
   }
 }
 
 .row-subject {
-  font-size: 0.875rem;
-  color: var(--color-text-primary, #e8f5e9);
+  font-size: $text-sm;
+  color: $text-primary;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -96,23 +98,23 @@
 }
 
 .row-recipient {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-xs;
+  color: $text-secondary;
 }
 
 .row-date {
-  font-size: 0.75rem;
-  color: var(--color-text-muted, #6b8c6b);
+  font-size: $text-xs;
+  color: $text-muted;
   white-space: nowrap;
 }
 
 .chevron {
-  color: var(--color-text-secondary, #a5c8a5);
+  color: $text-secondary;
   font-size: 1.25rem;
   flex-shrink: 0;
 }
 
 .scroll-sentinel {
   height: 1px;
-  margin-top: 8px;
+  margin-top: $spacing-sm;
 }

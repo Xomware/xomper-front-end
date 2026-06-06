@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .link-page {
   min-height: 100vh;
@@ -11,14 +12,10 @@
 }
 
 .link-card {
-  background: $card-gradient;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba($champion-gold, 0.2);
-  border-radius: $radius-lg;
+  @include xomper-hero-card;
   padding: $spacing-xl;
   width: 100%;
   max-width: 420px;
-  box-shadow: $shadow-xl;
 }
 
 // ==========================================
@@ -93,7 +90,7 @@
   padding: 14px $spacing-lg;
   border-radius: $radius-xl;
   border: none;
-  background: $gold-accent;
+  background: $champion-gold;
   color: $deep-navy;
   font-size: $text-base;
   font-weight: 600;
@@ -199,7 +196,7 @@
   margin: 0;
 
   &.yes {
-    background: $gold-accent;
+    background: $champion-gold;
     color: $deep-navy;
 
     &:hover:not(:disabled) {

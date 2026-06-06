@@ -1,35 +1,43 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .audit-feed {
-  padding: 24px;
+  padding: $spacing-lg;
   max-width: 800px;
   margin: 0 auto;
 }
 
 .feed-header {
-  margin-bottom: 24px;
-  h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+  margin-bottom: $spacing-lg;
+  h2 { margin: 0; font-family: $font-display; font-size: 1.5rem; font-weight: 600; color: $text-primary; }
 }
 
 .state-empty {
   text-align: center;
-  padding: 48px 16px;
-  color: rgba(255,255,255,0.5);
+  padding: 48px $spacing-md;
+  color: $text-muted;
 
-  &.state-warning { color: #f59e0b; }
-  &.state-error   { color: #ef4444; }
+  &.state-warning { color: $champion-gold; }
+  &.state-error   { color: $error-red; }
 
-  .state-title { font-weight: 600; margin-bottom: 8px; }
-  .state-body  { font-size: 0.875rem; }
-  .state-sub   { font-size: 0.875rem; margin-top: 4px; }
+  .state-title { font-weight: 600; margin-bottom: $spacing-sm; }
+  .state-body  { font-size: $text-sm; }
+  .state-sub   { font-size: $text-sm; margin-top: 4px; }
 }
 
 .btn-secondary {
   margin-top: 12px;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
-  padding: 8px 16px;
+  background: rgba($surface-light, 0.2);
+  color: $text-primary;
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-family: $font-body;
   cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: rgba($surface-light, 0.3); }
 }
 
 .row-list {
@@ -38,37 +46,38 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .row-item {
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  padding: 14px 16px;
+  @include xomper-card;
+  border: 1px solid rgba($surface-light, 0.1);
+  padding: 14px $spacing-md;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: border-color $transition-fast;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  &:hover { background: rgba(255,255,255,0.09); }
+  &:hover { border-color: rgba($champion-gold, 0.3); }
 }
 
 .row-action {
   font-weight: 600;
   font-size: 0.95rem;
+  color: $text-primary;
 }
 
 .row-meta {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.5);
+  color: $text-secondary;
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
 
 .row-date {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.35);
+  font-size: $text-xs;
+  color: $text-muted;
 }
 
 .sentinel {
@@ -85,8 +94,8 @@
 .spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-top-color: #10b981;
+  border: 2px solid rgba($surface-light, 0.4);
+  border-top-color: $champion-gold;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;

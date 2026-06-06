@@ -1,48 +1,52 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .admin-shell {
-  padding: 24px;
+  padding: $spacing-lg;
   max-width: 800px;
   margin: 0 auto;
 }
 
 .admin-header {
-  margin-bottom: 32px;
+  margin-bottom: $spacing-xl;
 }
 
 .admin-title {
+  font-family: $font-display;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-text-primary, #e8f5e9);
+  color: $text-primary;
   margin: 0 0 4px;
 }
 
 .admin-subtitle {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-sm;
+  color: $text-secondary;
   margin: 0;
 }
 
 .tile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
+  gap: $spacing-md;
 }
 
 .tile {
+  @include xomper-card;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  padding: 20px 16px;
-  background: var(--color-surface-elevated, #1e2a1e);
-  border: 1px solid var(--color-border, #2d3f2d);
-  border-radius: 12px;
+  gap: $spacing-sm;
+  padding: 20px $spacing-md;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background $transition-fast, border-color $transition-fast;
+  border: 1px solid rgba($surface-light, 0.3);
 
   &:hover:not(.disabled) {
-    background: var(--color-surface-hover, #243624);
-    border-color: var(--color-success-green, #4caf50);
+    background: $bg-card-hover;
+    border-color: $champion-gold;
   }
 
   &.disabled {
@@ -59,12 +63,12 @@
 .tile-label {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--color-text-primary, #e8f5e9);
+  color: $text-primary;
   line-height: 1.2;
 }
 
 .tile-subtitle {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary, #a5c8a5);
+  font-size: $text-xs;
+  color: $text-secondary;
   line-height: 1.4;
 }

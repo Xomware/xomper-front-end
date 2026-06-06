@@ -1,15 +1,16 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .rules-section {
   margin-bottom: $spacing-xl;
 }
 
 .rules-section-title {
+  @include xomper-subheader;
   font-family: $font-display;
   font-size: 1.5rem;
   letter-spacing: 0.05em;
-  color: $champion-gold;
   margin: 0 0 $spacing-md;
 }
 
@@ -61,13 +62,11 @@
 }
 
 .setting-card {
+  @include xomper-card;
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
   padding: $spacing-md;
-  background: rgba($dark-navy, 0.5);
-  border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-md;
 }
 
 .setting-label {

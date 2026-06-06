@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .modal-backdrop {
   position: fixed;
@@ -19,6 +20,7 @@
 }
 
 .modal-card {
+  @include xomper-hero-card;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -28,10 +30,6 @@
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  background: $card-gradient;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba($champion-gold, 0.3);
-  border-radius: $radius-lg;
   padding: $spacing-xl;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   display: flex;

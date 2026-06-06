@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .login-page {
   display: flex;
@@ -86,13 +87,10 @@
 
 // Login Box
 .login-box {
-  background: $card-gradient;
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba($champion-gold, 0.2);
-  border-radius: $radius-lg;
+  @include xomper-hero-card;
   padding: $spacing-xl;
   width: 100%;
-  box-shadow: $shadow-xl;
+  border: 1px solid rgba($champion-gold, 0.2);
 }
 
 .login-title {
@@ -221,7 +219,7 @@
 }
 
 .auth-error {
-  color: #ef4444;
+  color: $error-red;
   font-size: $text-sm;
   text-align: center;
   margin: 0;

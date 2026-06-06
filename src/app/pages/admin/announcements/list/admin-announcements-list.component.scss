@@ -1,5 +1,9 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .announcements-list {
-  padding: 24px;
+  padding: $spacing-lg;
   max-width: 800px;
   margin: 0 auto;
 }
@@ -8,26 +12,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: $spacing-lg;
 
   h2 {
     margin: 0;
+    font-family: $font-display;
     font-size: 1.5rem;
     font-weight: 600;
+    color: $text-primary;
   }
 }
 
 .state-empty {
   text-align: center;
-  padding: 48px 16px;
-  color: rgba(255, 255, 255, 0.5);
+  padding: 48px $spacing-md;
+  color: $text-muted;
 
-  &.state-warning { color: #f59e0b; }
-  &.state-error   { color: #ef4444; }
+  &.state-warning { color: $champion-gold; }
+  &.state-error   { color: $error-red; }
 
-  .state-title { font-weight: 600; margin-bottom: 8px; }
-  .state-body  { font-size: 0.875rem; }
-  .state-sub   { font-size: 0.875rem; margin-top: 4px; }
+  .state-title { font-weight: 600; margin-bottom: $spacing-sm; }
+  .state-body  { font-size: $text-sm; }
+  .state-sub   { font-size: $text-sm; margin-top: 4px; }
 }
 
 .row-list {
@@ -43,9 +49,9 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 16px;
+  @include xomper-card;
+  border: 1px solid rgba($surface-light, 0.2);
+  padding: $spacing-md;
 }
 
 .row-body {
@@ -62,31 +68,30 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: $spacing-sm;
 }
 
 .chip {
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  font-weight: 500;
+  @include xomper-chip;
+  font-size: $text-xs;
 
-  &.chip-critical { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-  &.chip-info     { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-  &.chip-active   { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-  &.chip-inactive { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5); }
-  &.chip-expired  { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-  &.chip-expiry   { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+  &.chip-critical { background: rgba($error-red, 0.2); color: $error-red; }
+  &.chip-info     { background: rgba($steel-blue, 0.2); color: $steel-blue; }
+  &.chip-active   { background: rgba($success-green, 0.2); color: $success-green; }
+  &.chip-inactive { background: rgba($surface-light, 0.3); color: $text-muted; }
+  &.chip-expired  { background: rgba($error-red, 0.15); color: $error-red; }
+  &.chip-expiry   { background: rgba($champion-gold, 0.15); color: $champion-gold; }
 }
 
 .row-title {
   font-weight: 600;
   margin: 0 0 4px;
+  color: $text-primary;
 }
 
 .row-body-text {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: $text-sm;
+  color: $text-secondary;
   margin: 0 0 6px;
   white-space: pre-wrap;
   overflow: hidden;
@@ -96,16 +101,16 @@
 }
 
 .row-meta {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: $text-xs;
+  color: $text-muted;
   margin: 0;
 }
 
 .btn-delete {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 8px;
+  background: rgba($error-red, 0.15);
+  color: $error-red;
+  border: 1px solid rgba($error-red, 0.3);
+  border-radius: $radius-md;
   padding: 6px 12px;
   font-size: 0.8rem;
   cursor: pointer;
@@ -115,6 +120,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background $transition-fast;
 
   &:disabled {
     opacity: 0.5;
@@ -122,37 +128,43 @@
   }
 
   &:hover:not(:disabled) {
-    background: rgba(239, 68, 68, 0.25);
+    background: rgba($error-red, 0.25);
   }
 }
 
 .btn-primary {
-  background: #10b981;
-  color: #000;
+  background: $champion-gold;
+  color: $deep-navy;
   border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-weight: 600;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-weight: 700;
+  font-family: $font-body;
   cursor: pointer;
+  transition: filter $transition-fast;
 
-  &:hover { background: #059669; }
+  &:hover { filter: brightness(1.1); }
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 8px 16px;
+  background: rgba($surface-light, 0.2);
+  color: $text-primary;
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-family: $font-body;
   cursor: pointer;
   margin-top: 12px;
+  transition: background $transition-fast;
+
+  &:hover { background: rgba($surface-light, 0.3); }
 }
 
 .spinner-sm {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border: 2px solid rgba($text-primary, 0.3);
+  border-top-color: $text-primary;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;

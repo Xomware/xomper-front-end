@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 // Empty State
 .empty-state {
@@ -75,7 +76,7 @@
   left: $spacing-sm;
   width: 32px;
   height: 32px;
-  background: $gold-accent;
+  background: $champion-gold;
   color: $deep-navy;
   border-radius: $radius-full;
   display: flex;

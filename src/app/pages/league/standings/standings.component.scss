@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 // View Toggle Buttons
 .switch-container {
@@ -14,15 +15,10 @@
 }
 
 .view-button {
-  background-color: rgba($dark-navy, 0.6);
-  color: $text-secondary;
-  border: 1px solid $surface-light;
-  border-radius: $radius-xl;
+  @include xomper-chip-outline;
   padding: 10px 24px;
-  margin: 0;
-  cursor: pointer;
   font-size: $text-sm;
-  font-family: $font-body;
+  cursor: pointer;
   transition: all $transition-base;
 
   &:hover:not(.selected) {
@@ -95,10 +91,10 @@
       text-shadow: 0 0 10px rgba($champion-gold, 0.5);
     }
     &.silver {
-      color: silver;
+      color: #b0bec5;
     }
     &.bronze {
-      color: #cd7f32;
+      color: #8d6e63;
     }
   }
 }
@@ -147,8 +143,8 @@
 }
 
 .team-more-btn {
-  background: $steel-blue;
-  color: white;
+  background: $champion-gold;
+  color: $deep-navy;
   border: none;
   border-radius: $radius-xl;
   padding: 6px 16px;
@@ -159,7 +155,7 @@
   transition: all $transition-base;
 
   &:hover {
-    background-color: darken($steel-blue, 10%);
+    filter: brightness(1.1);
     transform: scale(1.05);
   }
 }

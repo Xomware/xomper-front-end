@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .profile-page {
   display: flex;
@@ -12,16 +13,12 @@
 }
 
 .profile-container {
+  @include xomper-card;
   text-align: center;
-  background: $card-gradient;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-lg;
   padding: $spacing-xl;
   width: 450px;
   max-width: 95vw;
   min-height: 500px;
-  box-shadow: $shadow-xl;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -70,20 +67,16 @@
 }
 
 .league-card {
+  @include xomper-card;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba($dark-navy, 0.6);
-  border: 1px solid rgba($surface-light, 0.3);
-  border-radius: $radius-lg;
   padding: $spacing-md;
-  box-shadow: $shadow-sm;
   transition: all $transition-base;
 
   &:hover {
     transform: translateX(4px);
     border-color: rgba($champion-gold, 0.4);
-    box-shadow: $shadow-md;
   }
 }
 
@@ -110,8 +103,8 @@
 }
 
 .league-more-btn {
-  background: $steel-blue;
-  color: white;
+  background: $champion-gold;
+  color: $deep-navy;
   border: none;
   border-radius: $radius-xl;
   padding: 8px 18px;
@@ -122,7 +115,7 @@
   transition: all $transition-base;
 
   &:hover {
-    background-color: darken($steel-blue, 10%);
+    filter: brightness(1.1);
     transform: scale(1.05);
   }
 }

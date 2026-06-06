@@ -1,15 +1,16 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .rules-section {
   margin-bottom: $spacing-xl;
 }
 
 .rules-section-title {
+  @include xomper-subheader;
   font-family: $font-display;
   font-size: 1.5rem;
   letter-spacing: 0.05em;
-  color: $champion-gold;
   margin: 0 0 $spacing-md;
 }
 
@@ -21,14 +22,12 @@
 }
 
 .rulebook-chapter {
-  background: rgba($dark-navy, 0.4);
-  border: 1px solid rgba($surface-light, 0.12);
-  border-radius: $radius-md;
+  @include xomper-card;
   overflow: hidden;
   transition: all $transition-base;
 
   &.expanded {
-    border-color: rgba($champion-gold, 0.3);
+    border: 1px solid rgba($champion-gold, 0.3);
   }
 }
 

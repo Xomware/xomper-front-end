@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .league-page {
   display: flex;
@@ -12,14 +13,10 @@
 }
 
 .league-container {
-  background: $card-gradient;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-lg;
+  @include xomper-hero-card;
   padding: $spacing-lg;
   width: 95%;
   max-width: 1200px;
-  box-shadow: $shadow-lg;
 }
 
 .league-header {

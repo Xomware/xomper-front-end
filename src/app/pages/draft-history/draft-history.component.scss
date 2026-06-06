@@ -1,5 +1,6 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 .draft-history-page {
   min-height: 100vh;
@@ -59,7 +60,7 @@
   transition: all $transition-base;
 
   &.active {
-    background: $gold-accent;
+    background: $champion-gold;
     color: $deep-navy;
     border-color: $champion-gold;
   }

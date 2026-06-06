@@ -1,56 +1,64 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
 .tables-menu {
-  padding: 24px;
+  padding: $spacing-lg;
   max-width: 700px;
   margin: 0 auto;
 }
 
 .menu-header {
-  margin-bottom: 24px;
+  margin-bottom: $spacing-lg;
 
   h2 {
     margin: 0;
+    font-family: $font-display;
     font-size: 1.5rem;
     font-weight: 600;
+    color: $text-primary;
   }
 }
 
 .tile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  gap: $spacing-md;
 }
 
 .tile {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 24px 20px;
+  @include xomper-card;
+  border: 1px solid rgba($surface-light, 0.2);
+  padding: $spacing-lg 20px;
   cursor: pointer;
   color: inherit;
   text-align: left;
-  transition: background 0.15s;
+  transition: border-color $transition-fast, background $transition-fast;
   display: flex;
   flex-direction: column;
   gap: 6px;
   position: relative;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: $bg-card-hover;
+    border-color: rgba($champion-gold, 0.4);
   }
 }
 
 .tile-label {
   font-size: 1.05rem;
   font-weight: 600;
+  color: $text-primary;
 }
 
 .tile-subtitle {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: $text-secondary;
 }
 
 .tile-badge {
-  font-size: 0.7rem;
-  color: #10b981;
+  @include xomper-chip-outline;
+  font-size: $text-xs;
   margin-top: 4px;
+  width: fit-content;
 }
