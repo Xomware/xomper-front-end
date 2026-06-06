@@ -1,6 +1,6 @@
 # Plan: Web ↔ iOS Parity — s8 Team Analyzer
 
-**Status**: In Progress
+**Status**: Done
 **Created**: 2026-06-04
 **Last updated**: 2026-06-06
 **Epic**: [`../PLAN.md`](../PLAN.md)
