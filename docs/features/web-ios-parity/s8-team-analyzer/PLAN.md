@@ -2,7 +2,7 @@
 
 **Status**: In Progress
 **Created**: 2026-06-04
-**Last updated**: 2026-06-05
+**Last updated**: 2026-06-06
 **Epic**: [`../PLAN.md`](../PLAN.md)
 **Brainstorm**: [`../BRAINSTORM.md`](../BRAINSTORM.md)
 
@@ -96,12 +96,12 @@ The `PlayerValuesService` must be written so the endpoint base URL is a single c
 1. [x] **`PlayerValuesService` + model (FIRST).** Port `PlayerValuesStore`: single 12h-cached `shareReplay(1)` fetch of FantasyCalc; build `valueById`, `positionById`, `pickValuesByName`, `pickYearsByName`; expose `value(id)`, `position(id)`, `pickValue(name)`, `pickNames(forYears)`, `allPickNames`, `hasValues`. Port `parseYearPrefix` (leading 4-digit token). Endpoint base URL as a single swappable constant (per CORS note). Verify a real fetch returns ~450 players + pick rows.
 2. [x] **`TeamAnalysisService`.** Port `TeamAnalysisBuilder.build` (taxi excluded from position buckets; bench = not starter/reserve/taxi; FLEX/unknown → bench), `axisMaxes`, `leagueAverageAxes`. Feed from `league.service` rosters+users + `player.service` positions. Unit-spot-check axis sums against an iOS screenshot of one roster.
 3. [x] **`RecommendedTradeService`.** Port `TradeEvaluator.evaluate` / `sideValue` / `suggestBalance` and `RecommendedTradeBuilder.recommend` verbatim — preserve the 5% `fairThreshold`, weak ≤0.85 / strong ≥1.05 bands, `myImprovement` cap, dedupe key, and `prefix(limit)` ranking. Port `TradeEvaluation.Verdict` labels.
-4. [ ] **`HexagonChartComponent` (SVG).** Hand-roll: 4 grid rings (0.25/0.5/0.75/1.0), 6 axis lines, vertex math (`angle = i·π/3 − π/2`, start top, clockwise), normalize each vertex by `axisMaxes[label]`, render dashed league-average polygon behind solid primary (gold) + comparison (cyan), dots on solid polygons only, axis labels at radius·1.18. `viewBox`-based, responsive.
-5. [ ] **`TeamAnalyzerComponent` shell + 3 tabs.** Tab bar (Compare/League/Trade); loading/error/empty states gated on `hasValues`; Compare tab (header, chart, legend, opponent dropdown sorted by total value desc, breakdown card); League tab (averages card + teams ranked by total value with per-axis bars normalized to league max, delta coloring gold≥1.05 / red≤0.85, YOU badge); Trade tab (partner picker, live evaluation strip + verdict pill, give/receive side cards with player+pick add/remove, balance suggestions, recommended-trades list). Trade state local to component.
-6. [ ] **`PositionBreakdownCard` + `RecommendedTradeCard`.** Port presentation 1:1 (structure, not theme — s10 styles later).
-7. [ ] **Routing + sidebar.** Replace the line-267 redirect with the real route under AuthGuard; flip the sidebar entry to `/team-analyzer`, remove `placeholder`.
+4. [x] **`HexagonChartComponent` (SVG).** Hand-roll: 4 grid rings (0.25/0.5/0.75/1.0), 6 axis lines, vertex math (`angle = i·π/3 − π/2`, start top, clockwise), normalize each vertex by `axisMaxes[label]`, render dashed league-average polygon behind solid primary (gold) + comparison (cyan), dots on solid polygons only, axis labels at radius·1.18. `viewBox`-based, responsive.
+5. [x] **`TeamAnalyzerComponent` shell + 3 tabs.** Tab bar (Compare/League/Trade); loading/error/empty states gated on `hasValues`; Compare tab (header, chart, legend, opponent dropdown sorted by total value desc, breakdown card); League tab (averages card + teams ranked by total value with per-axis bars normalized to league max, delta coloring gold≥1.05 / red≤0.85, YOU badge); Trade tab (partner picker, live evaluation strip + verdict pill, give/receive side cards with player+pick add/remove, balance suggestions, recommended-trades list). Trade state local to component.
+6. [x] **`PositionBreakdownCard` + `RecommendedTradeCard`.** Port presentation 1:1 (structure, not theme — s10 styles later).
+7. [x] **Routing + sidebar.** Replace the line-267 redirect with the real route under AuthGuard; flip the sidebar entry to `/team-analyzer`, remove `placeholder`.
 8. [ ] **Smoke:** load page → chart renders for home team; switch opponent; League tab ranks 12 teams; Trade tab evaluates a manual trade and surfaces a recommendation; verify behind `?newShell=1` gate.
-9. [ ] **Build** (`ng build`) clean, no TS strict errors.
+9. [x] **Build** (`ng build`) clean, no TS strict errors.
 10. [ ] **`/ultrareview`** (D-A) before PR.
 11. [ ] **Open PR(s)** with `Closes #<sub-issue>`, reference epic.
 

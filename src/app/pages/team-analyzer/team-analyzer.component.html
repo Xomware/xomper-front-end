@@ -1,0 +1,392 @@
+<div class="analyzer-page">
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="state-center">
+      <p class="state-msg">Fetching player values&hellip;</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @else if (error) {
+    <div class="state-center">
+      <p class="state-msg state-msg--error">{{ error }}</p>
+      <button class="retry-btn" (click)="loadData()">Retry</button>
+    </div>
+  }
+
+  <!-- No data yet -->
+  @else if (analyses.length === 0) {
+    <div class="state-center">
+      <p class="state-msg">No league data available.</p>
+    </div>
+  }
+
+  <!-- Main content -->
+  @else {
+    <!-- Tab bar -->
+    <div class="tab-bar" role="tablist">
+      @for (tab of tabs; track tab) {
+        <button
+          class="tab-btn"
+          [class.tab-btn--active]="activeTab === tab"
+          (click)="activeTab = tab"
+          [attr.aria-selected]="activeTab === tab"
+          role="tab"
+        >
+          {{ tabLabel(tab) }}
+          <span class="tab-underline" [class.tab-underline--visible]="activeTab === tab"></span>
+        </button>
+      }
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- COMPARE TAB                                                    -->
+    <!-- ============================================================ -->
+    @if (activeTab === 'compare') {
+      @if (myAnalysis) {
+        <div class="tab-content">
+
+          <!-- Header caption -->
+          <p class="caption">
+            @if (comparisonAnalysis === null) {
+              Your roster, valued by position group. League average shown as a dashed reference polygon.
+            } @else {
+              Comparing your team vs <strong>{{ comparisonAnalysis.teamName }}</strong>. League average underlaid as a dashed reference.
+            }
+          </p>
+
+          <!-- Hexagon chart -->
+          <app-hexagon-chart
+            [primary]="hexAxes(myAnalysis)"
+            [comparison]="comparisonAnalysis ? hexAxes(comparisonAnalysis) : null"
+            [leagueAverage]="leagueAverages"
+            [axisMaxes]="axisMaxes"
+          />
+
+          <!-- Legend -->
+          <div class="legend">
+            <span class="legend-chip legend-chip--gold">{{ myAnalysis.teamName }}</span>
+            @if (comparisonAnalysis) {
+              <span class="legend-chip legend-chip--cyan">{{ comparisonAnalysis.teamName }}</span>
+            }
+            <span class="legend-chip legend-chip--avg">League avg</span>
+          </div>
+
+          <!-- Opponent dropdown -->
+          <div class="opponent-row">
+            <span class="section-label">Compare against</span>
+            <select class="dropdown" [(ngModel)]="comparisonRosterId" (ngModelChange)="selectComparison($event)">
+              <option [ngValue]="null">None</option>
+              @for (team of compareOpponents; track team.rosterId) {
+                <option [ngValue]="team.rosterId">{{ team.teamName }} ({{ totalValue(team) }})</option>
+              }
+            </select>
+          </div>
+
+          <!-- Position breakdown card -->
+          <app-position-breakdown-card
+            [my]="myAnalysis"
+            [opp]="comparisonAnalysis"
+            [averages]="leagueAverages"
+            [maxes]="axisMaxes"
+          />
+
+        </div>
+      } @else {
+        <div class="state-center">
+          <p class="state-msg">Could not resolve your team in this league.</p>
+        </div>
+      }
+    }
+
+    <!-- ============================================================ -->
+    <!-- LEAGUE TAB                                                     -->
+    <!-- ============================================================ -->
+    @if (activeTab === 'league') {
+      <div class="tab-content">
+
+        <!-- League averages card -->
+        <div class="avg-card">
+          <p class="avg-card-title">League averages</p>
+          <div class="avg-axes">
+            @for (axis of leagueAverages; track axis.label) {
+              <div class="avg-axis">
+                <span class="avg-axis-label">{{ axis.label }}</span>
+                <span class="avg-axis-value">{{ axis.value }}</span>
+              </div>
+            }
+          </div>
+          <div class="avg-divider"></div>
+          <div class="avg-total-row">
+            <span class="avg-total-label">Average total</span>
+            <span class="avg-total-value">{{ leagueAvgTotal() }}</span>
+          </div>
+        </div>
+
+        <!-- Teams section header -->
+        <p class="section-eyebrow">Teams &middot; ranked by total value</p>
+
+        <!-- Ranked team rows -->
+        @for (team of rankedTeams; track team.rosterId; let rank = $index) {
+          <div class="league-row" [class.league-row--mine]="isMyTeam(team)">
+            <div class="league-row-header">
+              <span class="rank" [class.rank--first]="rank === 0">{{ rank + 1 }}</span>
+              <span class="team-name" [class.team-name--mine]="isMyTeam(team)">{{ team.teamName }}</span>
+              @if (isMyTeam(team)) {
+                <span class="you-badge">YOU</span>
+              }
+              <span class="spacer"></span>
+              <span class="total-val">{{ totalValue(team) }}</span>
+            </div>
+
+            <!-- Per-axis bars -->
+            <div class="axis-bars">
+              @for (axis of hexAxes(team); track axis.label; let i = $index) {
+                <div class="axis-bar-col">
+                  <span class="axis-bar-label">{{ axis.label }}</span>
+                  <div class="axis-bar-track">
+                    <div
+                      class="axis-bar-fill"
+                      [ngClass]="deltaClass(axis.value, leagueAverages[i]?.value ?? 0)"
+                      [style.width.%]="fillFraction(axis.value, axisMaxes[axis.label] ?? axis.value) * 100"
+                    ></div>
+                  </div>
+                  <span
+                    class="axis-bar-val"
+                    [ngClass]="deltaClass(axis.value, leagueAverages[i]?.value ?? 0)"
+                  >{{ axis.value }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ============================================================ -->
+    <!-- TRADE TAB                                                      -->
+    <!-- ============================================================ -->
+    @if (activeTab === 'trade') {
+      @if (myAnalysis) {
+        <div class="tab-content">
+
+          <!-- Explainer -->
+          <div class="explainer-card">
+            <div class="explainer-header">
+              <span class="explainer-icon">&#8644;</span>
+              <span class="explainer-title">Trade analyzer</span>
+            </div>
+            <p class="explainer-body">
+              Pick a partner, drop in players or draft picks from each side. Live FantasyCalc value totals + verdict pill update on every change. Uneven trades surface balance suggestions; the recommended-trades section below auto-finds fair-value upgrades to your weakest position.
+            </p>
+          </div>
+
+          <!-- Partner picker -->
+          <div class="opponent-row">
+            <span class="section-label">Trade partner</span>
+            <select class="dropdown" [(ngModel)]="tradePartnerRosterId" (ngModelChange)="selectTradePartner($event)">
+              <option [ngValue]="null">None</option>
+              @for (team of tradePartnerCandidates; track team.rosterId) {
+                <option [ngValue]="team.rosterId">{{ team.teamName }} ({{ totalValue(team) }})</option>
+              }
+            </select>
+          </div>
+
+          @if (tradePartner) {
+            <!-- Evaluation strip -->
+            <div class="eval-card">
+              <div class="eval-values">
+                <div class="eval-col">
+                  <span class="eval-col-label">You give</span>
+                  <span class="eval-col-val">{{ tradeEvaluation?.sideAValue ?? 0 }}</span>
+                </div>
+                <span class="eval-arrow">&#8644;</span>
+                <div class="eval-col">
+                  <span class="eval-col-label">You receive</span>
+                  <span class="eval-col-val">{{ tradeEvaluation?.sideBValue ?? 0 }}</span>
+                </div>
+              </div>
+              <span class="verdict-pill" [ngClass]="verdictClass">{{ verdictLabel }}</span>
+            </div>
+
+            <!-- Side A — You give -->
+            <div class="side-card">
+              <div class="side-header">
+                <div class="side-header-text">
+                  <span class="side-direction">You give</span>
+                  <span class="side-team">{{ myAnalysis.teamName }}</span>
+                </div>
+                <span class="side-val">{{ tradeEvaluation?.sideAValue ?? 0 }}</span>
+              </div>
+
+              @if (tradeSideAPlayerIds.length === 0 && tradeSideAPickNames.length === 0) {
+                <p class="side-empty">No players or picks added yet.</p>
+              }
+
+              @for (pid of tradeSideAPlayerIds; track pid) {
+                <div class="trade-item">
+                  <span class="trade-item-name">{{ playerName(pid) }}</span>
+                  <span class="trade-item-badge">{{ playerPosition(pid) }}</span>
+                  <span class="spacer"></span>
+                  <span class="trade-item-val">{{ playerValue(pid) }}</span>
+                  <button class="remove-btn" (click)="removeFromSideA(pid)" aria-label="Remove">&#10005;</button>
+                </div>
+              }
+
+              @for (name of tradeSideAPickNames; track name) {
+                <div class="trade-item">
+                  <span class="trade-item-name">{{ name }}</span>
+                  <span class="trade-item-badge">PICK</span>
+                  <span class="spacer"></span>
+                  <span class="trade-item-val">{{ pickValue(name) }}</span>
+                  <button class="remove-btn" (click)="removePickFromSideA(name)" aria-label="Remove">&#10005;</button>
+                </div>
+              }
+
+              <div class="side-actions">
+                <button class="add-btn add-btn--primary" (click)="openPlayerPicker('a', myAnalysis.rosterId, myAnalysis.teamName)">+ Player</button>
+                <button class="add-btn add-btn--outline" (click)="openPickPicker('a', myAnalysis.rosterId, myAnalysis.teamName)">+ Pick</button>
+              </div>
+            </div>
+
+            <!-- Side B — You receive -->
+            <div class="side-card">
+              <div class="side-header">
+                <div class="side-header-text">
+                  <span class="side-direction">You receive</span>
+                  <span class="side-team">{{ tradePartner.teamName }}</span>
+                </div>
+                <span class="side-val">{{ tradeEvaluation?.sideBValue ?? 0 }}</span>
+              </div>
+
+              @if (tradeSideBPlayerIds.length === 0 && tradeSideBPickNames.length === 0) {
+                <p class="side-empty">No players or picks added yet.</p>
+              }
+
+              @for (pid of tradeSideBPlayerIds; track pid) {
+                <div class="trade-item">
+                  <span class="trade-item-name">{{ playerName(pid) }}</span>
+                  <span class="trade-item-badge">{{ playerPosition(pid) }}</span>
+                  <span class="spacer"></span>
+                  <span class="trade-item-val">{{ playerValue(pid) }}</span>
+                  <button class="remove-btn" (click)="removeFromSideB(pid)" aria-label="Remove">&#10005;</button>
+                </div>
+              }
+
+              @for (name of tradeSideBPickNames; track name) {
+                <div class="trade-item">
+                  <span class="trade-item-name">{{ name }}</span>
+                  <span class="trade-item-badge">PICK</span>
+                  <span class="spacer"></span>
+                  <span class="trade-item-val">{{ pickValue(name) }}</span>
+                  <button class="remove-btn" (click)="removePickFromSideB(name)" aria-label="Remove">&#10005;</button>
+                </div>
+              }
+
+              <div class="side-actions">
+                <button class="add-btn add-btn--primary" (click)="openPlayerPicker('b', tradePartner.rosterId, tradePartner.teamName)">+ Player</button>
+                <button class="add-btn add-btn--outline" (click)="openPickPicker('b', tradePartner.rosterId, tradePartner.teamName)">+ Pick</button>
+              </div>
+            </div>
+
+            <!-- Balance suggestions -->
+            @if (tradeBalance.length > 0) {
+              <div class="balance-card">
+                <div class="balance-header">
+                  <p class="balance-title">Balance suggestions</p>
+                  <p class="balance-subtitle">Add one of these to {{ balanceLighterLabel }} to bring the trade within 5%.</p>
+                </div>
+                @for (suggestion of tradeBalance; track suggestion.playerId) {
+                  <button class="balance-item" (click)="addBalanceSuggestion(suggestion)">
+                    <div class="balance-item-info">
+                      <span class="balance-item-name">{{ suggestion.playerName }}</span>
+                      <span class="balance-item-pos">{{ suggestion.position }}</span>
+                    </div>
+                    <span class="spacer"></span>
+                    <span class="balance-item-val">{{ suggestion.value }}</span>
+                    <span class="balance-item-plus">+</span>
+                  </button>
+                }
+              </div>
+            }
+
+            <!-- Clear trade -->
+            @if (!tradeIsEmpty) {
+              <button class="clear-btn" (click)="clearTrade()">Clear trade</button>
+            }
+          }
+
+          <!-- Recommended trades -->
+          <div class="recs-section">
+            <p class="section-eyebrow">Recommended trades</p>
+            @if (recommendations.length === 0) {
+              <p class="recs-empty">No fair-value upgrades found right now. Either you don't have a position below 85% of league avg, or no partner's surplus matches your strength positions within 5%.</p>
+            } @else {
+              @for (rec of recommendations; track rec.id) {
+                <app-recommended-trade-card
+                  [rec]="rec"
+                  (click)="loadRecommendation(rec)"
+                  style="display: block; margin-bottom: 8px;"
+                />
+              }
+            }
+          </div>
+
+        </div>
+      } @else {
+        <div class="state-center">
+          <p class="state-msg">Could not resolve your team in this league.</p>
+        </div>
+      }
+    }
+  }
+
+</div>
+
+<!-- ============================================================ -->
+<!-- PICKER MODAL (player or pick selection)                       -->
+<!-- ============================================================ -->
+@if (sidePicker?.show) {
+  <div class="picker-backdrop" (click)="closePicker()"></div>
+  <div class="picker-modal" role="dialog" [attr.aria-label]="sidePicker!.kind === 'player' ? 'Add player' : 'Add pick'">
+    <div class="picker-header">
+      <span class="picker-title">
+        {{ sidePicker!.kind === 'player' ? 'Add player from ' + sidePicker!.teamName : 'Add pick to ' + sidePicker!.teamName }}
+      </span>
+      <button class="picker-close" (click)="closePicker()" aria-label="Close">&#10005;</button>
+    </div>
+
+    @if (sidePicker!.kind === 'player') {
+      <p class="picker-note">Players sorted by value descending. Already-added players are hidden.</p>
+      <div class="picker-list">
+        @if (pickerPlayerEntries.length === 0) {
+          <p class="picker-empty">No eligible players found.</p>
+        }
+        @for (entry of pickerPlayerEntries; track entry.playerId) {
+          <button class="picker-item" (click)="selectPickerPlayer(entry)">
+            <span class="picker-item-name">{{ entry.name }}</span>
+            <span class="picker-item-badge">{{ entry.position }}</span>
+            <span class="spacer"></span>
+            <span class="picker-item-val">{{ entry.value }}</span>
+          </button>
+        }
+      </div>
+    } @else {
+      <p class="picker-note">Pick values are league-wide — add a pick you actually own.</p>
+      <div class="picker-list">
+        @if (pickerPickEntries.length === 0) {
+          <p class="picker-empty">No pick values available for the current + next 2 seasons.</p>
+        }
+        @for (name of pickerPickEntries; track name) {
+          <button class="picker-item" (click)="selectPickerPick(name)">
+            <span class="picker-item-name">{{ name }}</span>
+            <span class="picker-item-badge">PICK</span>
+            <span class="spacer"></span>
+            <span class="picker-item-val">{{ pickValue(name) }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

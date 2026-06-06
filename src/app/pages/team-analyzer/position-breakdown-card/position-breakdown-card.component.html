@@ -1,0 +1,34 @@
+<div class="breakdown-card">
+  @for (axis of myAxes; track axis.label; let i = $index) {
+    <div class="breakdown-row">
+      <span class="label">{{ axis.label }}</span>
+
+      <div class="bar-track">
+        <div
+          class="bar-fill"
+          [style.width.%]="fillFraction(axis.value, leagueMax(axis.label, axis.value)) * 100"
+        ></div>
+      </div>
+
+      <span class="value my-value" [ngClass]="deltaClass(axis.value, avgValue(i))">
+        {{ axis.value }}
+      </span>
+
+      @if (oppValue(i) !== null) {
+        <span class="value opp-value">{{ oppValue(i) }}</span>
+      } @else {
+        <span class="value avg-value">{{ avgValue(i) }}</span>
+      }
+    </div>
+  }
+
+  <div class="divider"></div>
+
+  <div class="total-row">
+    <span class="total-label">Total roster value</span>
+    <span class="total-my">{{ myTotal }}</span>
+    @if (opp) {
+      <span class="total-opp">vs {{ oppTotal }}</span>
+    }
+  </div>
+</div>

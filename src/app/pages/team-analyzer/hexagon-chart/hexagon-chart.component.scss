@@ -1,0 +1,71 @@
+@use '../../../../styles/variables' as v;
+
+.hexagon-chart {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+// Grid rings
+.grid-ring {
+  stroke: rgba(v.$surface-light, 0.35);
+  stroke-width: 1;
+
+  &--outer {
+    stroke-width: 1.5;
+  }
+}
+
+// Axis lines
+.axis-line {
+  stroke: rgba(v.$surface-light, 0.25);
+  stroke-width: 1;
+  fill: none;
+}
+
+// Polygons — primary (gold)
+.polygon {
+  &--primary {
+    fill: rgba(v.$champion-gold, 0.28);
+    stroke: v.$champion-gold;
+    stroke-width: 2;
+  }
+
+  // Comparison (cyan)
+  &--comparison {
+    fill: rgba(0, 255, 255, 0.18);
+    stroke: #00ffff;
+    stroke-width: 2;
+  }
+
+  // League average baseline (dashed gray — behind both solid polygons)
+  &--average {
+    fill: rgba(128, 128, 128, 0.12);
+    stroke: rgba(128, 128, 128, 0.7);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+}
+
+// Vertex dots
+.dot {
+  &--primary {
+    fill: v.$champion-gold;
+  }
+
+  &--comparison {
+    fill: #00ffff;
+  }
+}
+
+// Axis labels
+.axis-label {
+  font-family: v.$font-body;
+  font-size: 11px;
+  font-weight: 700;
+  fill: v.$text-secondary;
+  letter-spacing: 0.02em;
+  user-select: none;
+}

@@ -1,0 +1,68 @@
+<svg
+  class="hexagon-chart"
+  [attr.viewBox]="'0 0 ' + viewBoxSize + ' ' + viewBoxSize"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-label="Team value hexagon chart"
+>
+  <!-- Grid rings (0.25 / 0.5 / 0.75 / 1.0) -->
+  <g class="grid-rings">
+    @for (path of gridRingPaths; track $index) {
+      <path
+        [attr.d]="path"
+        class="grid-ring"
+        [class.grid-ring--outer]="$index === gridRingLevels.length - 1"
+        fill="none"
+      />
+    }
+  </g>
+
+  <!-- Axis lines from center to each hex vertex -->
+  <g class="axis-lines">
+    @for (path of axisLinePaths; track $index) {
+      <path [attr.d]="path" class="axis-line" />
+    }
+  </g>
+
+  <!-- League-average baseline (dashed gray, behind primary + comparison) -->
+  @if (averagePolygon) {
+    <polygon
+      [attr.points]="averagePolygon"
+      class="polygon polygon--average"
+    />
+  }
+
+  <!-- Comparison polygon (cyan) -->
+  @if (comparisonPolygon) {
+    <polygon
+      [attr.points]="comparisonPolygon"
+      class="polygon polygon--comparison"
+    />
+    @for (dot of comparisonDots; track $index) {
+      <circle [attr.cx]="dot.cx" [attr.cy]="dot.cy" r="3" class="dot dot--comparison" />
+    }
+  }
+
+  <!-- Primary polygon (gold) -->
+  @if (primaryPolygon) {
+    <polygon
+      [attr.points]="primaryPolygon"
+      class="polygon polygon--primary"
+    />
+    @for (dot of primaryDots; track $index) {
+      <circle [attr.cx]="dot.cx" [attr.cy]="dot.cy" r="3" class="dot dot--primary" />
+    }
+  }
+
+  <!-- Axis labels at radius × 1.18 -->
+  <g class="axis-labels">
+    @for (pos of axisLabelPositions; track $index) {
+      <text
+        [attr.x]="pos.x"
+        [attr.y]="pos.y"
+        class="axis-label"
+        text-anchor="middle"
+        dominant-baseline="middle"
+      >{{ pos.label }}</text>
+    }
+  </g>
+</svg>

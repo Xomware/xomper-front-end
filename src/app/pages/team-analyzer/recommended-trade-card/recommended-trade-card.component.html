@@ -1,0 +1,24 @@
+<div class="rec-card">
+  <div class="rec-header">
+    <span class="partner-name">{{ rec.partnerTeamName }}</span>
+    <span class="gap-pill">{{ percentGapLabel }}</span>
+  </div>
+
+  <div class="rec-sides">
+    <div class="rec-side">
+      <span class="side-label give-label">Give</span>
+      <span class="player-name">{{ rec.give.name }}</span>
+      <span class="player-meta">{{ rec.give.position }} &middot; {{ rec.give.value }}</span>
+    </div>
+
+    <span class="arrows" aria-hidden="true">&#8644;</span>
+
+    <div class="rec-side">
+      <span class="side-label receive-label">Receive</span>
+      <span class="player-name">{{ rec.receive.name }}</span>
+      <span class="player-meta">{{ rec.receive.position }} &middot; {{ rec.receive.value }}</span>
+    </div>
+  </div>
+
+  <p class="tap-hint">Click to load into the builder above.</p>
+</div>

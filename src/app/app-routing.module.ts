@@ -264,7 +264,15 @@ const routes: Routes = [
       },
     ],
   },
-  { path: 'team-analyzer', redirectTo: 'team', pathMatch: 'full' },
+  // s8b: Team Analyzer — replaced placeholder redirect with real component
+  {
+    path: 'team-analyzer',
+    loadComponent: () =>
+      import('./pages/team-analyzer/team-analyzer.component').then(
+        (m) => m.TeamAnalyzerComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
 
   // 302 redirects for my-* → flat routes (remove ~14 days post-s5 default flip)
   { path: 'my-profile', redirectTo: 'profile', pathMatch: 'full' },

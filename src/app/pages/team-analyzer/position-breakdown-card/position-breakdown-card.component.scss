@@ -1,0 +1,101 @@
+@use '../../../../styles/variables' as v;
+
+.breakdown-card {
+  background: v.$bg-card;
+  border-radius: v.$radius-lg;
+  padding: v.$spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: v.$spacing-xs;
+  margin: 0 v.$spacing-md;
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: v.$spacing-sm;
+}
+
+.label {
+  font-size: v.$text-sm;
+  font-weight: 600;
+  color: v.$text-primary;
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(v.$surface-light, 0.4);
+  border-radius: v.$radius-sm;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: v.$champion-gold;
+  border-radius: v.$radius-sm;
+  transition: width v.$transition-base;
+}
+
+.value {
+  font-size: v.$text-xs;
+  font-weight: 700;
+  font-family: v.$font-mono;
+  width: 48px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.my-value {
+  color: v.$text-primary;
+
+  &.delta--gold {
+    color: v.$champion-gold;
+  }
+
+  &.delta--red {
+    color: v.$error-red;
+  }
+}
+
+.opp-value {
+  color: #00ffff;
+}
+
+.avg-value {
+  color: v.$text-muted;
+}
+
+.divider {
+  height: 1px;
+  background: rgba(v.$surface-light, 0.4);
+  margin: v.$spacing-xs 0;
+}
+
+.total-row {
+  display: flex;
+  align-items: center;
+  gap: v.$spacing-sm;
+}
+
+.total-label {
+  font-size: v.$text-sm;
+  font-weight: 600;
+  color: v.$text-secondary;
+  flex: 1;
+}
+
+.total-my {
+  font-size: v.$text-sm;
+  font-weight: 700;
+  color: v.$champion-gold;
+  font-family: v.$font-mono;
+}
+
+.total-opp {
+  font-size: v.$text-sm;
+  color: #00ffff;
+  font-family: v.$font-mono;
+}

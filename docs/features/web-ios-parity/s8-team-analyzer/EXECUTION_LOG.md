@@ -49,4 +49,46 @@
 
 - **Action**: Ran `ng build`. Committed all files. Opened PR #94.
 - **Files changed**: all above
-- **Result**: TBD
+- **Result**: Success (PR #95 merged at d00c129)
+
+---
+
+## PR 8b — Visual Layer (2026-06-06)
+
+## [2026-06-06 01:00] — Phase 0: Issue + Branch
+
+- **Action**: Created GitHub issue #96 "web-ios-parity s8b: Team Analyzer UI" with label `epic:web-ios-parity`. Created branch `feature/96-team-analyzer-ui` off master at `d00c129`.
+- **Files changed**: none
+- **Result**: Success
+
+## [2026-06-06 01:05] — Step 4: HexagonChartComponent
+
+- **Action**: Created hand-rolled SVG radar chart component. 4 grid rings (0.25/0.5/0.75/1.0), 6 axis lines, vertex angle = i·π/3 − π/2 (top start, clockwise), per-axis normalization against axisMaxes, primary (gold) + comparison (cyan) solid polygons with vertex dots, dashed gray league-average polygon behind both. viewBox=300×300, responsive. Port of iOS `HexagonChartView.swift`.
+- **Files changed**: `src/app/pages/team-analyzer/hexagon-chart/hexagon-chart.component.{ts,html,scss}`
+- **Decisions**: SVG polygon element (not path) — cleaner for closed shapes. `ngOnChanges` rebuilds geometry on every input change. Axis labels use SVG `<text>` at radius×1.18.
+- **Result**: Success
+
+## [2026-06-06 01:10] — Step 6: PositionBreakdownCard + RecommendedTradeCard
+
+- **Action**: Created both card components. Breakdown card: per-axis progress bars (filled to myValue/leagueMax), delta coloring (gold ≥1.05, red ≤0.85), opponent/average column. Recommended trade card: partner name, gap pill (green), give/receive layout with position·value meta, tap hint. Port of iOS `PositionBreakdownCard.swift` + `RecommendedTradeCard.swift`.
+- **Files changed**: `position-breakdown-card/{ts,html,scss}`, `recommended-trade-card/{ts,html,scss}`
+- **Result**: Success
+
+## [2026-06-06 01:20] — Step 5: TeamAnalyzerComponent
+
+- **Action**: Created 3-tab shell component. Compare tab: hex chart + opponent dropdown + breakdown card + legend + caption. League tab: averages card + 12 ranked teams with per-axis bars + YOU badge. Trade tab: partner picker, evaluation strip + verdict pill, give/receive side cards with player+pick add/remove, balance suggestions, recommended trades list, bottom-sheet picker modal. Trade state is component-local (no shared controller). Loading/error/empty states gated on data load.
+- **Files changed**: `team-analyzer.component.{ts,html,scss}`
+- **Decisions**: `loadData()` kept public (required by template retry button). Trade evaluator called on every add/remove (pure function, no side effects). Picker modal is a bottom-sheet div (no Angular CDK dependency — scope discipline).
+- **Result**: Success
+
+## [2026-06-06 01:25] — Step 7: Routing + Sidebar
+
+- **Action**: Replaced `{ path: 'team-analyzer', redirectTo: 'team' }` with real lazy-loaded route behind AuthGuard. Flipped sidebar `teamAnalyzer` entry from `/team` (placeholder: true) to `/team-analyzer` (no placeholder).
+- **Files changed**: `src/app/app-routing.module.ts`, `src/app/components/sidebar/sidebar.entries.ts`
+- **Result**: Success
+
+## [2026-06-06 01:30] — Step 9: Build
+
+- **Action**: `ng build --configuration=production` — clean, no TypeScript errors. One `private` → `public` fix for `loadData` (template retry button requires public access). Team-analyzer lazy chunk: 57.93 kB raw / 12.18 kB transfer. No new dependencies.
+- **Files changed**: none (code fix only)
+- **Result**: Build SUCCESS. Budget warning on main bundle is pre-existing, unrelated to this PR.

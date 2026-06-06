@@ -76,8 +76,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         label: 'Team Analyzer',
         icon: '📊',
-        route: '/team', // TODO(s8): replace with /team-analyzer once component is built
-        placeholder: true,
+        route: '/team-analyzer',
       },
     ],
   },
