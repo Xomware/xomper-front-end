@@ -1,0 +1,124 @@
+// ================================================
+// XOMPER Theme Mixins — Midnight Emerald accent treatment
+// s10: shared accent mixins consumed by all surfaces.
+// Import convention: @import 'styles/theme' in component SCSS.
+// All values map 1:1 to XomperColors.swift + XomperTheme.swift.
+// ================================================
+
+@import 'variables';
+
+// ------------------------------------------------------------------
+// xomper-gradient-bg
+// The full-page Midnight Emerald gradient background.
+// Maps to XomperColors.bgGradient (deepNavy → darkNavy → deepNavy, 180°).
+// ------------------------------------------------------------------
+@mixin xomper-gradient-bg {
+  background: $bg-gradient;
+  min-height: 100vh;
+}
+
+// ------------------------------------------------------------------
+// xomper-card
+// Standard surface card. Maps to XomperColors.bgCard + radius-lg + shadow-md.
+// ------------------------------------------------------------------
+@mixin xomper-card {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+}
+
+// ------------------------------------------------------------------
+// xomper-hero-card
+// Gold-bordered hero card over the card gradient, with hover lift.
+// Maps to iOS gold-border + cardGradient treatment (Landing headline,
+// AI Review header, Team Analyzer top cards).
+// ------------------------------------------------------------------
+@mixin xomper-hero-card {
+  background: $card-gradient;
+  border: 1px solid rgba($champion-gold, 0.4);
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  transition: box-shadow $transition-base, transform $transition-base;
+
+  &:hover {
+    box-shadow: 0 0 0 1px rgba($champion-gold, 0.6), $shadow-lg;
+    transform: translateY(-1px);
+  }
+}
+
+// ------------------------------------------------------------------
+// xomper-section-divider
+// Red 3px top-bar + uppercase tracked red h2 text.
+// Maps to iOS Rectangle.fill(errorRed) + Text.uppercased().tracking(2).
+// Usage: apply to the wrapper element containing .section-bar + h2.
+// ------------------------------------------------------------------
+@mixin xomper-section-divider {
+  .section-bar {
+    height: 3px;
+    background: $accent-red;
+    width: 100%;
+    border-radius: 1px;
+    margin-bottom: 0;
+  }
+
+  h2,
+  .section-title {
+    color: $accent-red;
+    font-size: 1.05rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 12px 0 0;
+    line-height: 1.2;
+  }
+}
+
+// ------------------------------------------------------------------
+// xomper-subheader
+// Champion-gold h3 subheader.
+// Maps to iOS championGold foreground on h3 / subsection labels.
+// ------------------------------------------------------------------
+@mixin xomper-subheader {
+  color: $champion-gold;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 14px 0 4px;
+  line-height: 1.3;
+}
+
+// ------------------------------------------------------------------
+// xomper-chip
+// Gold pill chip — solid. Maps to iOS typeChip (championGold bg, deepNavy text).
+// ------------------------------------------------------------------
+@mixin xomper-chip {
+  display: inline-flex;
+  align-items: center;
+  background: $champion-gold;
+  color: $deep-navy;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px $spacing-sm;
+  border-radius: 999px;
+  font-family: $font-body;
+  white-space: nowrap;
+}
+
+// ------------------------------------------------------------------
+// xomper-chip-outline
+// Gold outline chip — transparent bg. Used for secondary/filter chips.
+// ------------------------------------------------------------------
+@mixin xomper-chip-outline {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: $champion-gold;
+  border: 1px solid rgba($champion-gold, 0.5);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px $spacing-sm;
+  border-radius: 999px;
+  font-family: $font-body;
+  white-space: nowrap;
+}

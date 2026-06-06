@@ -1,4 +1,5 @@
 @import 'styles/variables';
+@import 'styles/theme';
 
 .standings-scroll {
   display: flex;
@@ -24,12 +25,12 @@
 
 // Empty / loading card
 .standings-scroll__empty-card {
+  @include xomper-card;
+
   display: flex;
   align-items: center;
   gap: $spacing-sm;
   padding: $spacing-md;
-  border-radius: $radius-lg;
-  background: $card-gradient;
 }
 
 .standings-scroll__empty-icon {
@@ -56,19 +57,19 @@
   }
 }
 
-// Team chip
+// Team chip — card treatment with gold active border
 .team-chip {
+  @include xomper-card;
+
   display: flex;
   align-items: center;
   gap: $spacing-sm;
   padding: $spacing-sm $spacing-md;
   min-width: 140px;
-  border-radius: $radius-lg;
-  background: $card-gradient;
   border: 1px solid transparent;
   cursor: pointer;
   flex-shrink: 0;
-  transition: border-color $transition-base;
+  transition: border-color $transition-base, box-shadow $transition-base;
   text-align: left;
 
   &--mine {

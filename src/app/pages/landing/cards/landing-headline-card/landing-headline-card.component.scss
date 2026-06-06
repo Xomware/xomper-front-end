@@ -1,33 +1,38 @@
 @import 'styles/variables';
+@import 'styles/theme';
 
 .headline-card {
+  @include xomper-hero-card;
+
   display: block;
   padding: $spacing-md;
-  border-radius: $radius-lg;
-  background: $card-gradient;
   width: 100%;
   box-sizing: border-box;
 
-  // Gold border — hero treatment (matches iOS)
-  border: 1px solid rgba($champion-gold, 0.4);
-
+  // Placeholder and skeleton states override the hero treatment
   &--placeholder {
-    border: 1px solid rgba($champion-gold, 0.25);
+    border-color: rgba($champion-gold, 0.25);
+    background: $card-gradient;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
   }
 
   &--skeleton {
-    border: 1px solid rgba($surface-light, 0.2);
+    border-color: rgba($surface-light, 0.2);
+    background: $card-gradient;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
   }
 
   &--populated {
     text-decoration: none;
     cursor: pointer;
-    transition: box-shadow $transition-base, transform $transition-base;
-
-    &:hover {
-      box-shadow: 0 0 0 1px rgba($champion-gold, 0.6);
-      transform: translateY(-1px);
-    }
   }
 }
 
@@ -41,14 +46,7 @@
 
 // Gold pill chip (matches iOS typeChip)
 .headline-card__type-chip {
-  background: $champion-gold;
-  color: $deep-navy;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 3px $spacing-sm;
-  border-radius: 999px;
-  font-family: $font-body;
+  @include xomper-chip;
 }
 
 .headline-card__period {

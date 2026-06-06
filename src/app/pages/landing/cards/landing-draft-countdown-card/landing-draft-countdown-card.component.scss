@@ -1,19 +1,13 @@
 @import 'styles/variables';
+@import 'styles/theme';
 
 .draft-card {
+  @include xomper-hero-card;
+
   padding: $spacing-md;
-  border-radius: $radius-lg;
-  background: $card-gradient;
-  border: 1px solid rgba($champion-gold, 0.3);
   cursor: pointer;
-  transition: box-shadow $transition-base, transform $transition-base;
   width: 100%;
   box-sizing: border-box;
-
-  &:hover {
-    box-shadow: 0 0 0 1px rgba($champion-gold, 0.5);
-    transform: translateY(-1px);
-  }
 }
 
 .draft-card__header {

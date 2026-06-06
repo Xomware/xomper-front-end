@@ -1,3 +1,6 @@
+@import 'styles/variables';
+@import 'styles/theme';
+
 .ai-review-list {
   max-width: 760px;
   margin: 0 auto;
@@ -9,19 +12,21 @@
 }
 
 .ai-review-list__title {
-  color: var(--color-text-primary, #ffffff);
+  // s10: --color-text-primary → --xomper-text-primary; fallback updated
+  color: var(--xomper-text-primary, #{$text-primary});
   font-size: 1.6rem;
   font-weight: 700;
   margin: 0 0 4px;
 }
 
 .ai-review-list__subtitle {
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+  // s10: --color-text-secondary → --xomper-text-secondary; fallback updated
+  color: var(--xomper-text-secondary, #{$text-secondary});
   font-size: 0.85rem;
   margin: 0;
 }
 
-// Skeleton rows
+// Skeleton rows — tokenized
 .ai-review-list__skeletons {
   display: flex;
   flex-direction: column;
@@ -30,12 +35,12 @@
 
 .skeleton-row {
   height: 90px;
-  border-radius: 10px;
+  border-radius: $radius-lg;
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.04) 0%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.04) 100%
+    rgba($bg-card-hover, 0.6) 0%,
+    rgba($surface-light, 0.4) 50%,
+    rgba($bg-card-hover, 0.6) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
@@ -50,29 +55,34 @@
 .ai-review-list__error {
   text-align: center;
   padding: 48px 0;
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--xomper-text-secondary, #{$text-secondary});
 
   p { margin: 0 0 16px; }
 }
 
 .btn-retry {
-  background: transparent;
-  border: 1px solid var(--color-champion-gold, #f0c040);
-  color: var(--color-champion-gold, #f0c040);
+  @include xomper-chip-outline;
+
   padding: 8px 20px;
-  border-radius: 6px;
+  border-radius: $radius-md;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
+  background: transparent;
+  border: 1px solid rgba($champion-gold, 0.5);
+  color: $champion-gold;
+  transition: background $transition-fast;
 
-  &:hover { background: rgba(240,192,64,0.1); }
+  &:hover {
+    background: rgba($champion-gold, 0.08);
+  }
 }
 
 // Empty state
 .ai-review-list__empty {
   text-align: center;
   padding: 48px 0;
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--xomper-text-secondary, #{$text-secondary});
   font-size: 0.9rem;
 }
 
@@ -106,8 +116,9 @@
 .spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid rgba(255,255,255,0.15);
-  border-top-color: var(--color-champion-gold, #f0c040);
+  border: 3px solid rgba($surface-light, 0.4);
+  // s10: was #f0c040 (off-palette). Correct: championGold.
+  border-top-color: var(--xomper-champion-gold, #{$champion-gold});
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -119,7 +130,7 @@
 // End-of-list label
 .ai-review-list__end {
   text-align: center;
-  color: var(--color-text-tertiary, rgba(255, 255, 255, 0.35));
+  color: var(--xomper-text-muted, #{$text-muted});
   font-size: 0.75rem;
   margin-top: 16px;
 }

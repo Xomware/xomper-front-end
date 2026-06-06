@@ -1,4 +1,5 @@
 @import 'styles/variables';
+@import 'styles/theme';
 
 .matchups-card {
   display: flex;
@@ -24,12 +25,12 @@
 
 // Empty / loading states
 .matchups-card__empty {
+  @include xomper-card;
+
   display: flex;
   align-items: center;
   gap: $spacing-sm;
   padding: $spacing-md;
-  border-radius: $radius-lg;
-  background: $card-gradient;
 }
 
 .matchups-card__empty-icon {
@@ -50,13 +51,14 @@
 }
 
 .matchup-row {
+  @include xomper-card;
+
   display: flex;
   align-items: center;
   gap: $spacing-sm;
   padding: $spacing-md;
-  border-radius: $radius-lg;
-  background: $card-gradient;
   border: 1px solid transparent;
+  transition: border-color $transition-base;
 
   &--mine {
     border-color: rgba($champion-gold, 0.4);

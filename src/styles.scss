@@ -1,17 +1,45 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
 // ================================================
-// CSS Custom Property Tokens — Midnight Emerald
-// Consumed by shell components (s1+); do not remove until after s10.
+// CSS Custom Property Tokens — Midnight Emerald (full XomperColors palette)
+// Hexes sourced from XomperColors.swift — do not hand-edit hex values.
+// s10: extended from 6 → 25 tokens; keep --xomper-* namespace throughout.
 // ================================================
 :root {
+  // -- Backgrounds --
+  --xomper-deep-navy: #{$deep-navy};
+  --xomper-dark-navy: #{$dark-navy};
   --xomper-bg-dark: #{$bg-dark};
-  --xomper-champion-gold: #{$champion-gold};
-  --xomper-accent-red: #{$accent-red};
-  --xomper-text-primary: #{$text-primary};
   --xomper-bg-card: #{$bg-card};
+  --xomper-bg-card-hover: #{$bg-card-hover};
+  --xomper-bg-input: #{$bg-input};
+
+  // -- Accents --
+  --xomper-champion-gold: #{$champion-gold};
+  --xomper-steel-blue: #{$steel-blue};
+  --xomper-accent-red: #{$accent-red};
+
+  // -- Text --
+  --xomper-text-primary: #{$text-primary};
+  --xomper-text-secondary: #{$text-secondary};
   --xomper-text-muted: #{$text-muted};
+
+  // -- Semantic --
+  --xomper-success-green: #{$success-green};
+  --xomper-error-red: #{$error-red};
+  --xomper-surface-light: #{$surface-light};
+
+  // -- Legacy (migration only) --
+  --xomper-legacy-red: #{$legacy-red};
+  --xomper-legacy-blue: #{$legacy-blue};
+
+  // -- Gradients --
+  --xomper-bg-gradient: #{$bg-gradient};
+  --xomper-card-gradient: #{$card-gradient};
+  --xomper-gold-accent: #{$gold-accent};
+  --xomper-red-accent: #{$red-accent};
 }
 
 *,

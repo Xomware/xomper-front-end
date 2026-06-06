@@ -1,3 +1,6 @@
+@import 'styles/variables';
+@import 'styles/theme';
+
 .ai-review-detail {
   max-width: 760px;
   margin: 0 auto;
@@ -11,14 +14,17 @@
   gap: 6px;
   background: transparent;
   border: none;
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+  // s10: --color-text-secondary → --xomper-text-secondary
+  color: var(--xomper-text-secondary, #{$text-secondary});
   font-size: 0.875rem;
   cursor: pointer;
   padding: 8px 0;
   margin-bottom: 20px;
-  transition: color 0.15s;
+  transition: color $transition-fast;
 
-  &:hover { color: var(--color-text-primary, #ffffff); }
+  &:hover {
+    color: var(--xomper-text-primary, #{$text-primary});
+  }
 }
 
 // Loading skeleton
@@ -30,12 +36,12 @@
 }
 
 .skeleton {
-  border-radius: 8px;
+  border-radius: $radius-md;
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.04) 0%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.04) 100%
+    rgba($bg-card-hover, 0.6) 0%,
+    rgba($surface-light, 0.4) 50%,
+    rgba($bg-card-hover, 0.6) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
@@ -56,28 +62,32 @@
 .ai-review-detail__not-found {
   text-align: center;
   padding: 64px 0;
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--xomper-text-secondary, #{$text-secondary});
 
   p { margin: 0 0 16px; }
 }
 
 .btn-back {
   background: transparent;
-  border: 1px solid var(--color-text-secondary, rgba(255,255,255,0.3));
-  color: var(--color-text-secondary, rgba(255,255,255,0.6));
+  border: 1px solid rgba($surface-light, 0.6);
+  color: var(--xomper-text-secondary, #{$text-secondary});
   padding: 8px 20px;
-  border-radius: 6px;
+  border-radius: $radius-md;
   cursor: pointer;
   font-size: 0.85rem;
+  transition: border-color $transition-fast, color $transition-fast;
 
-  &:hover { border-color: var(--color-text-primary, #fff); color: var(--color-text-primary, #fff); }
+  &:hover {
+    border-color: $text-primary;
+    color: var(--xomper-text-primary, #{$text-primary});
+  }
 }
 
-// Header card
+// Header card — hero treatment (gold border, card gradient)
+// s10: was --color-surface/#1e2d2a (off-palette), now xomper-hero-card mixin
 .ai-review-detail__header-card {
-  background: var(--color-surface, #1e2d2a);
-  border: 1px solid var(--color-border, rgba(255,255,255,0.08));
-  border-radius: 12px;
+  @include xomper-hero-card;
+
   padding: 18px 20px;
   margin-bottom: 12px;
 }
@@ -91,33 +101,31 @@
 }
 
 .ai-review-detail__chip {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 5px;
-  color: #1a1a1a;
-  white-space: nowrap;
+  @include xomper-chip;
+
+  border-radius: $radius-sm;
+  // Color override per chip type (set via [style.background] binding in template)
+  // Base chip text is deep-navy — already set by mixin
 }
 
 .ai-review-detail__period {
-  color: var(--color-text-primary, #ffffff);
+  color: var(--xomper-text-primary, #{$text-primary});
   font-size: 1rem;
   font-weight: 600;
 }
 
 .ai-review-detail__date {
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.55));
+  color: var(--xomper-text-secondary, #{$text-secondary});
   font-size: 0.8rem;
   margin: 0;
 }
 
-// Body card
+// Body card — standard card
+// s10: was --color-surface/#1e2d2a (off-palette), now xomper-card mixin
 .ai-review-detail__body-card {
-  background: var(--color-surface, #1e2d2a);
-  border: 1px solid var(--color-border, rgba(255,255,255,0.08));
-  border-radius: 12px;
+  @include xomper-card;
+
+  border: 1px solid rgba($surface-light, 0.4);
   padding: 20px;
   margin-bottom: 12px;
 }
@@ -131,9 +139,9 @@
 }
 
 .ai-review-detail__meta-tag {
-  color: var(--color-text-tertiary, rgba(255,255,255,0.35));
+  color: var(--xomper-text-muted, #{$text-muted});
   font-size: 0.72rem;
-  background: rgba(255,255,255,0.04);
+  background: rgba($surface-light, 0.2);
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: $radius-sm;
 }

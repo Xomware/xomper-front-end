@@ -6,7 +6,7 @@
   width: 260px;
   min-width: 260px;
   height: 100%;
-  background: var(--xomper-bg-card, $bg-card);
+  background: var(--xomper-bg-card, #{$bg-card});
   border-right: 1px solid $surface-light;
   overflow-y: auto;
   padding: $spacing-md 0;
@@ -31,10 +31,11 @@
   border-radius: $radius-sm;
   text-decoration: none;
   font-size: 1rem;
+  color: var(--xomper-text-primary, #{$text-primary});
   transition: background $transition-fast;
 
   &:hover {
-    background: $bg-card-hover;
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
   }
 }
 
@@ -46,11 +47,11 @@
   margin: 0;
   border-radius: $radius-md;
   text-decoration: none;
-  color: var(--xomper-text-primary, $text-primary);
+  color: var(--xomper-text-primary, #{$text-primary});
   transition: background $transition-fast;
 
   &:hover {
-    background: $bg-card-hover;
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
   }
 }
 
@@ -59,7 +60,7 @@
   height: 36px;
   border-radius: $radius-full;
   overflow: hidden;
-  background: $bg-card-hover;
+  background: var(--xomper-bg-card-hover, #{$bg-card-hover});
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -75,7 +76,7 @@
 .avatar-initials {
   font-size: $text-sm;
   font-weight: 600;
-  color: var(--xomper-champion-gold, $champion-gold);
+  color: var(--xomper-champion-gold, #{$champion-gold});
 }
 
 .profile-name {
@@ -84,6 +85,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--xomper-text-primary, #{$text-primary});
 }
 
 // ---- Sections ----
@@ -102,7 +104,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--xomper-text-muted, $text-muted);
+  color: var(--xomper-text-muted, #{$text-muted});
   padding: $spacing-xs $spacing-sm;
   margin-bottom: $spacing-xs;
 }
@@ -121,20 +123,33 @@ ul {
   padding: $spacing-xs $spacing-sm;
   border-radius: $radius-sm;
   text-decoration: none;
-  color: var(--xomper-text-primary, $text-primary);
+  color: var(--xomper-text-primary, #{$text-primary});
   font-size: $text-sm;
   transition: background $transition-fast, color $transition-fast;
   width: 100%;
+  position: relative;
 
   &:hover {
-    background: $bg-card-hover;
-    color: var(--xomper-champion-gold, $champion-gold);
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
+    color: var(--xomper-champion-gold, #{$champion-gold});
   }
 
+  // s10: gold left-bar active indicator (matches iOS sidebar active state)
   &.entry--active {
-    background: $bg-card-hover;
-    color: var(--xomper-champion-gold, $champion-gold);
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
+    color: var(--xomper-champion-gold, #{$champion-gold});
     font-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background: var(--xomper-champion-gold, #{$champion-gold});
+      border-radius: 0 2px 2px 0;
+    }
   }
 }
 

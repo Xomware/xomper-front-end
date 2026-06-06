@@ -1,9 +1,11 @@
 @import 'src/styles/variables';
+@import 'src/styles/theme';
 
 .shell {
   display: flex;
   min-height: 100vh;
-  background: var(--xomper-bg-dark, $bg-dark);
+  // s10: full Midnight Emerald gradient background
+  background: $bg-gradient;
 
   &__sidebar {
     // sidebar component manages its own width (260px); this just ensures it is
@@ -32,7 +34,7 @@
     align-items: center;
     gap: $spacing-md;
     padding: $spacing-sm $spacing-md;
-    background: var(--xomper-bg-card, $bg-card);
+    background: var(--xomper-bg-card, #{$bg-card});
     border-bottom: 1px solid $surface-light;
     height: 56px;
     flex-shrink: 0;
@@ -41,7 +43,7 @@
   &__topbar-title {
     font-family: $font-display;
     font-size: $text-xl;
-    color: var(--xomper-champion-gold, $champion-gold);
+    color: var(--xomper-champion-gold, #{$champion-gold});
     letter-spacing: 0.05em;
   }
 }
@@ -60,9 +62,11 @@
   cursor: pointer;
   font-size: 1.1rem;
   flex-shrink: 0;
+  color: var(--xomper-text-primary, #{$text-primary});
+  transition: background $transition-fast;
 
   &:hover {
-    background: $bg-card-hover;
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
   }
 }
 
@@ -81,16 +85,17 @@
   padding: 6px;
   margin: 0;
   flex-shrink: 0;
+  transition: background $transition-fast;
 
   &:hover {
-    background: $bg-card-hover;
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
   }
 
   &__line {
     display: block;
     width: 100%;
     height: 2px;
-    background: var(--xomper-text-primary, $text-primary);
+    background: var(--xomper-text-primary, #{$text-primary});
     border-radius: 2px;
   }
 }

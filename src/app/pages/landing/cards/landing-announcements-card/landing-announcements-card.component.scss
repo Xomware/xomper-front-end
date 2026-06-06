@@ -1,4 +1,5 @@
 @import 'styles/variables';
+@import 'styles/theme';
 
 .announcements-card {
   display: flex;
@@ -28,16 +29,17 @@
   gap: $spacing-sm;
 }
 
-// Individual row
+// Individual row — xomper-card base + accent bar
 .announcement-row {
+  @include xomper-card;
+
   display: flex;
-  border-radius: $radius-lg;
-  background: $card-gradient;
   overflow: hidden;
 
   &__accent {
     width: 3px;
-    background: #ef4444; // accentRed
+    // s10: was #ef4444 (off-palette). Correct: accentRed.
+    background: $accent-red;
     flex-shrink: 0;
   }
 
@@ -58,7 +60,8 @@
     font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.05em;
-    color: #ef4444;
+    // s10: was #ef4444 (off-palette). Correct: accentRed.
+    color: $accent-red;
     flex-shrink: 0;
   }
 

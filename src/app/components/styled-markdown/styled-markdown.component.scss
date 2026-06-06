@@ -1,10 +1,12 @@
+@import 'styles/variables';
+
 .styled-markdown {
   width: 100%;
 }
 
 // h1 — big white title (matches iOS Text(.title2.weight(.bold)))
 .md-h1 {
-  color: var(--color-text-primary, #ffffff);
+  color: var(--xomper-text-primary, #{$text-primary});
   font-size: 1.35rem;
   font-weight: 700;
   margin: 12px 0 8px;
@@ -12,7 +14,7 @@
 }
 
 // h2 — red 3px top bar + uppercase red text with letter-spacing
-// (matches iOS Rectangle.fill(errorRed) + Text.uppercased().tracking(2))
+// (matches iOS Rectangle.fill(accentRed) + Text.uppercased().tracking(2))
 .md-h2-wrapper {
   margin-top: 28px;
   margin-bottom: 10px;
@@ -20,13 +22,16 @@
 
 .md-h2-bar {
   height: 3px;
-  background: var(--color-error-red, #e53935);
+  // BUG FIX s10: was #e53935 (off-palette). Correct: accentRed #FF4757.
+  // errorRed (#FF5252) used here per plan note — the h2 divider maps to accentRed.
+  background: var(--xomper-accent-red, #{$accent-red});
   width: 100%;
   margin-bottom: 0;
 }
 
 .md-h2 {
-  color: var(--color-error-red, #e53935);
+  // BUG FIX s10: was #e53935 (off-palette). Correct: accentRed #FF4757.
+  color: var(--xomper-accent-red, #{$accent-red});
   font-size: 1.05rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -37,7 +42,8 @@
 
 // h3 — gold subheader (matches iOS championGold foreground)
 .md-h3 {
-  color: var(--color-champion-gold, #f0c040);
+  // BUG FIX s10: was #f0c040 (off-palette). Correct: championGold #00FFAB.
+  color: var(--xomper-champion-gold, #{$champion-gold});
   font-size: 0.95rem;
   font-weight: 700;
   margin: 14px 0 4px;
@@ -57,32 +63,33 @@
   width: 3px;
   min-height: 1.2em;
   align-self: stretch;
-  background: var(--color-champion-gold, #f0c040);
+  // BUG FIX s10: was #f0c040 (off-palette). Correct: championGold #00FFAB.
+  background: var(--xomper-champion-gold, #{$champion-gold});
   border-radius: 2px;
 }
 
 .md-quote__body {
   font-style: italic;
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.65));
+  color: var(--xomper-text-secondary, #{$text-secondary});
   margin: 0;
   line-height: 1.5;
   font-size: 0.9rem;
 
   strong {
-    color: var(--color-text-primary, #ffffff);
+    color: var(--xomper-text-primary, #{$text-primary});
     font-style: normal;
   }
 }
 
 // paragraph — body text; **bold** rendered as <strong>
 .md-paragraph {
-  color: var(--color-text-primary, #ffffff);
+  color: var(--xomper-text-primary, #{$text-primary});
   font-size: 0.9rem;
   line-height: 1.5;
   margin-bottom: 12px;
 
   strong {
-    color: var(--color-text-primary, #ffffff);
+    color: var(--xomper-text-primary, #{$text-primary});
     font-weight: 700;
   }
 }

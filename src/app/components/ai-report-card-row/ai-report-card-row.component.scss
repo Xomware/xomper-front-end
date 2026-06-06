@@ -1,18 +1,23 @@
+@import 'styles/variables';
+@import 'styles/theme';
+
+// s10: was --color-surface/#1e2d2a (off-palette). Now xomper-card mixin + xomper-* tokens.
 .card-row {
+  @include xomper-card;
+
   display: block;
   width: 100%;
-  background: var(--color-surface, #1e2d2a);
-  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
-  border-radius: 10px;
+  border: 1px solid rgba($surface-light, 0.4);
   padding: 14px 16px;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s ease;
+  transition: background $transition-fast, border-color $transition-fast;
 
   &:hover,
   &:focus-visible {
-    background: var(--color-surface-hover, rgba(255, 255, 255, 0.05));
-    outline: 2px solid var(--color-champion-gold, #f0c040);
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
+    border-color: rgba($champion-gold, 0.3);
+    outline: 2px solid var(--xomper-champion-gold, #{$champion-gold});
     outline-offset: 2px;
   }
 }
@@ -26,33 +31,31 @@
 }
 
 .card-row__chip {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 2px 7px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  white-space: nowrap;
+  @include xomper-chip;
+
+  border-radius: $radius-sm;
+  // Per-type color overridden via [style.background] binding in template
 }
 
 .card-row__period {
-  color: var(--color-text-secondary, rgba(255, 255, 255, 0.65));
+  // s10: --color-text-secondary → --xomper-text-secondary
+  color: var(--xomper-text-secondary, #{$text-secondary});
   font-size: 0.8rem;
   font-weight: 500;
 }
 
 .card-row__date {
   margin-left: auto;
-  color: var(--color-text-tertiary, rgba(255, 255, 255, 0.4));
+  color: var(--xomper-text-muted, #{$text-muted});
   font-size: 0.75rem;
 }
 
 .card-row__snippet {
-  color: var(--color-text-primary, #ffffff);
+  // s10: --color-text-primary → --xomper-text-primary
+  color: var(--xomper-text-primary, #{$text-primary});
   font-size: 0.85rem;
   line-height: 1.45;
   margin: 0 0 8px;
-  // 3-line clamp
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -65,5 +68,5 @@
 }
 
 .card-row__chevron {
-  color: var(--color-text-tertiary, rgba(255, 255, 255, 0.4));
+  color: var(--xomper-text-muted, #{$text-muted});
 }
