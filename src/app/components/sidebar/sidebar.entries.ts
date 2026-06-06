@@ -111,9 +111,7 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         label: 'Draft Order',
         icon: '🎲',
-        route: '/league',
-        // TODO(s9): builds the component
-        placeholder: true,
+        route: '/league/draft-order',
       },
     ],
   },

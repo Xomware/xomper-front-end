@@ -106,6 +106,13 @@ const routes: Routes = [
             (m) => m.RuleProposalsComponent,
           ),
       },
+      {
+        path: 'draft-order',
+        loadComponent: () =>
+          import('./pages/league/draft-order/draft-order.component').then(
+            (m) => m.DraftOrderComponent,
+          ),
+      },
     ],
   },
 
