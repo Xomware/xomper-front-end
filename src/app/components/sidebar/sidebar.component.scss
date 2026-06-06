@@ -12,13 +12,38 @@
   padding: $spacing-md 0;
 }
 
+// ---- Sidebar header (profile chip + search icon) ----
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin: 0 $spacing-sm $spacing-md;
+}
+
 // ---- Profile chip ----
+.sidebar-search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: $radius-sm;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $bg-card-hover;
+  }
+}
+
 .profile-chip {
   display: flex;
   align-items: center;
   gap: $spacing-sm;
   padding: $spacing-sm $spacing-md;
-  margin: 0 $spacing-sm $spacing-md;
+  margin: 0;
   border-radius: $radius-md;
   text-decoration: none;
   color: var(--xomper-text-primary, $text-primary);

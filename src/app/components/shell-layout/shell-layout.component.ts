@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { NgIf } from '@angular/common'
-import { RouterOutlet } from '@angular/router'
+import { Router, RouterOutlet } from '@angular/router'
 import { SidebarComponent } from '../sidebar/sidebar.component'
 import { MobileDrawerComponent } from '../mobile-drawer/mobile-drawer.component'
 import { FooterComponent } from '../footer/footer.component'
@@ -33,7 +33,7 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   private mediaQuery!: MediaQueryList
   private mqListener!: (e: MediaQueryListEvent) => void
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private supabase: SupabaseService, private router: Router) {}
 
   ngOnInit(): void {
     this.mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`)
@@ -62,5 +62,9 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
 
   closeDrawer(): void {
     this.drawerOpen = false
+  }
+
+  goToSearch(): void {
+    this.router.navigate(['/search'])
   }
 }

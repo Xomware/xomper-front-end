@@ -1,12 +1,22 @@
 <nav class="sidebar" aria-label="Main navigation">
-  <!-- Profile chip -->
-  <a class="profile-chip" routerLink="/profile" (click)="onEntryClick()" aria-label="My profile">
-    <div class="avatar" [ngClass]="{ 'avatar--placeholder': !avatarUrl }">
-      <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Profile avatar" />
-      <span *ngIf="!avatarUrl" class="avatar-initials">{{ displayName[0]?.toUpperCase() }}</span>
-    </div>
-    <span class="profile-name">{{ displayName }}</span>
-  </a>
+  <!-- Sidebar header: profile chip + search icon -->
+  <div class="sidebar-header">
+    <a class="profile-chip" routerLink="/profile" (click)="onEntryClick()" aria-label="My profile">
+      <div class="avatar" [ngClass]="{ 'avatar--placeholder': !avatarUrl }">
+        <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Profile avatar" />
+        <span *ngIf="!avatarUrl" class="avatar-initials">{{ displayName[0]?.toUpperCase() }}</span>
+      </div>
+      <span class="profile-name">{{ displayName }}</span>
+    </a>
+    <a
+      class="sidebar-search-btn"
+      routerLink="/search"
+      (click)="onEntryClick()"
+      aria-label="Search"
+    >
+      🔍
+    </a>
+  </div>
 
   <!-- Sections -->
   <div class="sections">

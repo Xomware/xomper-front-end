@@ -9,16 +9,23 @@
       <button
         class="mode-btn"
         [class.active]="searchMode === 'user'"
-        (click)="searchMode = 'user'"
+        (click)="setMode('user')"
       >
         User
       </button>
       <button
         class="mode-btn"
         [class.active]="searchMode === 'league'"
-        (click)="searchMode = 'league'"
+        (click)="setMode('league')"
       >
         League
+      </button>
+      <button
+        class="mode-btn"
+        [class.active]="searchMode === 'player'"
+        (click)="setMode('player')"
+      >
+        Player
       </button>
     </div>
 
@@ -27,7 +34,7 @@
       <input
         type="text"
         class="search-input"
-        [placeholder]="searchMode === 'user' ? 'Enter a Sleeper username...' : 'Enter a Sleeper league ID...'"
+        [placeholder]="config.placeholder"
         [(ngModel)]="searchTerm"
         (keyup.enter)="search()"
       />
@@ -40,11 +47,59 @@
       </button>
     </div>
 
-    <p class="search-hint" *ngIf="searchMode === 'user'">
-      Search by Sleeper username or user ID
-    </p>
-    <p class="search-hint" *ngIf="searchMode === 'league'">
-      Paste a Sleeper league ID to view any league
-    </p>
+    <p class="search-hint">{{ config.hint }}</p>
+
+    <!-- Result area -->
+
+    <!-- Prompt state (pre-search) -->
+    <div class="search-state search-state--prompt" *ngIf="!searched && !loading">
+      <p>{{ config.promptCopy }}</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="search-state search-state--error" *ngIf="searched && errorMessage">
+      <p>{{ errorMessage }}</p>
+      <p class="search-state__sub">Try a different {{ config.emptyNoun }}.</p>
+    </div>
+
+    <!-- Player results -->
+    <div class="player-results" *ngIf="searchMode === 'player' && searched && !errorMessage">
+      <!-- Empty state -->
+      <div class="search-state search-state--empty" *ngIf="playerResults.length === 0">
+        <p>No players found.</p>
+        <p class="search-state__sub">Try a different {{ config.emptyNoun }}.</p>
+      </div>
+
+      <!-- Results list -->
+      <ul class="player-list" *ngIf="playerResults.length > 0">
+        <li
+          *ngFor="let player of playerResults"
+          class="player-row"
+          (click)="openPlayerModal(player)"
+          role="button"
+          tabindex="0"
+          (keyup.enter)="openPlayerModal(player)"
+        >
+          <img
+            class="player-row__pic"
+            [src]="player.getProfilePicture()"
+            [alt]="player.getFullName()"
+          />
+          <div class="player-row__info">
+            <span class="player-row__name">{{ player.getFullName() }}</span>
+            <span class="player-row__meta">{{ player.getDisplayPosition() }} &bull; {{ player.getTeam() ?? 'FA' }}</span>
+          </div>
+          <span class="player-row__chevron">›</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
+
+<!-- Player modal overlay -->
+<app-player-modal
+  *ngIf="selectedPlayer"
+  [player]="selectedPlayer"
+  [startPos]="{ top: 0, left: 0, width: 0, height: 0 }"
+  (close)="closePlayerModal()"
+></app-player-modal>

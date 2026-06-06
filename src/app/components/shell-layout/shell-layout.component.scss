@@ -46,6 +46,26 @@
   }
 }
 
+// ---- Top bar search button ----
+.topbar-search-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $bg-card-hover;
+  }
+}
+
 // ---- Hamburger button ----
 .hamburger {
   display: flex;
