@@ -1,0 +1,65 @@
+<div class="draft-picks">
+  <app-loader [loading]="loading"></app-loader>
+
+  <div *ngIf="!loading">
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="draftRounds.length === 0">
+      <p>No draft picks found for {{ year }}.</p>
+      <p class="hint">Draft picks will appear here once the draft is complete.</p>
+    </div>
+
+    <!-- Draft Rounds -->
+    <div class="draft-rounds" *ngIf="draftRounds.length > 0">
+      <div class="round-section" *ngFor="let round of draftRounds">
+        <h2 class="round-title">Round {{ round.round }}</h2>
+
+        <div class="picks-grid">
+          <div
+            class="pick-card"
+            *ngFor="let pick of round.picks"
+            [ngStyle]="getTeamStyle(pick.player_team)"
+          >
+            <!-- Pick Number -->
+            <div class="pick-number">{{ pick.pick_no }}</div>
+
+            <!-- Player Info -->
+            <div class="player-section">
+              <img
+                [src]="'https://sleepercdn.com/content/nfl/players/thumb/' + pick.player_id + '.jpg'"
+                (error)="$any($event.target).src = 'assets/img/nfl.png'"
+                alt="{{ pick.player_name }}"
+                class="player-pic"
+              />
+              <div class="player-details">
+                <h3 class="player-name">{{ pick.player_name }}</h3>
+                <div class="player-meta">
+                  <span class="position-badge" [ngClass]="getPositionClass(pick.player_position)">
+                    {{ pick.player_position }}
+                  </span>
+                  <span class="team-abbr">{{ pick.player_team || 'FA' }}</span>
+                </div>
+              </div>
+              <img
+                *ngIf="pick.player_team"
+                [src]="'https://sleepercdn.com/images/team_logos/nfl/' + pick.player_team.toLowerCase() + '.png'"
+                alt="{{ pick.player_team }}"
+                class="team-logo"
+              />
+            </div>
+
+            <!-- Picked By -->
+            <div class="picked-by">
+              <span class="picked-label">Picked by:</span>
+              <span class="team-name">{{ pick.picked_by_team_name || pick.picked_by_username }}</span>
+            </div>
+
+            <!-- Keeper Badge -->
+            <div class="keeper-badge" *ngIf="pick.is_keeper">
+              KEEPER
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

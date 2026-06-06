@@ -17,36 +17,6 @@
 .page-header {
   text-align: center;
   margin-bottom: $spacing-xl;
-  position: relative;
-
-  .back-btn {
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    background: transparent;
-    border: 1px solid $surface-light;
-    color: $text-secondary;
-    padding: 8px 16px;
-    margin: 0;
-    border-radius: $radius-md;
-    cursor: pointer;
-    font-size: $text-sm;
-    transition: all $transition-base;
-
-    &:hover {
-      border-color: $champion-gold;
-      color: $champion-gold;
-      background: transparent;
-    }
-
-    svg {
-      width: 18px;
-      height: 18px;
-    }
-  }
 
   .page-title {
     font-family: $font-display;
@@ -63,16 +33,19 @@
   }
 }
 
-// Season Selector
-.season-selector {
+// Year Selector
+.year-selector {
   display: flex;
   justify-content: center;
   gap: $spacing-sm;
-  margin-bottom: $spacing-xl;
+  margin-bottom: $spacing-lg;
   flex-wrap: wrap;
 }
 
-.season-btn {
+.year-btn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
   background: rgba($dark-navy, 0.6);
   color: $text-secondary;
   border: 1px solid $surface-light;
@@ -97,188 +70,57 @@
   }
 }
 
-// Empty State
-.empty-state {
-  text-align: center;
-  padding: $spacing-2xl;
-  background: $card-gradient;
-  border-radius: $radius-lg;
-  border: 1px solid rgba($surface-light, 0.2);
-
-  p {
-    font-size: $text-lg;
-    color: $text-secondary;
-    margin: 0;
-  }
-
-  .hint {
-    font-size: $text-sm;
-    color: $text-muted;
-    margin-top: $spacing-sm;
-  }
-}
-
-// Draft Rounds
-.draft-rounds {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-}
-
-.round-section {
-  background: $card-gradient;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-lg;
-  padding: $spacing-lg;
-}
-
-.round-title {
-  font-family: $font-display;
-  font-size: 1.5rem;
-  letter-spacing: 0.05em;
+.season-badge {
+  font-size: $text-xs;
+  background: rgba($champion-gold, 0.2);
   color: $champion-gold;
-  margin-bottom: $spacing-lg;
-  padding-bottom: $spacing-sm;
-  border-bottom: 2px solid rgba($champion-gold, 0.3);
+  border-radius: $radius-sm;
+  padding: 1px 6px;
+  font-family: $font-body;
+  font-weight: 500;
+
+  .year-btn.active & {
+    background: rgba($deep-navy, 0.3);
+    color: $deep-navy;
+  }
 }
 
-// Picks Grid
-.picks-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: $spacing-md;
+// Sub-tab bar
+.subtab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid rgba($surface-light, 0.4);
+  margin-bottom: $spacing-xl;
+  overflow-x: auto;
 }
 
-.pick-card {
-  position: relative;
-  background: rgba($dark-navy, 0.6);
-  border: 1px solid rgba($surface-light, 0.3);
-  border-radius: $radius-lg;
-  padding: $spacing-md;
+.subtab-link {
+  padding: 12px 24px;
+  font-size: $text-sm;
+  font-weight: 600;
+  color: $text-secondary;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
   transition: all $transition-base;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: $font-mono;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: $shadow-lg;
-    border-color: rgba($champion-gold, 0.4);
-  }
-}
-
-.pick-number {
-  position: absolute;
-  top: $spacing-sm;
-  left: $spacing-sm;
-  width: 32px;
-  height: 32px;
-  background: $gold-accent;
-  color: $deep-navy;
-  border-radius: $radius-full;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: $text-sm;
-  font-family: $font-mono;
-}
-
-.player-section {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  margin-left: 40px;
-  margin-bottom: $spacing-sm;
-}
-
-.player-pic {
-  width: 50px;
-  height: 50px;
-  border-radius: $radius-full;
-  object-fit: cover;
-  border: 2px solid $surface-light;
-}
-
-.player-details {
-  flex: 1;
-  min-width: 0;
-
-  .player-name {
-    font-size: $text-base;
-    font-weight: 600;
-    margin: 0;
     color: $text-primary;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background: rgba($surface-light, 0.2);
   }
 
-  .player-meta {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    margin-top: 4px;
+  &.active {
+    color: $champion-gold;
+    border-bottom-color: $champion-gold;
   }
 }
 
-.position-badge {
-  font-size: $text-xs;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: $radius-sm;
-  text-transform: uppercase;
-
-  &.pos-qb { background: #e74c3c; color: white; }
-  &.pos-rb { background: #27ae60; color: white; }
-  &.pos-wr { background: #3498db; color: white; }
-  &.pos-te { background: #f39c12; color: white; }
-  &.pos-k { background: #9b59b6; color: white; }
-  &.pos-def { background: #34495e; color: white; }
-}
-
-.team-abbr {
-  font-size: $text-xs;
-  color: $text-secondary;
-  font-family: $font-mono;
-}
-
-.team-logo {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.picked-by {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
-  padding-top: $spacing-sm;
-  border-top: 1px solid rgba($surface-light, 0.2);
-  margin-top: $spacing-sm;
-
-  .picked-label {
-    font-size: $text-xs;
-    color: $text-muted;
-  }
-
-  .team-name {
-    font-size: $text-sm;
-    color: $text-primary;
-    font-weight: 500;
-  }
-}
-
-.keeper-badge {
-  position: absolute;
-  top: $spacing-sm;
-  right: $spacing-sm;
-  background: $steel-blue;
-  color: white;
-  font-size: $text-xs;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: $radius-sm;
-  text-transform: uppercase;
+.subtab-content {
+  min-height: 200px;
 }
 
 // Mobile
@@ -287,31 +129,21 @@
     padding: $spacing-md;
   }
 
-  .page-header {
-    .back-btn {
-      position: relative;
-      margin-bottom: $spacing-md;
-    }
-
-    .page-title {
-      font-size: 2rem;
-    }
+  .page-header .page-title {
+    font-size: 2rem;
   }
 
-  .season-selector {
+  .year-selector {
     gap: $spacing-xs;
   }
 
-  .season-btn {
+  .year-btn {
     padding: 8px 16px;
     font-size: $text-sm;
   }
 
-  .picks-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .round-section {
-    padding: $spacing-md;
+  .subtab-link {
+    padding: 10px 16px;
+    font-size: $text-xs;
   }
 }

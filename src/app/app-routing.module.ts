@@ -277,8 +277,49 @@ const routes: Routes = [
   // Account setup (authenticated)
   { path: 'link-sleeper', component: LinkSleeperComponent, canActivate: [AuthGuard] },
 
-  // League History (authenticated)
+  // Draft History (authenticated) — s4: per-year shell with nested sub-tab routes
+  // URL scheme: /draft-history/:year/{live|picks|recap|mocks}
+  // DraftHistoryComponent is the shell (year chips + sub-tab bar + router-outlet).
+  // Root /draft-history has no children — DraftHistoryComponent.ngOnInit redirects to
+  // /draft-history/:currentSeason/live (or picks for past seasons).
   { path: 'draft-history', component: DraftHistoryComponent, canActivate: [AuthGuard] },
+  {
+    path: 'draft-history/:year',
+    component: DraftHistoryComponent,
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: 'live',
+        loadComponent: () =>
+          import('./pages/draft-history/live/draft-live.component').then(
+            (m) => m.DraftLiveComponent,
+          ),
+      },
+      {
+        path: 'picks',
+        loadComponent: () =>
+          import('./pages/draft-history/picks/draft-picks.component').then(
+            (m) => m.DraftPicksComponent,
+          ),
+      },
+      {
+        path: 'recap',
+        loadComponent: () =>
+          import('./pages/draft-history/recap/draft-recap.component').then(
+            (m) => m.DraftRecapComponent,
+          ),
+      },
+      {
+        path: 'mocks',
+        loadComponent: () =>
+          import('./pages/draft-history/mocks/draft-mocks.component').then(
+            (m) => m.DraftMocksComponent,
+          ),
+      },
+      // Default sub-tab: DraftHistoryComponent.ngOnInit redirects per isCurrentSeason
+      { path: '', redirectTo: 'live', pathMatch: 'full' },
+    ],
+  },
   { path: 'matchup-history', component: MatchupHistoryComponent, canActivate: [AuthGuard] },
 
   // Catch-all

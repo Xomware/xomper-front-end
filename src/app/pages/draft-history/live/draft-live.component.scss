@@ -1,0 +1,403 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+
+.draft-live {
+  min-height: 200px;
+}
+
+// Header card
+.live-header {
+  background: $card-gradient;
+  border: 1px solid rgba($surface-light, 0.3);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+
+  &.status-drafting {
+    border-color: rgba($champion-gold, 0.5);
+    background: linear-gradient(
+      135deg,
+      rgba($champion-gold, 0.05) 0%,
+      rgba(12, 22, 18, 0.97) 50%,
+    );
+  }
+
+  &.status-complete {
+    border-color: rgba($success-green, 0.3);
+  }
+}
+
+.header-main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: $text-xs;
+  font-weight: 700;
+  font-family: $font-mono;
+  padding: 2px 10px;
+  border-radius: $radius-full;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  &.badge-drafting {
+    background: rgba($champion-gold, 0.2);
+    color: $champion-gold;
+    border: 1px solid rgba($champion-gold, 0.5);
+  }
+
+  &.badge-pre_draft {
+    background: rgba($text-secondary, 0.1);
+    color: $text-secondary;
+    border: 1px solid rgba($surface-light, 0.4);
+  }
+
+  &.badge-complete {
+    background: rgba($success-green, 0.15);
+    color: $success-green;
+    border: 1px solid rgba($success-green, 0.3);
+  }
+
+  &.badge-paused {
+    background: rgba($error-red, 0.15);
+    color: $error-red;
+    border: 1px solid rgba($error-red, 0.3);
+  }
+}
+
+.draft-name {
+  font-family: $font-display;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  color: $text-primary;
+  margin: 0;
+}
+
+.countdown {
+  font-family: $font-mono;
+  font-size: $text-lg;
+  font-weight: 600;
+  color: $champion-gold;
+  text-align: right;
+}
+
+// Controls bar
+.controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+}
+
+.chip-group {
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-xl;
+  overflow: hidden;
+}
+
+.chip {
+  padding: 8px 20px;
+  background: transparent;
+  border: none;
+  color: $text-secondary;
+  font-size: $text-sm;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-fast;
+  font-family: $font-mono;
+
+  &.active {
+    background: $gold-accent;
+    color: $deep-navy;
+  }
+
+  &:hover:not(.active) {
+    background: rgba($surface-light, 0.3);
+    color: $text-primary;
+  }
+}
+
+// Empty state
+.empty-state {
+  text-align: center;
+  padding: $spacing-2xl;
+  background: $card-gradient;
+  border-radius: $radius-lg;
+  border: 1px solid rgba($surface-light, 0.2);
+
+  p {
+    font-size: $text-lg;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+// ===== ROUNDS LIST VIEW =====
+.rounds-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.round-block {
+  background: $card-gradient;
+  border: 1px solid rgba($surface-light, 0.2);
+  border-radius: $radius-lg;
+  overflow: hidden;
+}
+
+.round-heading {
+  font-family: $font-display;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  color: $champion-gold;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1px solid rgba($surface-light, 0.2);
+  margin: 0;
+}
+
+.round-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.pick-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  border-bottom: 1px solid rgba($surface-light, 0.1);
+  min-height: 56px;
+  transition: background $transition-fast;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.my-pick {
+    background: rgba($champion-gold, 0.05);
+    border-left: 3px solid $champion-gold;
+  }
+
+  &:not(.pick-made) {
+    opacity: 0.6;
+  }
+}
+
+.pick-slot {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  background: rgba($surface-light, 0.3);
+  color: $text-secondary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-mono;
+  font-size: $text-sm;
+  font-weight: 700;
+  flex-shrink: 0;
+
+  .pick-made & {
+    background: $gold-accent;
+    color: $deep-navy;
+  }
+}
+
+.player-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-full;
+  object-fit: cover;
+  border: 2px solid rgba($surface-light, 0.4);
+  flex-shrink: 0;
+}
+
+.pick-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .player-name {
+    font-size: $text-sm;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-pos-team {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $text-xs;
+    color: $text-secondary;
+  }
+}
+
+.empty-pick {
+  flex: 1;
+
+  .owner-name {
+    font-size: $text-sm;
+    color: $text-muted;
+    font-style: italic;
+  }
+}
+
+.my-badge {
+  font-size: $text-xs;
+  font-weight: 700;
+  background: rgba($champion-gold, 0.2);
+  color: $champion-gold;
+  border: 1px solid rgba($champion-gold, 0.4);
+  border-radius: $radius-full;
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+// Position badges (rounds list + board)
+.pos-badge,
+.cell-pos {
+  display: inline-block;
+  font-size: $text-xs;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: $radius-sm;
+  text-transform: uppercase;
+
+  &.pos-qb { background: #e74c3c; color: white; }
+  &.pos-rb { background: #27ae60; color: white; }
+  &.pos-wr { background: #3498db; color: white; }
+  &.pos-te { background: #f39c12; color: white; }
+  &.pos-k  { background: #9b59b6; color: white; }
+  &.pos-def { background: #34495e; color: white; }
+}
+
+// ===== BOARD GRID VIEW =====
+.board-wrapper {
+  overflow: hidden;
+  border-radius: $radius-lg;
+  border: 1px solid rgba($surface-light, 0.3);
+}
+
+.board-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+
+  th, td {
+    padding: 6px 8px;
+    text-align: center;
+    border: 1px solid rgba($surface-light, 0.15);
+    font-size: $text-xs;
+  }
+
+  thead th {
+    background: rgba($dark-navy, 0.8);
+    color: $text-secondary;
+    font-family: $font-mono;
+    font-weight: 700;
+    font-size: $text-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .round-col, .round-label {
+    width: 36px;
+    min-width: 36px;
+    background: rgba($dark-navy, 0.6);
+    color: $champion-gold;
+    font-family: $font-mono;
+    font-weight: 700;
+  }
+
+  .slot-col {
+    min-width: 80px;
+  }
+}
+
+.board-cell {
+  vertical-align: top;
+  background: rgba($dark-navy, 0.4);
+  min-height: 52px;
+  transition: all $transition-fast;
+  text-align: center;
+  padding: 6px;
+
+  &.pick-made {
+    background: rgba($surface-light, 0.2);
+  }
+
+  &.my-pick {
+    background: rgba($champion-gold, 0.1);
+    border-color: rgba($champion-gold, 0.3) !important;
+  }
+
+  &.dimmed {
+    opacity: 0.3;
+  }
+}
+
+.cell-name {
+  font-size: $text-xs;
+  font-weight: 600;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 72px;
+  display: block;
+}
+
+.cell-owner {
+  font-size: 10px;
+  color: $text-muted;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 72px;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .controls-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .live-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .countdown {
+    text-align: left;
+  }
+
+  .pick-row {
+    padding: $spacing-sm $spacing-md;
+  }
+}

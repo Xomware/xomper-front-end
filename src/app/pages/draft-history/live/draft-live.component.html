@@ -1,0 +1,138 @@
+<div class="draft-live">
+  <app-loader [loading]="loading"></app-loader>
+
+  <div *ngIf="!loading">
+    <!-- No draft found -->
+    <div class="empty-state" *ngIf="!draft">
+      <p>No draft found for {{ year }}.</p>
+    </div>
+
+    <div *ngIf="draft">
+      <!-- Header card: status + countdown -->
+      <div class="live-header" [class]="'status-' + draft.status">
+        <div class="header-main">
+          <span class="status-badge" [class]="'badge-' + draft.status">{{ draftStatusLabel }}</span>
+          <h2 class="draft-name">{{ draft.metadata?.name || year + ' Draft' }}</h2>
+        </div>
+        <div class="countdown" *ngIf="countdown">{{ countdown }}</div>
+      </div>
+
+      <!-- Controls bar -->
+      <div class="controls-bar">
+        <!-- All / My Picks filter -->
+        <div class="chip-group">
+          <button
+            class="chip"
+            [class.active]="pickFilter === 'all'"
+            (click)="setPickFilter('all')"
+          >All Picks</button>
+          <button
+            class="chip"
+            [class.active]="pickFilter === 'mine'"
+            (click)="setPickFilter('mine')"
+          >My Picks</button>
+        </div>
+
+        <!-- Rounds / Board toggle -->
+        <div class="chip-group">
+          <button
+            class="chip"
+            [class.active]="viewMode === 'rounds'"
+            (click)="setViewMode('rounds')"
+          >Rounds</button>
+          <button
+            class="chip"
+            [class.active]="viewMode === 'board'"
+            (click)="setViewMode('board')"
+          >Board</button>
+        </div>
+      </div>
+
+      <!-- ============ ROUNDS LIST VIEW ============ -->
+      <div class="rounds-list" *ngIf="viewMode === 'rounds'">
+        <div class="round-block" *ngFor="let round of filteredRounds">
+          <h3 class="round-heading">Round {{ round.round }}</h3>
+          <div class="round-rows">
+            <div
+              class="pick-row"
+              *ngFor="let cell of round.cells"
+              [class.pick-made]="cell.pick !== null"
+              [class.my-pick]="cell.isMine"
+            >
+              <!-- Slot / pick number -->
+              <span class="pick-slot">{{ cell.pick ? cell.pick.pick_no : (round.round - 1) * teamCount + cell.slot }}</span>
+
+              <!-- Player info if pick made -->
+              <ng-container *ngIf="cell.pick">
+                <img
+                  class="player-thumb"
+                  [src]="'https://sleepercdn.com/content/nfl/players/thumb/' + cell.pick.player_id + '.jpg'"
+                  (error)="$any($event.target).src = 'assets/img/nfl.png'"
+                  alt="{{ cell.pick.metadata?.first_name }} {{ cell.pick.metadata?.last_name }}"
+                />
+                <div class="pick-info">
+                  <span class="player-name">
+                    {{ cell.pick.metadata?.first_name }} {{ cell.pick.metadata?.last_name }}
+                  </span>
+                  <span class="player-pos-team">
+                    <span class="pos-badge" [class]="'pos-' + (cell.pick.metadata?.position | lowercase)">
+                      {{ cell.pick.metadata?.position }}
+                    </span>
+                    {{ cell.pick.metadata?.team || 'FA' }}
+                  </span>
+                </div>
+              </ng-container>
+
+              <!-- Empty slot -->
+              <div class="empty-pick" *ngIf="!cell.pick">
+                <span class="owner-name">{{ cell.ownerName }}</span>
+              </div>
+
+              <!-- My pick indicator -->
+              <span class="my-badge" *ngIf="cell.isMine">Mine</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state for My Picks filter -->
+        <div class="empty-state" *ngIf="filteredRounds.length === 0 && pickFilter === 'mine'">
+          <p>No picks made yet.</p>
+        </div>
+      </div>
+
+      <!-- ============ BOARD GRID VIEW ============ -->
+      <div class="board-wrapper" *ngIf="viewMode === 'board'">
+        <div class="board-scroll">
+          <table class="board-table">
+            <thead>
+              <tr>
+                <th class="round-col">Rd</th>
+                <th *ngFor="let slot of slots" class="slot-col">{{ slot }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let round of rounds">
+                <td class="round-label">{{ round.round }}</td>
+                <td
+                  *ngFor="let cell of round.cells"
+                  class="board-cell"
+                  [class.pick-made]="cell.pick !== null"
+                  [class.my-pick]="cell.isMine"
+                  [class.dimmed]="isCellDimmed(cell)"
+                >
+                  <ng-container *ngIf="cell.pick">
+                    <span class="cell-name">{{ cell.pick.metadata?.last_name || cell.pick.metadata?.first_name }}</span>
+                    <span class="cell-pos" [class]="'pos-' + (cell.pick.metadata?.position | lowercase)">
+                      {{ cell.pick.metadata?.position }}
+                    </span>
+                  </ng-container>
+                  <span class="cell-owner" *ngIf="!cell.pick">{{ cell.ownerName }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

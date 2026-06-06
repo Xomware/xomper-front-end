@@ -1,0 +1,33 @@
+<div class="draft-mocks">
+  <app-loader [loading]="loading"></app-loader>
+
+  <div *ngIf="!loading">
+    <!-- Non-admin empty state -->
+    <div class="empty-state" *ngIf="!isAdmin && cards.length === 0">
+      <p>Mock draft reports are visible to admins only.</p>
+    </div>
+
+    <!-- No reports (admin but none generated) -->
+    <div class="empty-state" *ngIf="isAdmin && cards.length === 0">
+      <p>No mock draft reports yet.</p>
+      <p class="hint">Trigger a mock draft analysis from the Admin panel to generate one.</p>
+    </div>
+
+    <!-- Report cards -->
+    <div class="mocks-list" *ngIf="cards.length > 0">
+      <div class="mock-card" *ngFor="let card of cards">
+        <button class="card-header" (click)="toggleCard(card)">
+          <div class="card-meta">
+            <span class="card-title">{{ card.displayTitle }}</span>
+            <span class="card-date">{{ card.report.createdAt | date:'MMM d, y' }}</span>
+          </div>
+          <span class="expand-icon" [class.open]="card.expanded">&#9660;</span>
+        </button>
+
+        <div class="card-body" *ngIf="card.expanded">
+          <app-styled-markdown [markdown]="card.report.bodyMarkdown"></app-styled-markdown>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

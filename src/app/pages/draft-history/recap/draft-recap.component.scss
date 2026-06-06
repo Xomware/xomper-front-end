@@ -1,0 +1,85 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+
+.draft-recap {
+  min-height: 200px;
+}
+
+.recap-report {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.report-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+
+  .report-title {
+    font-family: $font-display;
+    font-size: 1.75rem;
+    letter-spacing: 0.04em;
+    color: $champion-gold;
+    margin: 0;
+  }
+
+  .report-meta {
+    font-size: $text-sm;
+    color: $text-muted;
+    font-family: $font-mono;
+  }
+}
+
+.report-body {
+  background: $card-gradient;
+  border: 1px solid rgba($surface-light, 0.3);
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+}
+
+.grades-deferred-notice {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  background: rgba($surface-light, 0.2);
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $text-sm;
+  color: $text-muted;
+  font-style: italic;
+
+  .notice-icon {
+    font-size: $text-base;
+    flex-shrink: 0;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: $spacing-2xl;
+  background: $card-gradient;
+  border-radius: $radius-lg;
+  border: 1px solid rgba($surface-light, 0.2);
+
+  p {
+    font-size: $text-lg;
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  .hint {
+    font-size: $text-sm;
+    color: $text-muted;
+    margin-top: $spacing-sm;
+  }
+}
+
+@media (max-width: 768px) {
+  .report-body {
+    padding: $spacing-md;
+  }
+}

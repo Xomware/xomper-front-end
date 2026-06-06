@@ -1,0 +1,31 @@
+<div class="draft-recap">
+  <app-loader [loading]="loading"></app-loader>
+
+  <div *ngIf="!loading">
+    <!-- Has report -->
+    <div class="recap-report" *ngIf="report">
+      <div class="report-header">
+        <h2 class="report-title">{{ year }} Draft Recap</h2>
+        <span class="report-meta">{{ report.createdAt | date:'MMM d, y' }}</span>
+      </div>
+
+      <div class="report-body">
+        <app-styled-markdown [markdown]="report.bodyMarkdown"></app-styled-markdown>
+      </div>
+
+      <!-- TODO(grades): DraftGradesCard would mount here.
+           Deferred — no web FantasyCalc values service exists.
+           Follow-up: s4b-draft-grades. -->
+      <div class="grades-deferred-notice">
+        <span class="notice-icon">ℹ️</span>
+        Draft grades coming in a future update.
+      </div>
+    </div>
+
+    <!-- No report -->
+    <div class="empty-state" *ngIf="!report">
+      <p>No recap report available for {{ year }}.</p>
+      <p class="hint">Post-draft analysis will appear here after it's generated.</p>
+    </div>
+  </div>
+</div>
