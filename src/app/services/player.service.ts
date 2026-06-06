@@ -43,6 +43,11 @@ export class PlayerService {
 
   // -------- API CALLS --------
 
+  /** Full Sleeper player map, cached per session. */
+  getPlayerMap(): Observable<Record<string, Player>> {
+    return this.loadAllPlayers()
+  }
+
   getPlayerById(playerId: string): Observable<Player> {
     return this.loadAllPlayers().pipe(
       map(players => players[playerId])
