@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
+import { LeagueHistoryService } from 'src/app/services/league-history.service';
 
 import { MatchupsComponent } from './matchups.component';
 
@@ -8,7 +12,15 @@ describe('MatchupsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatchupsComponent]
+      imports: [MatchupsComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: LeagueHistoryService,
+          useValue: { getMatchupHistoryFromChain: () => of([]), getMatchupHistory: () => of([]) },
+        },
+      ],
     })
     .compileComponents();
 

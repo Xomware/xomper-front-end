@@ -82,12 +82,16 @@ export class TeamAnalysisService {
           continue // taxi never counts toward starter buckets
         }
 
+        if (reserve.has(pid)) {
+          continue // reserve (IR) players excluded from all buckets
+        }
+
         // Position: player map first, FantasyCalc fallback (mirrors iOS)
         const rawPos =
           playerMap[pid]?.position ?? this.valuesService.position(pid) ?? '?'
         const pos = rawPos.toUpperCase()
 
-        const onBench = !starters.has(pid) && !reserve.has(pid)
+        const onBench = !starters.has(pid)
 
         switch (pos) {
           case 'QB':
