@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { NgIf } from '@angular/common'
-import { Router, RouterOutlet } from '@angular/router'
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router'
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs'
+import { filter } from 'rxjs/operators'
 import { SidebarComponent } from '../sidebar/sidebar.component'
 import { MobileDrawerComponent } from '../mobile-drawer/mobile-drawer.component'
-import { FooterComponent } from '../footer/footer.component'
 import { ToastComponent } from '../toast/toast.component'
 import { SIDEBAR_SECTIONS, SidebarSection } from '../sidebar/sidebar.entries'
 import { SupabaseService } from 'src/app/services/supabase.service'
@@ -20,18 +21,20 @@ const MOBILE_BREAKPOINT = 768
     RouterOutlet,
     SidebarComponent,
     MobileDrawerComponent,
-    FooterComponent,
     ToastComponent,
   ],
 })
 export class ShellLayoutComponent implements OnInit, OnDestroy {
   isMobile = false
   drawerOpen = false
+  /** True when authenticated AND not on /login — gates sidebar/topbar/drawer. */
+  showChrome = false
 
   readonly sections: SidebarSection[] = SIDEBAR_SECTIONS
 
   private mediaQuery!: MediaQueryList
   private mqListener!: (e: MediaQueryListEvent) => void
+  private chromeSub!: Subscription
 
   constructor(private supabase: SupabaseService, private router: Router) {}
 
@@ -41,15 +44,29 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
     this.mqListener = (e: MediaQueryListEvent) => {
       this.isMobile = e.matches
       if (!e.matches) {
-        // Desktop: close drawer if it was open from mobile
         this.drawerOpen = false
       }
     }
     this.mediaQuery.addEventListener('change', this.mqListener)
+
+    // Seed with current URL then track NavigationEnd events.
+    const url$ = new BehaviorSubject<string>(this.router.url)
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => url$.next(e.urlAfterRedirects))
+
+    // showChrome is true only when the user is authenticated AND not on /login.
+    this.chromeSub = combineLatest([
+      this.supabase.currentUser$,
+      url$,
+    ]).subscribe(([user, url]) => {
+      this.showChrome = !!user && !url.startsWith('/login')
+    })
   }
 
   ngOnDestroy(): void {
     this.mediaQuery.removeEventListener('change', this.mqListener)
+    this.chromeSub?.unsubscribe()
   }
 
   get isAdmin(): boolean {

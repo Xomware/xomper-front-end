@@ -154,10 +154,17 @@ ul {
 }
 
 .entry-icon {
-  font-size: $text-base;
-  width: 24px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  // SVGs inherit currentColor from the parent .entry rule
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .entry-label {

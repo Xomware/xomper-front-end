@@ -1,16 +1,19 @@
 <div class="shell">
-  <!-- Desktop persistent sidebar rail -->
-  <app-sidebar
-    *ngIf="!isMobile"
-    [sections]="sections"
-    [isAdmin]="isAdmin"
-    class="shell__sidebar"
-  ></app-sidebar>
+  <!-- Shell chrome: sidebar + topbar + drawer hidden until authenticated + off /login -->
+  <ng-container *ngIf="showChrome">
+    <!-- Desktop persistent sidebar rail -->
+    <app-sidebar
+      *ngIf="!isMobile"
+      [sections]="sections"
+      [isAdmin]="isAdmin"
+      class="shell__sidebar"
+    ></app-sidebar>
+  </ng-container>
 
-  <!-- Main column -->
+  <!-- Main column always renders (holds router-outlet) -->
   <div class="shell__main-col">
-    <!-- Mobile top bar with hamburger -->
-    <header *ngIf="isMobile" class="shell__topbar">
+    <!-- Mobile top bar with hamburger — chrome-gated -->
+    <header *ngIf="isMobile && showChrome" class="shell__topbar">
       <button
         class="hamburger"
         (click)="toggleDrawer()"
@@ -27,7 +30,9 @@
         (click)="goToSearch()"
         aria-label="Search"
       >
-        🔍
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z" />
+        </svg>
       </button>
     </header>
 
@@ -35,13 +40,11 @@
       <app-toast></app-toast>
       <router-outlet></router-outlet>
     </main>
-
-    <app-footer></app-footer>
   </div>
 
-  <!-- Mobile overlay drawer -->
+  <!-- Mobile overlay drawer — chrome-gated -->
   <app-mobile-drawer
-    *ngIf="isMobile"
+    *ngIf="isMobile && showChrome"
     [open]="drawerOpen"
     [sections]="sections"
     [isAdmin]="isAdmin"

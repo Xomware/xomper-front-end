@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { NgClass, NgFor, NgIf } from '@angular/common'
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { RouterLink, RouterLinkActive } from '@angular/router'
 import { SupabaseService, Profile } from 'src/app/services/supabase.service'
 import { UserService } from 'src/app/services/user.service'
@@ -21,6 +22,7 @@ export class SidebarComponent {
   constructor(
     public supabase: SupabaseService,
     public userService: UserService,
+    private sanitizer: DomSanitizer,
   ) {}
 
   get profile(): Profile | null {
@@ -43,6 +45,11 @@ export class SidebarComponent {
 
   visibleEntries(section: SidebarSection): SidebarEntry[] {
     return section.entries.filter(e => !e.adminOnly || this.isAdmin)
+  }
+
+  /** Bypass Angular's HTML sanitizer for trusted inline SVG strings. */
+  safeIcon(entry: SidebarEntry): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(entry.svg)
   }
 
   onEntryClick(): void {
