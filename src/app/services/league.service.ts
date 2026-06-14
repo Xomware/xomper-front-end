@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, EMPTY, map, of, forkJoin } from 'rxjs'
+import { Observable, EMPTY, map, of, forkJoin, switchMap } from 'rxjs'
 import { expand, reduce, tap } from 'rxjs/operators'
 import { Roster } from '../models/roster.interface'
 import { League } from '../models/league.interface'
 import { LeagueModel } from '../models/league.model'
+import { RosterModel } from '../models/roster.model'
+import { UserModel } from '../models/user.model'
+import { StandingsTeamModel } from '../models/standings.model'
 import { User } from '../models/user.interface'
 import { LeagueConfig } from '../models/league-config.interface'
 import { Matchup } from '../models/matchup.interface'
@@ -13,6 +16,9 @@ import { NflState } from '../models/nfl-state.interface'
 import { PlayoffBracketMatch } from '../models/playoff-bracket.interface'
 import { environment } from 'src/environments/environment'
 import { getCurrentSeason } from '../constants/season'
+import { StandingsService } from './standings.service'
+import { UserService } from './user.service'
+import { TeamService } from './team.service'
 
 export interface Transaction {
   type: string
@@ -60,7 +66,12 @@ export class LeagueService {
     },
   }
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private standingsService: StandingsService,
+    private userService: UserService,
+    private teamService: TeamService,
+  ) {}
 
   // =========================================
   // API CALLS
@@ -208,6 +219,109 @@ export class LeagueService {
     this.currentLeague = null
     this.leagueState = null
     this.leagueChainCache = null
+  }
+
+  // =========================================
+  // HOME LEAGUE BOOTSTRAP
+  // =========================================
+
+  /**
+   * Idempotent bootstrap of the home (whitelisted) league.
+   * Returns immediately if myLeague is already fully loaded (has rosters).
+   * Otherwise fetches league → users → rosters → builds standings, then
+   * sets myLeague, myTeam. Single emission.
+   */
+  loadMyLeague(): Observable<LeagueModel> {
+    if (this.myLeague && this.myLeague.getRosters().length > 0) {
+      return of(this.myLeague)
+    }
+
+    return this.searchLeague(this.whitelistedLeagueId).pipe(
+      switchMap((league) => {
+        league.setDivisions()
+        return forkJoin({
+          users: this.findLeagueUsers(league.league_id),
+          rosters: this.findLeagueRosters(league.league_id),
+        }).pipe(
+          map(({ users, rosters }) => {
+            const userModels = users.map((u) => new UserModel(u))
+            league.setUsers(userModels)
+
+            const rosterModels = rosters.map((r) => new RosterModel(r))
+            league.setRosters(rosterModels)
+
+            const taxiIds = rosterModels.reduce(
+              (acc: string[], r) => acc.concat(r.taxi || []),
+              [],
+            )
+            league.setTaxiSquadIds(taxiIds)
+
+            const standings = this.buildStandingsForLeague(rosterModels, userModels, league)
+            const sortedStandings = this.standingsService.buildStandings(standings)
+            league.setStandingsTeams(sortedStandings)
+
+            this.setMyLeague(league)
+
+            const myUserName = this.userService.getMyUser()?.getUserName()
+            const myTeam = sortedStandings.find((t) => t.userName === myUserName)
+            if (myTeam) this.teamService.setMyTeam(myTeam)
+
+            return league
+          }),
+        )
+      }),
+    )
+  }
+
+  private buildStandingsForLeague(
+    rosters: RosterModel[],
+    users: UserModel[],
+    league: LeagueModel,
+  ): StandingsTeamModel[] {
+    return rosters.map((roster) => {
+      const user = users.find((u) => u.user_id === roster.owner_id)
+
+      let streakTotal = 0
+      let streakType: '' | 'win' | 'loss' = ''
+      const streakStr = roster.metadata?.streak as string | undefined
+      if (streakStr) {
+        const match = streakStr.match(/(\d+)([WL])/)
+        if (match) {
+          streakTotal = parseInt(match[1], 10)
+          streakType = match[2] === 'W' ? 'win' : 'loss'
+        }
+      }
+
+      const divisionIndex =
+        roster.settings?.division != null ? `division_${roster.settings.division}` : null
+      const divisionName = divisionIndex
+        ? String(league.metadata?.[divisionIndex] ?? 'Unknown Division')
+        : 'Unknown Division'
+      const divisionAvatar = divisionIndex
+        ? String(league.metadata?.[`${divisionIndex}_avatar`] ?? 'assets/img/nfl.png')
+        : 'assets/img/nfl.png'
+
+      return new StandingsTeamModel({
+        roster,
+        players: [],
+        user: new UserModel(user!),
+        league,
+        teamName: (user?.metadata?.team_name as string) || `${user?.display_name}'s Team`,
+        userName: user?.display_name || 'Unknown User',
+        avatar: user?.avatar ? this.userService.buildAvatar(user.avatar) : 'assets/img/nfl.png',
+        wins: roster.settings?.wins ?? 0,
+        losses: roster.settings?.losses ?? 0,
+        fpts: (roster.settings?.fpts ?? 0) + (roster.settings?.fpts_decimal ?? 0) / 100,
+        fptsAgainst:
+          (roster.settings?.fpts_against ?? 0) +
+          (roster.settings?.fpts_against_decimal ?? 0) / 100,
+        streak: { type: streakType, total: streakTotal },
+        divisionName,
+        divisionAvatar,
+        leagueRank: -1,
+        divisionRank: -1,
+      })
+    })
   }
 
   // =========================================
