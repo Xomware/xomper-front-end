@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { RouterLink } from '@angular/router'
 import { CronService } from 'src/app/services/cron.service'
 import { CronSetting, cronDisplayTitle } from 'src/app/models/cron-setting.model'
 import {
@@ -8,18 +9,16 @@ import {
 } from 'src/app/components/confirm-dialog/confirm-dialog.component'
 
 /**
- * Admin Cron Settings — per-row enabled/test-mode toggle pair.
+ * Admin Cron Settings — per-row enabled kill-switch.
  *
- * "Test mode active" gold sticky banner when any row has testMode=true.
  * Per-row pending spinner while an in-flight toggle call resolves.
  * ConfirmDialog before flipping `enabled` to false (kill-switch).
- *
- * Mirrors iOS CronSettingsView.swift + CronSettingsStore.swift.
+ * For email previews, use Admin → Test Email (/admin/test-email).
  */
 @Component({
   selector: 'app-admin-cron-settings',
   standalone: true,
-  imports: [CommonModule, ConfirmDialogComponent],
+  imports: [CommonModule, RouterLink, ConfirmDialogComponent],
   templateUrl: './admin-cron-settings.component.html',
   styleUrls: ['./admin-cron-settings.component.scss'],
 })
@@ -62,10 +61,6 @@ export class AdminCronSettingsComponent implements OnInit {
         this.isLoading = false
       },
     })
-  }
-
-  get anyTestModeActive(): boolean {
-    return this.rows.some((r) => r.testMode)
   }
 
   displayTitle(row: CronSetting): string {
@@ -116,32 +111,6 @@ export class AdminCronSettingsComponent implements OnInit {
         // Revert optimistic update.
         this.rows = this.rows.map((r) =>
           r.cronKey === cronKey ? { ...r, enabled: !enabled } : r,
-        )
-      },
-    })
-  }
-
-  toggleTestMode(row: CronSetting): void {
-    if (!row.enabled) return  // test-mode disabled when cron is off (iOS UX rule)
-    const newTestMode = !row.testMode
-    const cronKey = row.cronKey
-    this.pendingKeys[cronKey] = true
-    // Optimistic.
-    this.rows = this.rows.map((r) =>
-      r.cronKey === cronKey ? { ...r, testMode: newTestMode } : r,
-    )
-    this.cronService.setTestMode(cronKey, newTestMode).subscribe({
-      next: (patch) => {
-        this.pendingKeys[cronKey] = false
-        this.rows = this.rows.map((r) =>
-          r.cronKey === cronKey ? { ...r, ...patch } : r,
-        )
-      },
-      error: () => {
-        this.pendingKeys[cronKey] = false
-        // Revert.
-        this.rows = this.rows.map((r) =>
-          r.cronKey === cronKey ? { ...r, testMode: !newTestMode } : r,
         )
       },
     })

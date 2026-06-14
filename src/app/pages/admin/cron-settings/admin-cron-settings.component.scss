@@ -7,19 +7,6 @@
   margin: 0 auto;
 }
 
-.test-mode-banner {
-  background: rgba($champion-gold, 0.1);
-  border-bottom: 1px solid rgba($champion-gold, 0.3);
-  color: $champion-gold;
-  font-size: $text-sm;
-  font-weight: 600;
-  text-align: center;
-  padding: 10px $spacing-md;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
 .page-header {
   padding: $spacing-lg $spacing-lg $spacing-sm;
   h2 { margin: 0; font-family: $font-display; font-size: 1.5rem; font-weight: 600; color: $text-primary; }
@@ -49,6 +36,20 @@
   transition: background $transition-fast;
 
   &:hover { background: rgba($surface-light, 0.3); }
+}
+
+.preview-hint {
+  margin: 0 $spacing-lg $spacing-sm;
+  font-size: $text-sm;
+  color: $text-muted;
+
+  &__link {
+    color: $text-secondary;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover { color: $text-primary; }
+  }
 }
 
 .row-list {

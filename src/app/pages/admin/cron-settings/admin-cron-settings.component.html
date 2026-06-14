@@ -1,9 +1,4 @@
 <div class="cron-settings">
-  <!-- Test-mode sticky banner -->
-  <div *ngIf="anyTestModeActive" class="test-mode-banner">
-    Test mode active — deliveries restricted to admin only
-  </div>
-
   <div class="page-header">
     <h2>Cron Settings</h2>
   </div>
@@ -28,6 +23,11 @@
     <p>No cron settings found.</p>
   </div>
 
+  <!-- Preview hint -->
+  <p *ngIf="!isLoading && !tableMissing && !error && rows.length > 0" class="preview-hint">
+    To preview an email, use <a routerLink="/admin/test-email" class="preview-hint__link">Admin → Test Email</a>.
+  </p>
+
   <!-- Rows -->
   <ul *ngIf="!isLoading && !tableMissing && !error && rows.length > 0" class="row-list">
     <li *ngFor="let row of rows" class="row-item">
@@ -49,19 +49,6 @@
               [class.toggle--off]="!row.enabled"
               (click)="toggleEnabled(row)"
               title="{{ row.enabled ? 'Disable' : 'Enable' }} cron"
-            ></button>
-          </div>
-
-          <!-- Test mode toggle (disabled when cron is off) -->
-          <div class="toggle-group" [class.toggle-group--disabled]="!row.enabled">
-            <span class="toggle-label" [class.toggle-label--off]="!row.testMode">Test</span>
-            <button
-              class="toggle"
-              [class.toggle--on]="row.testMode && row.enabled"
-              [class.toggle--off]="!row.testMode || !row.enabled"
-              [disabled]="!row.enabled"
-              (click)="toggleTestMode(row)"
-              title="Toggle test mode"
             ></button>
           </div>
         </ng-container>
