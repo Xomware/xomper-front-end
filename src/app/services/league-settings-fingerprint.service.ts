@@ -126,6 +126,8 @@ export class LeagueSettingsFingerprintService {
       approximations,
       isKeeper,
       teBonus,
+      scoringSettings: scoring,
+      rosterPositions,
     }
   }
 

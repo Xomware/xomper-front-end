@@ -27,6 +27,8 @@ const CLT_FORMAT: LeagueFormat = {
   approximations: [],
   isKeeper: false,
   teBonus: 0,
+  scoringSettings: { rec: 1 },
+  rosterPositions: [],
 }
 
 function bookOf(

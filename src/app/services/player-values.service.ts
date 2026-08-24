@@ -3,10 +3,8 @@ import { Observable, of, tap } from 'rxjs'
 import { League } from '../models/league.interface'
 import { LeagueFormat, ValueBook } from '../models/value-book.model'
 import { LeagueSettingsFingerprintService } from './league-settings-fingerprint.service'
-import {
-  CACHE_TTL_MS,
-  FantasyCalcDirectProvider,
-} from './value-providers/fantasy-calc.provider'
+import { CACHE_TTL_MS } from './value-providers/fantasy-calc.provider'
+import { CompositeValueProvider } from './value-providers/composite.provider'
 import { ValueProvider } from './value-providers/value-provider'
 
 /**
@@ -32,9 +30,11 @@ export class PlayerValuesService {
 
   constructor(
     private fingerprintService: LeagueSettingsFingerprintService,
-    fantasyCalc: FantasyCalcDirectProvider,
+    composite: CompositeValueProvider,
   ) {
-    this.provider = fantasyCalc
+    // Routes redraft to Sleeper projections and dynasty to FantasyCalc.
+    // See CompositeValueProvider for why neither wins everywhere.
+    this.provider = composite
   }
 
   /**

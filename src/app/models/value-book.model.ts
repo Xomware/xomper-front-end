@@ -43,6 +43,14 @@ export interface LeagueFormat {
   isKeeper: boolean
   /** `bonus_rec_te` from scoring_settings. Non-zero means TE-premium scoring. */
   teBonus: number
+
+  /**
+   * The league's raw scoring rules. Carried so a provider can compute values
+   * from the league's own scoring instead of borrowing a nearby format.
+   */
+  scoringSettings: Record<string, number>
+  /** The league's raw roster slots. Drives replacement level. */
+  rosterPositions: string[]
 }
 
 /** True when the league cannot be analyzed honestly at all. */
