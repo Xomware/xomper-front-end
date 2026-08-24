@@ -1,176 +1,94 @@
 import { Injectable } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
+import { Observable, of, tap } from 'rxjs'
+import { League } from '../models/league.interface'
+import { LeagueFormat, ValueBook } from '../models/value-book.model'
+import { LeagueSettingsFingerprintService } from './league-settings-fingerprint.service'
 import {
-  Observable,
-  shareReplay,
-  map,
-  tap,
-  catchError,
-  throwError,
-  of,
-} from 'rxjs'
-import {
-  FantasyCalcPlayerRaw,
-  PlayerValue,
-  parsePlayerValue,
-  parseYearPrefix,
-} from '../models/player-value.model'
+  CACHE_TTL_MS,
+  FantasyCalcDirectProvider,
+} from './value-providers/fantasy-calc.provider'
+import { ValueProvider } from './value-providers/value-provider'
 
 /**
- * FantasyCalc dynasty-superflex values endpoint.
- * Params: dynasty, 2-QB (superflex), 12-team, full PPR.
- * Closest publicly-available proxy for our league's TE-premium scoring.
+ * Builds per-league `ValueBook`s.
  *
- * Swappable constant — changing direct→proxy is a one-line edit here.
- * Port of the `private let endpoint` constant in iOS `PlayerValuesStore.swift`.
+ * Was a singleton holding one global value map, fetched from a FantasyCalc URL
+ * hardcoded to the CLT league's format. Every lookup in the app resolved
+ * against that one league. Now each league resolves to its own format and gets
+ * its own book.
+ *
+ * The provider is swappable: Phase 5 replaces `FantasyCalcDirectProvider` with
+ * a warehouse-backed provider and nothing above this service changes.
  */
-const FANTASYCALC_ENDPOINT =
-  'https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=12&ppr=1'
+interface CacheEntry {
+  book: ValueBook
+  loadedAt: number
+}
 
-/** 12-hour cache TTL in milliseconds. Values move slowly in dynasty. */
-const CACHE_TTL_MS = 12 * 60 * 60 * 1000
-
-/**
- * Fetches and caches dynasty superflex player values from FantasyCalc.
- * Single fetch per session (12h TTL); ~460 entries (~350 players + ~64 picks).
- *
- * Port of iOS `PlayerValuesStore.swift`.
- *
- * Usage:
- *   playerValuesService.values$.subscribe(loaded => { ... })
- *   playerValuesService.value('4984')        // Josh Allen → 10214
- *   playerValuesService.pickValue('2026 1st') // pick by name
- */
 @Injectable({ providedIn: 'root' })
 export class PlayerValuesService {
-  /** Shared, cached stream of parsed player values. Replays to late subscribers. */
-  private values$: Observable<PlayerValue[]> | null = null
-  private lastLoadedAt: number | null = null
+  private provider: ValueProvider
+  private cache = new Map<string, CacheEntry>()
 
-  // In-memory lookup maps populated after first fetch
-  private _valuesById = new Map<string, number>()
-  private _positionsById = new Map<string, string>()
-  private _pickValuesByName = new Map<string, number>()
-  private _pickYearsByName = new Map<string, number>()
-  private _loaded = false
-
-  constructor(private http: HttpClient) {}
+  constructor(
+    private fingerprintService: LeagueSettingsFingerprintService,
+    fantasyCalc: FantasyCalcDirectProvider,
+  ) {
+    this.provider = fantasyCalc
+  }
 
   /**
-   * Lazy-loaded, cached observable of all FantasyCalc entries.
-   * Emits once per session (12h TTL). Subscribe to trigger the
-   * initial fetch; subsequent subscribers get the cached result.
+   * Swap the value source. Phase 5 calls this with the warehouse provider.
+   * Clears the cache, since books from a different source aren't interchangeable.
    */
-  load(forceRefresh = false): Observable<PlayerValue[]> {
-    const now = Date.now()
-    const isStale =
-      !this.lastLoadedAt || now - this.lastLoadedAt > CACHE_TTL_MS
+  useProvider(provider: ValueProvider): void {
+    this.provider = provider
+    this.cache.clear()
+  }
 
-    if (!this.values$ || forceRefresh || isStale) {
-      this.values$ = this.http
-        .get<FantasyCalcPlayerRaw[]>(FANTASYCALC_ENDPOINT)
-        .pipe(
-          map((raw) => raw.map(parsePlayerValue)),
-          tap((entries) => this.hydrateMaps(entries)),
-          shareReplay(1),
-          catchError((err) => {
-            // Reset so next call retries
-            this.values$ = null
-            return throwError(() => err)
-          }),
-        )
+  get providerId(): string {
+    return this.provider.id
+  }
+
+  /**
+   * Book for a league. Cached per format, so every 12-team superflex dynasty
+   * league in a user's account shares one fetch.
+   */
+  bookFor(league: League, forceRefresh = false): Observable<ValueBook> {
+    const format = this.fingerprintService.resolve(league)
+    return this.bookForFormat(format, forceRefresh)
+  }
+
+  /** Book for an already-resolved format. */
+  bookForFormat(format: LeagueFormat, forceRefresh = false): Observable<ValueBook> {
+    const key = this.fingerprintService.key(format.fingerprint)
+    const cached = this.cache.get(key)
+
+    if (!forceRefresh && cached && !this.isStale(cached)) {
+      return of(cached.book)
     }
 
-    return this.values$
+    return this.provider
+      .bookFor(format)
+      .pipe(tap((book) => this.cache.set(key, { book, loadedAt: Date.now() })))
   }
 
-  // ---------------------------------------------------------------------------
-  // Lookup accessors — safe to call after load() has emitted
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Dynasty value for a Sleeper player ID.
-   * Returns 0 if unknown (matches iOS `value(for:)` default).
-   */
-  value(playerId: string): number {
-    return this._valuesById.get(playerId) ?? 0
+  /** Resolve a league's format without fetching values. */
+  formatFor(league: League): LeagueFormat {
+    return this.fingerprintService.resolve(league)
   }
 
-  /**
-   * Position string (QB/RB/WR/TE) for a Sleeper player ID.
-   * Returns null if unknown.
-   */
-  position(playerId: string): string | null {
-    return this._positionsById.get(playerId) ?? null
+  /** True when a fresh book for this format is already cached. */
+  hasBookFor(format: LeagueFormat): boolean {
+    const cached = this.cache.get(this.fingerprintService.key(format.fingerprint))
+    return !!cached && !this.isStale(cached)
   }
 
-  /**
-   * Dynasty value for a pick by display name (e.g. "2026 Pick 1.01").
-   * Returns 0 if unknown (matches iOS `pickValue(for:)` default).
-   */
-  pickValue(name: string): number {
-    return this._pickValuesByName.get(name) ?? 0
+  clearCache(): void {
+    this.cache.clear()
   }
 
-  /**
-   * All pick names currently loaded, sorted by value descending.
-   * Port of iOS `var allPickNames: [String]`.
-   */
-  get allPickNames(): string[] {
-    return [...this._pickValuesByName.entries()]
-      .sort(([, a], [, b]) => b - a)
-      .map(([name]) => name)
-  }
-
-  /**
-   * Pick names filtered to a set of years, sorted by value descending.
-   * Port of iOS `pickNames(forYears:)`.
-   */
-  pickNames(forYears: Set<number>): string[] {
-    return [...this._pickValuesByName.entries()]
-      .filter(([name]) => {
-        const year = this._pickYearsByName.get(name)
-        return year !== undefined && forYears.has(year)
-      })
-      .sort(([, a], [, b]) => b - a)
-      .map(([name]) => name)
-  }
-
-  /** True once the first successful fetch has populated the maps. */
-  get hasValues(): boolean {
-    return this._loaded
-  }
-
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
-
-  private hydrateMaps(entries: PlayerValue[]): void {
-    this._valuesById.clear()
-    this._positionsById.clear()
-    this._pickValuesByName.clear()
-    this._pickYearsByName.clear()
-
-    for (const entry of entries) {
-      if (entry.isPick) {
-        const name = entry.name
-        if (!name || name.trim() === '') continue
-        this._pickValuesByName.set(name, entry.value)
-        const year = parseYearPrefix(name)
-        if (year !== null) {
-          this._pickYearsByName.set(name, year)
-        }
-      } else {
-        const sid = entry.sleeperId
-        if (!sid || sid.trim() === '') continue
-        this._valuesById.set(sid, entry.value)
-        if (entry.position) {
-          this._positionsById.set(sid, entry.position)
-        }
-      }
-    }
-
-    this._loaded = true
-    this.lastLoadedAt = Date.now()
+  private isStale(entry: CacheEntry): boolean {
+    return Date.now() - entry.loadedAt > CACHE_TTL_MS
   }
 }

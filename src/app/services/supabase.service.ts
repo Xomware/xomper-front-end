@@ -197,11 +197,6 @@ export class SupabaseService {
     )
   }
 
-  isUserWhitelisted(): Observable<boolean> {
-    return this.getWhitelistedUser().pipe(
-      map(user => !!user)
-    )
-  }
 
   linkSleeperAccount(sleeperUserId: string, sleeperUsername: string, sleeperAvatar?: string | null): Observable<boolean> {
     const user = this.currentUser.value

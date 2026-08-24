@@ -3,6 +3,7 @@ import { forkJoin, map, Observable, switchMap } from 'rxjs'
 import { Roster } from '../models/roster.interface'
 import { User } from '../models/user.interface'
 import { HexAxis, HEX_AXIS_LABELS, TeamAnalysis, hexAxes } from '../models/team-analysis.model'
+import { ValueBook, ValueCoverage } from '../models/value-book.model'
 import { LeagueService } from './league.service'
 import { PlayerService } from './player.service'
 import { PlayerValuesService } from './player-values.service'
@@ -28,21 +29,23 @@ export class TeamAnalysisService {
   ) {}
 
   /**
-   * Load rosters + users for the home league, then build analyses.
-   * Triggers a FantasyCalc values load if not yet cached.
+   * Load everything needed to analyze an arbitrary league, then build.
+   *
+   * Replaces `buildForHomeLeague()`, which resolved the league id from
+   * `LeagueService.getWhitelistedLeagueId()` and could only ever analyze CLT.
    */
-  buildForHomeLeague(): Observable<TeamAnalysis[]> {
-    const leagueId = this.leagueService.getWhitelistedLeagueId()
-
-    return forkJoin([
-      this.leagueService.findLeagueRosters(leagueId),
-      this.leagueService.findLeagueUsers(leagueId),
-      this.valuesService.load(),
-    ]).pipe(
-      switchMap(([rosters, users, _values]) =>
-        this.playerService
-          .getPlayerMap()
-          .pipe(map((playerMap) => this.build(rosters, users, playerMap))),
+  buildForLeague(leagueId: string): Observable<TeamAnalysis[]> {
+    return this.leagueService.searchLeague(leagueId).pipe(
+      switchMap((league) =>
+        forkJoin([
+          this.leagueService.findLeagueRosters(leagueId),
+          this.leagueService.findLeagueUsers(leagueId),
+          this.valuesService.bookFor(league),
+          this.playerService.getPlayerMap(),
+        ]),
+      ),
+      map(([rosters, users, book, playerMap]) =>
+        this.build(rosters, users, playerMap, book),
       ),
     )
   }
@@ -55,6 +58,7 @@ export class TeamAnalysisService {
     rosters: Roster[],
     users: User[],
     playerMap: Record<string, { position?: string; first_name?: string; last_name?: string }>,
+    book: ValueBook,
   ): TeamAnalysis[] {
     const userById = new Map<string, User>(
       users.filter((u) => !!u.user_id).map((u) => [u.user_id, u]),
@@ -73,9 +77,28 @@ export class TeamAnalysisService {
         bench = 0,
         taxiSum = 0
 
+      const coverage: ValueCoverage = {
+        rostered: allRostered.length,
+        valued: 0,
+        unvaluedIds: [],
+        unvaluedStarterIds: [],
+      }
+
       for (const pid of allRostered) {
-        const value = this.valuesService.value(pid)
-        if (value <= 0) continue
+        const lookup = book.value(pid)
+        const value = lookup.value
+
+        // An unknown player is NOT a worthless player. The old code did
+        // `if (value <= 0) continue`, which silently dropped anyone the source
+        // didn't carry — every K and DEF in a redraft league, for instance —
+        // and produced a confident-looking chart built from a partial roster.
+        // Record them instead, and let the UI say so.
+        if (!lookup.known) {
+          coverage.unvaluedIds.push(pid)
+          if (starters.has(pid)) coverage.unvaluedStarterIds.push(pid)
+        } else {
+          coverage.valued++
+        }
 
         if (taxi.has(pid)) {
           taxiSum += value
@@ -88,7 +111,7 @@ export class TeamAnalysisService {
 
         // Position: player map first, FantasyCalc fallback (mirrors iOS)
         const rawPos =
-          playerMap[pid]?.position ?? this.valuesService.position(pid) ?? '?'
+          playerMap[pid]?.position ?? book.position(pid) ?? '?'
         const pos = rawPos.toUpperCase()
 
         const onBench = !starters.has(pid)
@@ -146,6 +169,7 @@ export class TeamAnalysisService {
         teValue: te,
         benchValue: bench,
         taxiValue: taxiSum,
+        coverage,
       } satisfies TeamAnalysis
     })
   }

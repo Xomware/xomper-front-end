@@ -14,6 +14,7 @@ import {
   TradeVerdict,
 } from '../models/team-analysis.model'
 import { hexAxes } from '../models/team-analysis.model'
+import { ValueBook } from '../models/value-book.model'
 import { PlayerValuesService } from './player-values.service'
 import { TeamAnalysisService } from './team-analysis.service'
 
@@ -40,9 +41,9 @@ export class RecommendedTradeService {
    * Both player and pick values contribute to each side.
    * Port of iOS `TradeEvaluator.evaluate(_:valuesStore:)`.
    */
-  evaluate(trade: ProposedTrade): TradeEvaluation {
-    const aValue = this.sideValue(trade.sideA)
-    const bValue = this.sideValue(trade.sideB)
+  evaluate(trade: ProposedTrade, book: ValueBook): TradeEvaluation {
+    const aValue = this.sideValue(trade.sideA, book)
+    const bValue = this.sideValue(trade.sideB, book)
     const delta = aValue - bValue
     const larger = Math.max(aValue, bValue)
     const gap = larger > 0 ? Math.abs(delta) / larger : 0
@@ -65,16 +66,34 @@ export class RecommendedTradeService {
    * Total dynasty value of one trade side (players + picks).
    * Port of iOS `TradeEvaluator.sideValue(_:valuesStore:)`.
    */
-  sideValue(side: TradeSide): number {
+  sideValue(side: TradeSide, book: ValueBook): number {
     const players = side.playerIds.reduce(
-      (sum, pid) => sum + this.valuesService.value(pid),
+      (sum, pid) => sum + book.value(pid).value,
       0,
     )
     const picks = side.pickNames.reduce(
-      (sum, name) => sum + this.valuesService.pickValue(name),
+      (sum, name) => sum + book.pickValue(name).value,
       0,
     )
     return players + picks
+  }
+
+  /**
+   * Players and picks in this trade that the value source doesn't cover.
+   *
+   * A trade containing an unvalued asset cannot be graded — the missing side
+   * is scored as 0, which reads as "they gave up nothing". Callers must
+   * surface this rather than showing a verdict.
+   */
+  unvaluedAssets(trade: ProposedTrade, book: ValueBook): string[] {
+    const sides = [trade.sideA, trade.sideB]
+    const players = sides.flatMap((side) =>
+      side.playerIds.filter((pid) => !book.value(pid).known),
+    )
+    const picks = sides.flatMap((side) =>
+      side.pickNames.filter((name) => !book.pickValue(name).known),
+    )
+    return [...players, ...picks]
   }
 
   /**
@@ -88,6 +107,7 @@ export class RecommendedTradeService {
     evaluation: TradeEvaluation,
     rosters: Roster[],
     playerMap: Record<string, { first_name?: string; last_name?: string; position?: string }>,
+    book: ValueBook,
     limit = 5,
   ): SuggestedAddOn[] {
     if (isVerdictFair(evaluation.verdict) || isTradeEmpty(trade)) return []
@@ -123,13 +143,17 @@ export class RecommendedTradeService {
 
     const candidates: SuggestedAddOn[] = (roster.players ?? []).flatMap((pid) => {
       if (alreadyInTrade.has(pid)) return []
-      const value = this.valuesService.value(pid)
-      if (value <= 0) return []
+      const lookup = book.value(pid)
+      // Unknown players are excluded from SUGGESTIONS (we can't price them, so
+      // we can't responsibly propose them) but callers get them back via
+      // `unvaluedAssets` rather than having them vanish silently.
+      if (!lookup.known || lookup.value <= 0) return []
+      const value = lookup.value
       const player = playerMap[pid]
       const name = player
         ? `${player.first_name ?? ''} ${player.last_name ?? ''}`.trim()
         : `Player #${pid}`
-      const position = player?.position ?? this.valuesService.position(pid) ?? '?'
+      const position = player?.position ?? book.position(pid) ?? '?'
       return [
         {
           playerId: pid,
@@ -174,6 +198,7 @@ export class RecommendedTradeService {
     analyses: TeamAnalysis[],
     rosters: Roster[],
     playerMap: Record<string, { first_name?: string; last_name?: string; position?: string }>,
+    book: ValueBook,
     limit = 5,
   ): RecommendedTrade[] {
     const leagueAverages = this.teamAnalysisService.leagueAverageAxes(analyses)
@@ -217,13 +242,13 @@ export class RecommendedTradeService {
         const avg = avgByPos.get(weak) ?? 1
         if (avg <= 0 || partnerStrength / avg < 1.05) continue
 
-        const theirPlayer = this.topPlayer(weak, partnerRoster, playerMap)
+        const theirPlayer = this.topPlayer(weak, partnerRoster, playerMap, book)
         if (!theirPlayer) continue
 
         for (const strong of strongPositions) {
           if (!myRoster) continue
 
-          const myCandidates = this.playersAtPosition(strong, myRoster, playerMap)
+          const myCandidates = this.playersAtPosition(strong, myRoster, playerMap, book)
             .sort((a, b) => b.value - a.value)
 
           const mine = myCandidates.find((candidate) => {
@@ -274,8 +299,9 @@ export class RecommendedTradeService {
     position: string,
     roster: Roster,
     playerMap: Record<string, { first_name?: string; last_name?: string; position?: string }>,
+    book: ValueBook,
   ): PlayerSummary | null {
-    const players = this.playersAtPosition(position, roster, playerMap)
+    const players = this.playersAtPosition(position, roster, playerMap, book)
     if (players.length === 0) return null
     return players.reduce((best, p) => (p.value > best.value ? p : best))
   }
@@ -284,12 +310,14 @@ export class RecommendedTradeService {
     position: string,
     roster: Roster,
     playerMap: Record<string, { first_name?: string; last_name?: string; position?: string }>,
+    book: ValueBook,
   ): PlayerSummary[] {
     return (roster.players ?? []).flatMap((pid) => {
-      const value = this.valuesService.value(pid)
-      if (value <= 0) return []
+      const lookup = book.value(pid)
+      if (!lookup.known || lookup.value <= 0) return []
+      const value = lookup.value
       const player = playerMap[pid]
-      const pos = player?.position ?? this.valuesService.position(pid) ?? '?'
+      const pos = player?.position ?? book.position(pid) ?? '?'
       if (pos.toUpperCase() !== position.toUpperCase()) return []
       const name = player
         ? `${player.first_name ?? ''} ${player.last_name ?? ''}`.trim()

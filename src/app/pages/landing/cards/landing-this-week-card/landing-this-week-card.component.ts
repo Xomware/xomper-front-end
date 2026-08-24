@@ -54,7 +54,8 @@ export class LandingThisWeekCardComponent implements OnInit {
 
     if (!this.isRegularSeason) return
 
-    const leagueId = this.leagueService.getWhitelistedLeagueId()
+    const leagueId = this.leagueService.getActiveLeagueId()
+    if (!leagueId) return
     const week = this.nflState?.week ?? 1
 
     this.isLoading = true
