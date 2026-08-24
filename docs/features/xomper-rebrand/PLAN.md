@@ -327,6 +327,80 @@ workflow and should be ported before 1.7 makes it dual-target.**
 so `getActiveLeagueId()` has a fallback. It disappears in Phase 4 with the
 follow table. It is no longer a whitelist.
 
+#### Phase 2b execution log — projections engine, 2026-08-24
+
+Commit `497290e`. Implements the 0.8 finding, which the phased plan recorded
+but never scheduled. Sits behind the Phase 2.3 `ValueProvider` seam.
+
+| Piece | Notes |
+|---|---|
+| `projections.model.ts` | `projectedPoints()` dot product. K/DEF use Sleeper's precomputed `pts_*` — FG-distance buckets and points-allowed tiers aren't in the payload, so computing from partial keys would be worse than the precomputed number. Unmatched scoring rules are reported to the UI. |
+| `vor.model.ts` | Replacement level from the league's own starting slots. Flex assignment is **simulated** against real projected points rather than assuming a fixed RB/WR/TE split. |
+| `projections.service.ts` | Season projections. Note the host: `api.sleeper.com`, not `api.sleeper.app/v1`. |
+| `ProjectionsValueProvider` | Computes the book. |
+| `CompositeValueProvider` | Redraft → projections; dynasty → FantasyCalc. |
+
+**Routing rationale.** Neither source wins everywhere. Projections cover K,
+DEF and exact custom scoring but express only THIS season's production — a
+32-year-old and a rookie projected identically are not the same dynasty
+asset, and projections carry no pick values at all. FantasyCalc expresses
+long-term worth but has no K/DEF and only ~193 redraft players.
+
+**Spike re-verified live, 2026-08-24** (0.8 was taken on trust; these are
+first-hand):
+
+- 2026 projections: **3,302 entries** — K 153, DEF 32, plus FB/P/CB.
+- CLT scoring keys: **24 of 45 matched** projection stat keys. The 21 misses
+  are sub-40 FG buckets and DEF/ST detail, exactly as 0.8 predicted.
+
+**Validated against the real 2026 CLT league** (`1317249551823814656`):
+
+```
+starters   QB 24  RB 25  WR 40  TE 19      (superflex + 2 FLEX, 12 teams)
+top 5      Gibbs, Bijan, Nacua, Chase, Josh Allen
+TE premium Bowers 8377, McBride 7034
+```
+
+Superflex correctly doubles QB starters and lifts Allen into the top 5; TE
+premium lifts the top tight ends. Against a synthetic 10-team half-PPR
+redraft with K and DEF slots, QBs correctly drop out of the top 6 and
+kickers/defenses carry real value (Aubrey 801, LAR DEF 1310) — the case
+FantasyCalc cannot serve at all.
+
+**Consequence for Phase 3.** The decision gate gets easier: the believability
+question for redraft is now about the projections engine, not about whether
+a borrowed dynasty curve can be stretched to cover redraft. It should still
+be run.
+
+**Consequence for Phase 5.** The warehouse no longer needs to store a value
+grid for every format. It stores *projections* (one set per season) and
+*dynasty curves* (the small `isDynasty × numQbs` grid), and computes league
+values on read. That is a smaller table and a smaller cron than 5.2 assumes.
+
+##### Repo gotcha found
+
+`tsconfig.app.json` uses `"files": ["src/main.ts"]`, so **any file not
+transitively imported from `main.ts` is never typechecked**. Two real type
+errors in `projections.provider.ts` passed `tsc -p tsconfig.app.json` cleanly
+until the file was wired up. Check new files directly, or wire them before
+trusting a green typecheck.
+
+##### Live bug fixed
+
+`environment.myLeagueId` was `1181789700187090944` — the **2025** league,
+status `complete`. Sleeper mints a new league id each season; the 2026 league
+is `1317249551823814656` and is already `in_season`. Fixed in all three env
+files here. **`clt-dynasty-league` has the same stale id and is the copy real
+users hit.**
+
+##### Draft-season risk re-assessed
+
+The 2026 CLT league is already `in_season` — it has drafted. Of the owner's
+2026 leagues, only *CLIT Fantasy Football* (`1389328793713250304`) is
+`pre_draft`. The 1.6–1.10 hold was protecting CLT against a draft that has
+already happened; confirm which league actually matters before holding
+further.
+
 ### Phase 3 — Decision gate (explicit stop)
 
 - [ ] **3.1** Run the analyzer against at least 6 real non-CLT leagues: 10-team half-PPR redraft, 12-team full-PPR redraft, 12-team 1QB dynasty, superflex dynasty, a 14-team, and a deep-bench league.
