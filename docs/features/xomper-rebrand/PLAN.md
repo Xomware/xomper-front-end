@@ -275,18 +275,57 @@ This means a credential or SSM-permission problem produces a **silently broken d
 
 All in `xomper-front-end`, deploying only to `beta.`. Cannot reach CLT users.
 
-- [ ] **2.1** Add `src/app/models/value-book.model.ts`: `ValueBook` (immutable, fingerprint-scoped), `ValueLookup = { value: number; known: boolean }`, `ValueCoverage = { rostered, valued, unvaluedIds, unvaluedStarterIds }`.
-- [ ] **2.2** Add `league-settings-fingerprint.service.ts`. From `LeagueModel`: `settings.type` → `isDynasty`; count `SUPER_FLEX`/`QB` in `roster_positions` → `numQbs`; `total_rosters` → `numTeams`; `scoring_settings.rec` → `ppr`. Clamp to the ranges 0.2 confirmed and **record the clamp** so the UI can report nearest-supported-format. Emit `unsupportedReasons[]` for IDP (`DL`/`LB`/`DB`/`IDP_FLEX` in `roster_positions`) and best-ball (`settings.best_ball === 1`). Flag keeper (`settings.type === 1`) as an approximation, not an error.
-- [ ] **2.3** Refactor `PlayerValuesService` into a **swappable-provider** `ValueBook` factory: `bookFor(league): Observable<ValueBook>`, behind a `ValueProvider` interface with a `FantasyCalcDirectProvider` implementation. Per-fingerprint in-memory `Map` + `sessionStorage`, existing 12h TTL (`:31`). `value()` returns `ValueLookup`, never a bare `0`. Keep `pickValue`/`allPickNames`/`pickNames` semantics, now per-book. **The provider seam is what makes Phase 5 a swap instead of a refactor.**
-- [ ] **2.4 Fix the silent-zero bug (must-fix #2).** `team-analysis.service.ts:78` — stop `continue`-ing on unknown; bucket at value 0 and record in `ValueCoverage`. `recommended-trade.service.ts:127` and `:290` — exclude unknowns from suggestion candidates but surface them as warnings rather than dropping them silently.
-- [ ] **2.5** Thread `ValueBook` as a parameter into `TeamAnalysisService.build()` and every `RecommendedTradeService` method. Delete `buildForHomeLeague()` (`:34-48`).
-- [ ] **2.6 Regression gate.** Update the three existing specs. Assert the CLT league's fingerprint resolves to exactly `isDynasty=true&numQbs=2&numTeams=12&ppr=1` — the currently hardcoded endpoint (`:27-28`) — and that `build()` output for CLT rosters is **identical pre- and post-refactor**. If CLT's numbers move, the refactor is wrong.
-- [ ] **2.7** Surface coverage in the UI: "valued 21 of 26 rostered", a distinct warning when an **unvalued player is a starter**, and a nearest-supported-format note when the fingerprint was clamped. **Never render a hexagon without a coverage indicator.**
-- [ ] **2.8** Hard gate: IDP and best-ball leagues render an explicit unsupported state instead of a plausible-looking wrong chart. Keeper renders with an approximation label.
-- [ ] **2.9** Decouple from CLT: remove `getWhitelistedLeagueId()` at all five call sites (`team-analysis.service.ts:35`, `team-analyzer.component.ts:118`, `login.component.ts:119`, `landing-this-week-card:57`, `landing-draft-countdown-card:36`), then delete it and `leagueMap` from `LeagueService`.
-- [ ] **2.10** Wire Search (`search.component.ts`, `league` mode) → `selected-league` / `selected-team` → team-analyzer for an arbitrary pasted league ID.
+- [x] **2.1** Add `src/app/models/value-book.model.ts`: `ValueBook` (immutable, fingerprint-scoped), `ValueLookup = { value: number; known: boolean }`, `ValueCoverage = { rostered, valued, unvaluedIds, unvaluedStarterIds }`.
+- [x] **2.2** Add `league-settings-fingerprint.service.ts`. From `LeagueModel`: `settings.type` → `isDynasty`; count `SUPER_FLEX`/`QB` in `roster_positions` → `numQbs`; `total_rosters` → `numTeams`; `scoring_settings.rec` → `ppr`. Clamp to the ranges 0.2 confirmed and **record the clamp** so the UI can report nearest-supported-format. Emit `unsupportedReasons[]` for IDP (`DL`/`LB`/`DB`/`IDP_FLEX` in `roster_positions`) and best-ball (`settings.best_ball === 1`). Flag keeper (`settings.type === 1`) as an approximation, not an error.
+- [x] **2.3** Refactor `PlayerValuesService` into a **swappable-provider** `ValueBook` factory: `bookFor(league): Observable<ValueBook>`, behind a `ValueProvider` interface with a `FantasyCalcDirectProvider` implementation. Per-fingerprint in-memory `Map` + `sessionStorage`, existing 12h TTL (`:31`). `value()` returns `ValueLookup`, never a bare `0`. Keep `pickValue`/`allPickNames`/`pickNames` semantics, now per-book. **The provider seam is what makes Phase 5 a swap instead of a refactor.**
+- [x] **2.4 Fix the silent-zero bug (must-fix #2).** `team-analysis.service.ts:78` — stop `continue`-ing on unknown; bucket at value 0 and record in `ValueCoverage`. `recommended-trade.service.ts:127` and `:290` — exclude unknowns from suggestion candidates but surface them as warnings rather than dropping them silently.
+- [x] **2.5** Thread `ValueBook` as a parameter into `TeamAnalysisService.build()` and every `RecommendedTradeService` method. Delete `buildForHomeLeague()` (`:34-48`).
+- [x] **2.6 Regression gate.** Update the three existing specs. Assert the CLT league's fingerprint resolves to exactly `isDynasty=true&numQbs=2&numTeams=12&ppr=1` — the currently hardcoded endpoint (`:27-28`) — and that `build()` output for CLT rosters is **identical pre- and post-refactor**. If CLT's numbers move, the refactor is wrong.
+- [x] **2.7** Surface coverage in the UI: "valued 21 of 26 rostered", a distinct warning when an **unvalued player is a starter**, and a nearest-supported-format note when the fingerprint was clamped. **Never render a hexagon without a coverage indicator.**
+- [x] **2.8** Hard gate: IDP and best-ball leagues render an explicit unsupported state instead of a plausible-looking wrong chart. Keeper renders with an approximation label.
+- [x] **2.9** Decouple from CLT: remove `getWhitelistedLeagueId()` at all five call sites (`team-analysis.service.ts:35`, `team-analyzer.component.ts:118`, `login.component.ts:119`, `landing-this-week-card:57`, `landing-draft-countdown-card:36`), then delete it and `leagueMap` from `LeagueService`.
+- [x] **2.10** Wire Search (`search.component.ts`, `league` mode) → `selected-league` / `selected-team` → team-analyzer for an arbitrary pasted league ID.
 - [ ] **2.11** Delete the CLT-only surfaces and their services from the platform: `rules.service.ts`, `taxi-squad.service.ts`, `league-history.service.ts`, `league/rules/*`, `world-cup/`, `payouts/`, `taxi-squad/`, `matchup-history/`, and their routes. They're live in `clt-dynasty-league`; without their Supabase tables they can't function here anyway.
-- [ ] **2.12** Delete the now-dead `SupabaseService.isUserWhitelisted()` (`:200`, **zero call sites** — the access gate is already gone; the brainstorm's "one-line change in `auth.guard.ts`" is stale). Leave `isAdmin`/`isAdmin$` alone until Phase 4.
+- [x] **2.12** Delete the now-dead `SupabaseService.isUserWhitelisted()` (`:200`, **zero call sites** — the access gate is already gone; the brainstorm's "one-line change in `auth.guard.ts`" is stale). Leave `isAdmin`/`isAdmin$` alone until Phase 4.
+
+#### Phase 2 execution log — 2026-08-24
+
+Branch `feat/value-book-multi-league`, commit `6dde0c6`. Not merged: master
+auto-deploys, and step 1.9 has not landed yet.
+
+| Step | Status | Notes |
+|---|---|---|
+| 2.1–2.3 | done | `value-book.model.ts`, `league-settings-fingerprint.service.ts`, `ValueProvider` + `FantasyCalcDirectProvider`. `PlayerValuesService` is now a per-format book factory. |
+| 2.4 | done | Silent-zero fixed in `team-analysis.service.ts` and `recommended-trade.service.ts`. New `unvaluedAssets()` reports unpriceable trade assets rather than grading around them. |
+| 2.5 | done | `ValueBook` threaded through `build()` and all `RecommendedTradeService` methods. `buildForHomeLeague()` → `buildForLeague(leagueId)`. |
+| 2.6 | done | 110 specs pass. Regression gates: CLT resolves to exactly `isDynasty=true, numQbs=2, numTeams=12, ppr=1`, and `build()` sums are unchanged for a fully covered roster. |
+| 2.7 | done | Coverage bar, unvalued-starter warning, nearest-format notes. |
+| 2.8 | done | IDP and best-ball render an explicit refusal instead of a chart. Keeper renders labelled. |
+| 2.9 | done | All five `getWhitelistedLeagueId()` call sites removed; `getActiveLeagueId()`/`loadActiveLeague()` replace them. `leagueMap`, `getLeagueMap`, `getLeagueConfig`, `getAllowedLeague*` deleted — all had zero call sites. |
+| 2.10 | done | `team-analyzer/:leagueId` route; "Analyze teams" link in the league header. Search already routed arbitrary pasted ids to `selected-league`. |
+| 2.11 | **HELD** | See below. |
+| 2.12 | done | `isUserWhitelisted()` deleted. |
+
+**2.11 deliberately held.** It deletes the CLT-only surfaces (`rules`,
+`taxi-squad`, `league-history`, `world-cup`, `payouts`, `matchup-history`)
+from the platform. `clt-dynasty-league` has the code but **cannot deploy** —
+the new repo has no `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, so both of
+its workflow runs failed. Deleting these before CLT is verifiably live
+somewhere would leave them with no working home. Unblock 1.5, verify 1.8,
+then delete.
+
+**Unplanned fix — `deploy-frontend.yml` silent credential failure.** The SSM
+step reported success with no AWS credentials: an empty command substitution
+still echoes and exits 0, so a credential or permission problem produced a
+built-and-deployed app with blank `apiAuthToken`, `apiId`, `supabaseUrl` and
+`supabaseAnonKey` instead of a failed build. Now uses `set -euo pipefail` with
+an explicit emptiness check per parameter, plus a post-injection check that no
+`'---'` placeholder survives. **The same bug exists in `clt-dynasty-league`'s
+workflow and should be ported before 1.7 makes it dual-target.**
+
+**Note on `environment.myLeagueId`.** Kept as a transitional *default* league
+so `getActiveLeagueId()` has a fallback. It disappears in Phase 4 with the
+follow table. It is no longer a whitelist.
 
 ### Phase 3 — Decision gate (explicit stop)
 
