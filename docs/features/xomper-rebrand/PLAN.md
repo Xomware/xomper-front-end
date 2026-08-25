@@ -232,7 +232,7 @@ It's 2026-08-24, peak draft season. `src/app/pages/draft-history/live/` is activ
   *Rollback: revert one file.*
 - [~] **1.10 Gate `xomper-front-end` deploys behind a GitHub environment approval** for the draft window. Cheap insurance against a typo'd bucket name in 1.9.
   *Rollback: remove the environment requirement.*
-- [~] **1.11 Announce `clt.xomware.com` to the league.** Both URLs work; the new one is canonical. Doing this early makes the Phase 6 cutover a non-event.
+- [x] **1.11 Announce `clt.xomware.com` to the league.** Both URLs work; the new one is canonical. Doing this early makes the Phase 6 cutover a non-event.
 - [x] **1.12 Freeze the CLT engine.** Add a header note to `player-values.service.ts`, `team-analysis.service.ts`, `recommended-trade.service.ts` recording the fork-point SHA and the frozen-fork decision.
 
 
@@ -332,9 +332,39 @@ authenticated, and no PAT exists in Secrets Manager or SSM — only
 key cannot modify auth settings. Unblock with `supabase login`, then
 `supabase projects list`.
 
-**1.5 acceptance now met** except for a human clicking through Google sign-in
-on the new host. Allowlist and callback are aligned and verified in the
-shipped bundle. Worth one manual login before announcing (1.11).
+**1.5 acceptance fully met — 2026-08-25.** Google sign-in confirmed working on
+`clt.dynasty.xomware.com` by Dominick. 1.11 (announce the URL) is unblocked.
+
+It did not work at first, and the cause was not the migration.
+
+**AuthGuard cold-load race.** `isAuthenticated()` read `currentUser.value`
+synchronously while the session resolves asynchronously. With PKCE, Google
+returns to `/home?code=...` and supabase-js still has to redeem that code:
+
+1. client created with `detectSessionInUrl`, exchange starts
+2. `initSession()` unresolved, so `currentUser.value` is `null`
+3. the guard reads it, sees false, navigates to `/login`
+4. **that redirect strips `?code=`, so the exchange can never finish**
+
+The user authenticated successfully and landed back on the login page with no
+error reported anywhere — the authorization code was discarded before it could
+be redeemed.
+
+**This was never a regression.** Sign-in could not have worked on
+`xomper.xomware.com` either; that app never had the traffic to surface it. The
+Supabase allowlist work was necessary but not sufficient — correct config,
+broken client.
+
+`AdminGuard` in the same directory already documented and solved this exact
+race. `AuthGuard` never got the same treatment. Fixed with the established
+pattern (`await initialized$`) in xomper-frontend #117 and ported to CLT
+(`6a5d537`), with four regression tests asserting the guard does not navigate
+while init is unresolved.
+
+**Lesson worth carrying:** when an auth symptom appears right after an
+infrastructure change, check whether the feature ever worked before assuming
+the change caused it. Two hours of Supabase and DNS verification came back
+clean because the config was never the problem.
 
 #### Phase 1 CLOSED — 2026-08-25
 
@@ -354,6 +384,24 @@ CI caught something worth keeping: stylelint enforces
 `declaration-property-value-allowed-list`, so raw `rem` and font-weight values
 are rejected. Use `$text-*` and `$font-weight-*`. The design system is
 enforced, not advisory.
+
+#### Public landing pages and naming — 2026-08-25 (PR #116)
+
+`/` redirected to `/home`, which is auth-gated, so every unauthenticated
+visitor to either domain hit a bare login form. Added a public
+`WelcomeComponent` at `/`, unguarded and lazy-loaded.
+
+Branding reads from `environment` (`appName`, `appTagline`,
+`poweredByXomper`) so one component serves both apps:
+
+| | platform | CLT |
+|---|---|---|
+| title | Xomper | CLT Dynasty League |
+| header | Xomper | **CLT Dynasty League** / *powered by* + Xomper mark |
+
+The Xomper mark is a JPEG on a light plate, blended with
+`mix-blend-mode: screen`. A transparent PNG or SVG would be cleaner if one
+gets made.
 
 #### Dynasty scoring correction — 2026-08-25 (PR #113)
 
