@@ -6,6 +6,17 @@
         <span class="pill__dot" aria-hidden="true"></span>{{ eyebrow }}
       </p>
 
+      <!-- Platform: the mark leads. The league app leads with the league's
+           own name and carries the Xomper mark under it as "powered by". -->
+      <img
+        *ngIf="!showPoweredBy"
+        class="hero__mark"
+        src="assets/img/xomper-logo.png"
+        [alt]="appName"
+        width="215"
+        height="256"
+      />
+
       <h1 class="hero__title">
         <span class="hero__title-accent">{{ titleLead }}</span>
         <span class="hero__title-rest" *ngIf="titleRest">{{ titleRest }}</span>
@@ -65,6 +76,115 @@
       <span class="stat__label">{{ stat.label }}</span>
       <span class="stat__note">{{ stat.note }}</span>
     </div>
+  </section>
+
+
+  <!-- Showcase: what the app actually draws. Everything here is the real
+       artwork and the real chart geometry, not a mockup of one. -->
+  <section class="showcase" aria-label="What the app looks like">
+
+    <article class="panel panel--wide">
+      <header class="panel__head">
+        <h2 class="panel__title">Team strength, overlaid</h2>
+        <p class="panel__sub">Your roster against a trade partner, with the league average behind both.</p>
+      </header>
+      <div class="panel__body panel__body--split">
+        <app-octagon-chart
+          [axes]="radarAxes"
+          [series]="radarSeries"
+          ariaLabel="Eight-axis team strength comparison"
+        />
+        <ul class="legend">
+          <li *ngFor="let s of radarSeries" class="legend__item">
+            <i class="legend__key" [style.background]="s.dashed ? 'transparent' : s.colour"
+               [style.border]="s.dashed ? '1px dashed ' + s.colour : 'none'"></i>
+            {{ s.label }}
+          </li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="panel">
+      <header class="panel__head">
+        <h2 class="panel__title">Trade evaluation</h2>
+        <p class="panel__sub">Both sides priced in your format, picks included.</p>
+      </header>
+      <div class="panel__body">
+        <div class="trade">
+          <div class="trade__side">
+            <span class="trade__label">You give</span>
+            <div class="asset" *ngFor="let a of tradeGive">
+              <img class="asset__face" *ngIf="a.playerId" [src]="headshot(a.playerId)" [alt]="a.name" loading="lazy" />
+              <span class="asset__pick" *ngIf="!a.playerId" aria-hidden="true">1st</span>
+              <span class="asset__text">
+                <span class="asset__name">{{ a.name }}</span>
+                <span class="asset__meta">{{ a.meta }}</span>
+              </span>
+              <span class="asset__value">{{ a.value }}</span>
+            </div>
+          </div>
+
+          <div class="trade__side">
+            <span class="trade__label">You get</span>
+            <div class="asset" *ngFor="let a of tradeGet">
+              <img class="asset__face" *ngIf="a.playerId" [src]="headshot(a.playerId)" [alt]="a.name" loading="lazy" />
+              <span class="asset__pick" *ngIf="!a.playerId" aria-hidden="true">1st</span>
+              <span class="asset__text">
+                <span class="asset__name">{{ a.name }}</span>
+                <span class="asset__meta">{{ a.meta }}</span>
+              </span>
+              <span class="asset__value">{{ a.value }}</span>
+            </div>
+          </div>
+        </div>
+        <p class="verdict"><span class="verdict__pill">FAIR</span> 9,691 against 9,700 — a 0.1% gap</p>
+      </div>
+    </article>
+
+    <article class="panel">
+      <header class="panel__head">
+        <h2 class="panel__title">Live draft</h2>
+        <p class="panel__sub">Picks as they land, with whoever actually owns them.</p>
+      </header>
+      <div class="panel__body">
+        <ul class="board">
+          <li class="board__row" *ngFor="let pick of draftPicks">
+            <span class="board__round">{{ pick.round }}</span>
+            <img class="board__team" [src]="teamLogo(pick.team)" [alt]="pick.team" loading="lazy" />
+            <img class="board__face" [src]="headshot(pick.playerId)" [alt]="pick.name" loading="lazy" />
+            <span class="board__name">{{ pick.name }}</span>
+            <span class="board__pos">{{ pick.position }}</span>
+          </li>
+          <li class="board__row board__row--onclock">
+            <span class="board__round">1.05</span>
+            <span class="board__onclock">On the clock — 1:42</span>
+          </li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="panel">
+      <header class="panel__head">
+        <h2 class="panel__title">Player trend</h2>
+        <p class="panel__sub">Value is a direction, not a number.</p>
+      </header>
+      <div class="panel__body">
+        <div class="trend-head">
+          <img class="trend-head__face" [src]="headshot(trendPlayer.playerId)" [alt]="trendPlayer.name" loading="lazy" />
+          <span class="trend-head__text">
+            <span class="trend-head__name">{{ trendPlayer.name }}</span>
+            <span class="trend-head__meta">{{ trendPlayer.meta }}</span>
+          </span>
+          <span class="trend-head__delta">+28%</span>
+        </div>
+        <app-trend-chart
+          [points]="trendPoints"
+          gradientId="trendNacua"
+          ariaLabel="Value trend over six weeks"
+        />
+      </div>
+    </article>
+
   </section>
 
   <section class="features" aria-label="What it does">

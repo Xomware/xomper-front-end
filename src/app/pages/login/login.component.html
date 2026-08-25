@@ -9,8 +9,8 @@
   <div class="login-content" *ngIf="!loading && !checkingAuth">
     <!-- Logo -->
     <div class="brand-section">
-      <img src="assets/img/xomper-banner.jpg" alt="XOMPER" class="brand-logo" />
-      <p class="tagline">Sleeper League Analyzer</p>
+      <img src="assets/img/xomper-banner.png" [alt]="appName" class="brand-logo" />
+      <p class="tagline">{{ tagline }}</p>
     </div>
 
     <!-- Auth Card -->

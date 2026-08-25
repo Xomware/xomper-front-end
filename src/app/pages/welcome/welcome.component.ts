@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core'
 import { NgFor, NgIf } from '@angular/common'
 import { Router, RouterLink } from '@angular/router'
+import { OctagonChartComponent, RadarSeries } from './showcase/octagon-chart.component'
+import { TrendChartComponent, TrendPoint } from './showcase/trend-chart.component'
 import { environment } from '../../../environments/environment'
 import { SupabaseService } from '../../services/supabase.service'
 
@@ -14,6 +16,22 @@ interface Feature {
   title: string
   copy: string
   points: string[]
+}
+
+interface TradeAsset {
+  /** Sleeper player id, or null for a draft pick. */
+  playerId: string | null
+  name: string
+  meta: string
+  value: string
+}
+
+interface DraftPick {
+  round: string
+  team: string
+  playerId: string
+  name: string
+  position: string
 }
 
 interface SampleRow {
@@ -43,7 +61,7 @@ interface SampleRow {
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink],
+  imports: [NgIf, NgFor, RouterLink, OctagonChartComponent, TrendChartComponent],
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.scss'],
 })
@@ -77,6 +95,53 @@ export class WelcomeComponent implements OnInit {
     { position: 'WR', mine: 78, league: 70, value: '15,600' },
     { position: 'TE', mine: 71, league: 44, value: '14,200' },
   ]
+
+  // --- showcase -------------------------------------------------------------
+  // Real Sleeper player ids, so the headshots and team marks are the actual
+  // artwork the app uses rather than placeholder silhouettes.
+
+  readonly radarAxes = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'BENCH', 'TAXI', 'PICKS']
+
+  readonly radarSeries: RadarSeries[] = [
+    { label: 'Your team', values: [92, 48, 78, 71, 64, 55, 40, 62], colour: '#00ffab' },
+    { label: 'Trade partner', values: [51, 88, 60, 35, 58, 71, 66, 45], colour: '#00b4d8' },
+    { label: 'League average', values: [61, 66, 70, 44, 60, 62, 52, 55], colour: '#8fada0', dashed: true },
+  ]
+
+  readonly tradeGive: TradeAsset[] = [
+    { playerId: '7564', name: 'Ja’Marr Chase', meta: 'WR · CIN', value: '9,691' },
+  ]
+
+  readonly tradeGet: TradeAsset[] = [
+    { playerId: '9221', name: 'Jahmyr Gibbs', meta: 'RB · DET', value: '6,800' },
+    { playerId: null, name: '2027 1st', meta: 'Draft pick', value: '2,900' },
+  ]
+
+  readonly draftPicks: DraftPick[] = [
+    { round: '1.01', team: 'BUF', playerId: '4984',  name: 'Josh Allen',     position: 'QB' },
+    { round: '1.02', team: 'DET', playerId: '9221',  name: 'Jahmyr Gibbs',   position: 'RB' },
+    { round: '1.03', team: 'CIN', playerId: '7564',  name: 'Ja’Marr Chase',  position: 'WR' },
+    { round: '1.04', team: 'ATL', playerId: '9509',  name: 'Bijan Robinson', position: 'RB' },
+  ]
+
+  readonly trendPlayer = { playerId: '9493', name: 'Puka Nacua', meta: 'WR · LAR' }
+
+  readonly trendPoints: TrendPoint[] = [
+    { label: 'Wk 1', value: 6100 },
+    { label: 'Wk 2', value: 6320 },
+    { label: 'Wk 3', value: 6180 },
+    { label: 'Wk 4', value: 6900 },
+    { label: 'Wk 5', value: 7450 },
+    { label: 'Wk 6', value: 7810 },
+  ]
+
+  headshot(playerId: string): string {
+    return `https://sleepercdn.com/content/nfl/players/thumb/${playerId}.jpg`
+  }
+
+  teamLogo(team: string): string {
+    return `https://sleepercdn.com/images/team_logos/nfl/${team.toLowerCase()}.png`
+  }
 
   readonly stats: Stat[] = [
     {

@@ -103,3 +103,21 @@ app-footer {
   flex-shrink: 0;
   width: 100%;
 }
+
+
+// --- public landing ----------------------------------------------------------
+// The app is a fixed-chrome dashboard: a pinned footer and a scrolling content
+// pane. A long marketing page wants the opposite — one document scroll, with
+// the footer arriving at the end rather than sitting over the content.
+.app-container--landing {
+  .content {
+    overflow-y: visible;
+    padding: 0;
+    padding-bottom: 0;
+  }
+
+  app-footer .footer,
+  ::ng-deep app-footer .footer {
+    position: static;
+  }
+}
