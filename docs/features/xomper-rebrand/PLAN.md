@@ -225,14 +225,14 @@ It's 2026-08-24, peak draft season. `src/app/pages/draft-history/live/` is activ
 - [x] **1.5 Point CLT's workflow at the NEW bucket only.** Deploy. Verify: Google/email login from the new host, landing cards, `/league/standings`, `/league/rulebook`, `/team`, `/taxi-squad`, `/matchup-history`, `/draft-history/:year/live` polling, `/team-analyzer` hexagon, admin panel.
   *Rollback: none needed — the old pipeline still owns `xomper.xomware.com` and is unaffected.*
 - [x] **1.6 Snapshot `s3://xomper.xomware.com`** to a dated backup prefix. This is the rollback artifact for every step that follows.
-- [ ] **1.7 Make CLT's workflow dual-target.** Sync to `s3://clt.xomware.com` **and** `s3://xomper.xomware.com`; invalidate both distributions. Sync failures must fail the job — no `|| true`. CLT now owns the legacy domain.
+- [~] **1.7 Make CLT's workflow dual-target.** Sync to `s3://clt.xomware.com` **and** `s3://xomper.xomware.com`; invalidate both distributions. Sync failures must fail the job — no `|| true`. CLT now owns the legacy domain.
   *Rollback: revert the workflow to single-target; restore the 1.6 snapshot if the legacy bucket was corrupted.*
-- [ ] **1.8 Verify dual-target end-to-end.** Push a trivially visible change (version string in the footer) from `clt-dynasty-league`. Confirm it lands on **both** hosts. **Hard gate — do not proceed until this passes.**
-- [ ] **1.9 Repoint `xomper-front-end`'s `deploy-frontend.yml`** to `s3://beta.xomper.xomware.com` and SSM `/xomper-platform/api/*`. After this, no push to `xomper-front-end` master can reach the live CLT domain.
+- [~] **1.8 Verify dual-target end-to-end.** Push a trivially visible change (version string in the footer) from `clt-dynasty-league`. Confirm it lands on **both** hosts. **Hard gate — do not proceed until this passes.**
+- [~] **1.9 Repoint `xomper-front-end`'s `deploy-frontend.yml`** to `s3://beta.xomper.xomware.com` and SSM `/xomper-platform/api/*`. After this, no push to `xomper-front-end` master can reach the live CLT domain.
   *Rollback: revert one file.*
-- [ ] **1.10 Gate `xomper-front-end` deploys behind a GitHub environment approval** for the draft window. Cheap insurance against a typo'd bucket name in 1.9.
+- [~] **1.10 Gate `xomper-front-end` deploys behind a GitHub environment approval** for the draft window. Cheap insurance against a typo'd bucket name in 1.9.
   *Rollback: remove the environment requirement.*
-- [ ] **1.11 Announce `clt.xomware.com` to the league.** Both URLs work; the new one is canonical. Doing this early makes the Phase 6 cutover a non-event.
+- [~] **1.11 Announce `clt.xomware.com` to the league.** Both URLs work; the new one is canonical. Doing this early makes the Phase 6 cutover a non-event.
 - [x] **1.12 Freeze the CLT engine.** Add a header note to `player-values.service.ts`, `team-analysis.service.ts`, `recommended-trade.service.ts` recording the fork-point SHA and the frozen-fork decision.
 
 
@@ -336,7 +336,50 @@ key cannot modify auth settings. Unblock with `supabase login`, then
 on the new host. Allowlist and callback are aligned and verified in the
 shipped bundle. Worth one manual login before announcing (1.11).
 
-**1.7 onward deliberately held.** 1.7 is the first step that points a workflow
+#### Phase 1 CLOSED — 2026-08-25
+
+Dominick: *"that app never really went live anyway."* That retires the reason
+1.7–1.10 existed.
+
+| Step | Outcome |
+|---|---|
+| 1.7, 1.8 | **Dropped, not executed.** The dual-target deploy and its verification gate existed only to keep legacy users on the old domain working through the interim. There are none. Executing them would have been ceremony against a risk that does not exist. |
+| 1.9, 1.10 | **Moot.** No `beta.` staging target and no deploy approval gate are needed when the domain has no live audience. `xomper.xomware.com` simply becomes the platform. |
+| 1.11 | Announce `clt.dynasty.xomware.com` to the league — still worth one manual Google sign-in first. |
+
+**Phase 2 merged** (PR #112) and deployed. `xomper.xomware.com` now serves the
+platform; `clt.dynasty.xomware.com` serves CLT. Both HTTP 200.
+
+CI caught something worth keeping: stylelint enforces
+`declaration-property-value-allowed-list`, so raw `rem` and font-weight values
+are rejected. Use `$text-*` and `$font-weight-*`. The design system is
+enforced, not advisory.
+
+#### Dynasty scoring correction — 2026-08-25 (PR #113)
+
+Closes a measured gap rather than a suspected one. FantasyCalc is
+parameterized on four axes only, so `bonus_rec_te` is invisible to it. Scoring
+Sleeper projections under CLT's real settings versus the plain-PPR settings
+that were actually served:
+
+**The top 24 tight ends project 20.0% more points.** Every TE was priced ~20%
+light and every trade involving one was graded against that.
+
+`scoring-adjustment.model.ts` derives a per-position multiplier and
+`CompositeValueProvider` scales the dynasty book by it. Only scoring is
+corrected — age and long-term worth stay as the dynasty source priced them,
+which is why that source is used for dynasty at all. Picks are not scaled
+(no position, so no positional correction). Multipliers clamp to 0.5–2.0.
+
+**Process note.** This session rebuilt the projections engine from scratch
+before noticing commit `497290e` had already implemented it, and overwrote
+`projections.provider.ts` with a weaker version in the process. Reverted, no
+loss. The committed version was better — it simulates flex assignment against
+actual projected points rather than assuming a proportional split. **Grep for
+existing implementations before writing a new one**, especially in a long
+session where earlier work has left the context window.
+
+**Superseded note —** 1.7 is the first step that points a workflow
 at the live bucket, 1.8 cannot pass while login is unverified, and it is draft
 week. `xomper-frontend` master still deploys to `s3://xomper.xomware.com` —
 1.9 has not run, so that branch must stay unmerged.
