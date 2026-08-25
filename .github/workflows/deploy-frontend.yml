@@ -52,14 +52,12 @@ jobs:
             echo "${name}=${value}" >> xomper_credentials.env
           }
 
-          fetch_param API_AUTH_TOKEN
           fetch_param API_ID
           fetch_param SUPABASE_URL
           fetch_param SUPABASE_ANON_KEY
 
       - name: Mask sensitive values
         run: |
-          echo "::add-mask::$(grep 'API_AUTH_TOKEN' xomper_credentials.env | cut -d'=' -f2)"
           echo "::add-mask::$(grep 'API_ID' xomper_credentials.env | cut -d'=' -f2)"
           echo "::add-mask::$(grep 'SUPABASE_URL' xomper_credentials.env | cut -d'=' -f2)"
           echo "::add-mask::$(grep 'SUPABASE_ANON_KEY' xomper_credentials.env | cut -d'=' -f2)"
@@ -72,7 +70,6 @@ jobs:
 
       - name: Inject environment variables into Angular
         run: |
-          sed -i "s|apiAuthToken: '---'|apiAuthToken: '$(grep 'API_AUTH_TOKEN' xomper_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
           sed -i "s|apiId: '---'|apiId: '$(grep 'API_ID' xomper_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
           sed -i "s|supabaseUrl: '---'|supabaseUrl: '$(grep 'SUPABASE_URL' xomper_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
           sed -i "s|supabaseAnonKey: '---'|supabaseAnonKey: '$(grep 'SUPABASE_ANON_KEY' xomper_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts

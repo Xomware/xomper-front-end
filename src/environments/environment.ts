@@ -6,7 +6,6 @@ export const environment = {
   poweredByXomper: false,
   secondaryCta: { label: 'Look up a league', route: '/search' },
   baseCallbackUrl: 'https://xomper.xomware.com',
-  apiAuthToken: '---',
   apiId: '---',
   supabaseUrl: '---',
   supabaseAnonKey: '---',

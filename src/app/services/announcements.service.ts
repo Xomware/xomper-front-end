@@ -26,7 +26,6 @@ import { AdminFieldValue, adminFieldValueToJson } from '../models/admin-field-va
 @Injectable({ providedIn: 'root' })
 export class AnnouncementsService {
   private readonly apiUrl = `https://${environment.apiId}.execute-api.us-east-1.amazonaws.com/dev`
-  private readonly apiAuthToken = environment.apiAuthToken
 
   /** In-memory cache from the last successful listAdmin() call. */
   private _adminCache: LeagueAnnouncement[] = []
@@ -35,7 +34,6 @@ export class AnnouncementsService {
 
   private get headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${this.apiAuthToken}`,
       'Content-Type': 'application/json',
     })
   }

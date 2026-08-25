@@ -10,7 +10,8 @@ import { TaxiSquadService } from './app/services/taxi-squad.service';
 import { DraftService } from './app/services/draft.service';
 import { SupabaseService } from './app/services/supabase.service';
 import { LeagueHistoryService } from './app/services/league-history.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
+import { apiAuthInterceptor } from './app/interceptors/api-auth.interceptor';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { AppRoutingModule } from './app/app-routing.module';
 import { FormsModule } from '@angular/forms';
@@ -31,7 +32,7 @@ bootstrapApplication(AppComponent, {
         DraftService,
         SupabaseService,
         LeagueHistoryService,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withInterceptorsFromDi(), withInterceptors([apiAuthInterceptor])),
         provideAnimations()
     ]
 })

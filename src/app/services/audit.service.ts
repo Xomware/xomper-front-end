@@ -24,7 +24,6 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AuditService {
   private readonly apiUrl = `https://${environment.apiId}.execute-api.us-east-1.amazonaws.com/dev`
-  private readonly apiAuthToken = environment.apiAuthToken
 
   /** In-memory store for loaded audit entries (deduped by id). */
   private _entries: AuditEntry[] = []
@@ -33,7 +32,6 @@ export class AuditService {
 
   private get headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${this.apiAuthToken}`,
       'Content-Type': 'application/json',
     })
   }
