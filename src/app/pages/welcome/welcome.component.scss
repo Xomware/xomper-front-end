@@ -1,0 +1,161 @@
+@import 'tokens';
+@import '../../../styles/variables';
+
+.welcome {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  background: $bg-gradient;
+}
+
+.welcome-inner {
+  width: 100%;
+  max-width: 44rem;
+  text-align: center;
+}
+
+// --- header ------------------------------------------------------------------
+
+.welcome-header {
+  margin-bottom: 2.25rem;
+}
+
+.welcome-title {
+  margin: 0;
+  font-size: clamp(2.25rem, 7vw, 3.5rem);
+  font-weight: $font-weight-extrabold;
+  letter-spacing: $tracking-tight;
+  line-height: 1.05;
+  color: $text-primary;
+}
+
+// "powered by <mark>" — the league owns the app, Xomper is the engine.
+.powered-by {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+}
+
+.powered-by-label {
+  font-size: $text-2xs;
+  letter-spacing: $tracking-wide;
+  text-transform: uppercase;
+  color: $text-muted;
+}
+
+.powered-by-logo {
+  height: 1.5rem;
+  width: auto;
+  // The mark ships on a light plate; blending drops it onto the dark
+  // background without needing a separate asset.
+  mix-blend-mode: screen;
+  opacity: 0.95;
+}
+
+.welcome-tagline {
+  margin: 1rem auto 0;
+  max-width: 32rem;
+  font-size: $text-md;
+  line-height: 1.5;
+  color: $text-secondary;
+}
+
+// --- actions -----------------------------------------------------------------
+
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 10rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: $radius-pill;
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+  letter-spacing: $tracking-wide;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.btn--primary {
+  background: $champion-gold;
+  color: $deep-navy;
+
+  &:hover {
+    background: lighten($champion-gold, 8%);
+  }
+}
+
+.btn--ghost {
+  border: 1px solid $surface-light;
+  color: $text-primary;
+
+  &:hover {
+    border-color: $champion-gold;
+    color: $champion-gold;
+  }
+}
+
+// --- features ----------------------------------------------------------------
+
+.welcome-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.25rem;
+  margin: 0 0 2.5rem;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+
+  li {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid $surface-light;
+    border-radius: $radius-lg;
+    background: $bg-card;
+  }
+}
+
+.feature-title {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+  color: $champion-gold;
+}
+
+.feature-copy {
+  display: block;
+  font-size: $text-2xs;
+  line-height: 1.55;
+  color: $text-secondary;
+}
+
+// --- footnote ----------------------------------------------------------------
+
+.welcome-footnote {
+  margin: 0;
+  font-size: $text-2xs;
+  line-height: 1.5;
+  color: $text-muted;
+}
+
+@media (max-width: 30rem) {
+  .btn {
+    width: 100%;
+  }
+}

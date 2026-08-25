@@ -10,6 +10,9 @@
 // for screenshots.
 export const environment = {
   production: true,
+  appName: 'Xomper',
+  appTagline: 'Fantasy football analysis for every league you are in.',
+  poweredByXomper: false,
   baseCallbackUrl: 'https://xomper.xomware.com',
   apiAuthToken: '---',
   apiId: '---',

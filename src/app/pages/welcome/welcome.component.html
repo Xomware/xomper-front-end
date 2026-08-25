@@ -1,0 +1,56 @@
+<div class="welcome">
+  <div class="welcome-inner">
+
+    <header class="welcome-header">
+      <h1 class="welcome-title">{{ appName }}</h1>
+
+      <!-- CLT only: the app is the league's, the engine behind it is Xomper. -->
+      <p class="powered-by" *ngIf="showPoweredBy">
+        <span class="powered-by-label">powered by</span>
+        <img
+          class="powered-by-logo"
+          src="assets/img/xomper-logo-transparent.jpg"
+          alt="Xomper"
+          width="96"
+          height="24"
+        />
+      </p>
+
+      <p class="welcome-tagline">{{ tagline }}</p>
+    </header>
+
+    <div class="welcome-actions">
+      <a class="btn btn--primary" routerLink="/login">Sign in</a>
+      <a class="btn btn--ghost" routerLink="/search">Browse leagues</a>
+    </div>
+
+    <ul class="welcome-features">
+      <li>
+        <span class="feature-title">Team analysis</span>
+        <span class="feature-copy">
+          Positional strength scored against your league, using your league's
+          own scoring rules — not a generic approximation.
+        </span>
+      </li>
+      <li>
+        <span class="feature-title">Trade evaluation</span>
+        <span class="feature-copy">
+          Grade any trade before you accept it, and see what would make a
+          lopsided one fair.
+        </span>
+      </li>
+      <li>
+        <span class="feature-title">Draft board</span>
+        <span class="feature-copy">
+          Follow your live draft pick by pick, with your own board alongside it.
+        </span>
+      </li>
+    </ul>
+
+    <p class="welcome-footnote">
+      Read-only. {{ appName }} never makes a move on your behalf &mdash; no
+      trades sent, no lineups set, no picks made.
+    </p>
+
+  </div>
+</div>
