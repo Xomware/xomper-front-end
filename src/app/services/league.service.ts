@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable, EMPTY, map, of, forkJoin, switchMap, throwError } from 'rxjs'
-import { expand, reduce, tap } from 'rxjs/operators'
+import { expand, reduce, tap, catchError } from 'rxjs/operators'
 import { Roster } from '../models/roster.interface'
 import { League } from '../models/league.interface'
 import { LeagueModel } from '../models/league.model'
@@ -16,6 +16,11 @@ import { NflState } from '../models/nfl-state.interface'
 import { PlayoffBracketMatch } from '../models/playoff-bracket.interface'
 import { environment } from 'src/environments/environment'
 import { getCurrentSeason } from '../constants/season'
+
+/** How many league members to ask about the new season before giving up. */
+const SUCCESSOR_PROBE_USERS = 3
+/** Hard cap on chain walking, so a malformed chain can never loop forever. */
+const MAX_CHAIN_DEPTH = 8
 import { StandingsService } from './standings.service'
 import { UserService } from './user.service'
 import { TeamService } from './team.service'
@@ -54,6 +59,9 @@ export class LeagueService {
   // Whitelisted league from environment
   /** Transitional default league. Removed in Phase 4 with followed leagues. */
   private defaultLeagueId: string | null = environment.myLeagueId || null
+
+  /** anchor league id -> current-season league id. Stable within a session. */
+  private resolvedLeagueIds = new Map<string, string>()
 
   constructor(
     private http: HttpClient,
@@ -176,7 +184,131 @@ export class LeagueService {
     if (!leagueId) {
       return throwError(() => new Error('No league selected'))
     }
-    return this.searchLeague(leagueId)
+    // Resolve forward first, so a configured id from a finished season does
+    // not quietly serve last year's standings.
+    return this.resolveCurrentLeagueId(leagueId).pipe(
+      switchMap((resolved) => this.searchLeague(resolved)),
+    )
+  }
+
+  // =========================================
+  // SEASON ROLLOVER
+  // =========================================
+
+  /**
+   * Resolve the current season's league id from a stable anchor.
+   *
+   * Sleeper mints a brand new `league_id` every season. It exposes
+   * `previous_league_id` but **no forward pointer**, so you can walk a chain
+   * backwards and never forwards. The practical consequence is that any
+   * hardcoded id silently starts serving a completed season the moment the
+   * new one is created — the app keeps working, it just shows last year.
+   *
+   * Since forward traversal is impossible, the successor is discovered
+   * sideways: league members carry over in a dynasty league, so listing a
+   * member's leagues for the current season surfaces the new one. The
+   * candidate is then verified by walking ITS chain back to the anchor, so a
+   * member's unrelated leagues can never be mistaken for this one.
+   *
+   * Never throws and never returns empty: any failure falls back to the anchor,
+   * because a stale league is still far better than a broken app.
+   */
+  resolveCurrentLeagueId(anchorLeagueId: string): Observable<string> {
+    const cached = this.resolvedLeagueIds.get(anchorLeagueId)
+    if (cached) return of(cached)
+
+    return this.getLeagueState().pipe(
+      map((state) => state?.season || getCurrentSeason()),
+      catchError(() => of(getCurrentSeason())),
+      switchMap((season) =>
+        this.searchLeague(anchorLeagueId).pipe(
+          switchMap((anchor) =>
+            anchor.season === season
+              ? of(anchorLeagueId)
+              : this.findSuccessor(anchorLeagueId, season),
+          ),
+        ),
+      ),
+      tap((resolved) => this.resolvedLeagueIds.set(anchorLeagueId, resolved)),
+      catchError(() => of(anchorLeagueId)),
+    )
+  }
+
+  /** Forget resolved ids. Used when a new season may have started mid-session. */
+  clearResolvedLeagues(): void {
+    this.resolvedLeagueIds.clear()
+  }
+
+  private findSuccessor(anchorId: string, season: string): Observable<string> {
+    return this.findLeagueUsers(anchorId).pipe(
+      switchMap((users) => {
+        // A few members, not one: any single owner may have left the league.
+        const userIds = users
+          .map((u) => u.user_id)
+          .filter((id): id is string => !!id)
+          .slice(0, SUCCESSOR_PROBE_USERS)
+
+        if (userIds.length === 0) return of(anchorId)
+
+        return forkJoin<LeagueModel[][]>(
+          userIds.map((id) =>
+            this.findUserLeagues(season, id).pipe(
+              catchError(() => of([] as LeagueModel[])),
+            ),
+          ),
+        ).pipe(
+          switchMap((lists) => {
+            const candidates = new Map<string, LeagueModel>()
+            for (const league of lists.flat()) {
+              if (league?.league_id) candidates.set(league.league_id, league)
+            }
+            if (candidates.size === 0) return of(anchorId)
+
+            // The overwhelmingly common case is a one-season gap, which needs
+            // no extra requests at all.
+            for (const league of candidates.values()) {
+              if (league.previous_league_id === anchorId) return of(league.league_id)
+            }
+
+            // Otherwise verify each candidate by walking its chain back.
+            return this.firstChainedTo(anchorId, [...candidates.values()])
+          }),
+        )
+      }),
+      catchError(() => of(anchorId)),
+    )
+  }
+
+  /** First candidate whose `previous_league_id` chain reaches the anchor. */
+  private firstChainedTo(
+    anchorId: string,
+    candidates: LeagueModel[],
+  ): Observable<string> {
+    if (candidates.length === 0) return of(anchorId)
+
+    return forkJoin<Array<string | null>>(
+      candidates.map((league) =>
+        this.chainReaches(anchorId, league.previous_league_id, 0).pipe(
+          map((reached) => (reached ? league.league_id : null)),
+          catchError(() => of(null)),
+        ),
+      ),
+    ).pipe(map((results) => results.find((id): id is string => !!id) ?? anchorId))
+  }
+
+  private chainReaches(
+    anchorId: string,
+    previousId: string | null,
+    depth: number,
+  ): Observable<boolean> {
+    if (!previousId || depth >= MAX_CHAIN_DEPTH) return of(false)
+    if (previousId === anchorId) return of(true)
+    return this.searchLeague(previousId).pipe(
+      switchMap((league) =>
+        this.chainReaches(anchorId, league.previous_league_id, depth + 1),
+      ),
+      catchError(() => of(false)),
+    )
   }
 
   // =========================================
