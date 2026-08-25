@@ -644,6 +644,47 @@ Sequenced before the warehouse because it establishes the auth pattern both APIs
 
 ### Phase 5 — Data warehouse
 
+#### DuckDB spike — 2026-08-25 (see `tools/duckdb-spike/`)
+
+**The nightly valuation can run as SQL, and it is byte-identical to the engine
+that ships today** — all 3,227 scored players match on points and value, with
+no missing or extra rows.
+
+| | |
+|---|---|
+| Wheel | 19.4 MB zipped, **53 MB unzipped** against Lambda's 250 MB limit |
+| Pipeline | ~690 ms for 3,302 players × 45 scoring keys |
+| Peak RSS | **517 MB** — size the Lambda at 1024 MB or above |
+| Output | 26 KB Parquet |
+| Sleeper API read, in SQL, no download step | 3,302 rows in 597 ms |
+
+The remote read is a real simplification: the ingest job can query the API
+directly rather than download-then-parse.
+
+**A bug the spike caught.** The first SQL port put QB replacement at 224.58
+instead of 214.84, shifting every skill-position value. Replacement is the
+best player who does NOT start, not the last one who does — `row_number()` is
+1-based, so rank N+1 for N starters, where the TypeScript engine indexes a
+0-based array at N. Nothing about the output looked wrong until it was diffed
+against the real engine. Keep the parity harness: it runs
+`src/app/models/*` compiled, not a second implementation of the same idea.
+
+**Version constraint.** Build on DuckDB **1.5.x**. 2.0 is announced but not on
+PyPI — stable is 1.5.5, only `1.6.0.dev*` beyond. 2.0's headline is async I/O
+("network storage is where you will see the big gains"), which is exactly a
+Lambda reading Parquet from S3. Its breaking changes are the native storage
+format and the C API, **neither of which reaches us if Parquet stays the
+on-disk format**. So do not adopt DuckDB's native storage format, and 2.0
+becomes a free upgrade.
+
+**Cost context (Cost Explorer, August 2026).** Recurring spend is ~$26/month
+and compute plus storage is ~$1.50 of it — WAF (~$12) and KMS (~$10) are the
+bill. A year of nightly value snapshots is ~34M rows, ~4 GB. The warehouse
+will cost cents; it is not where savings live. The 15 customer-managed keys
+are, most of them encrypting publicly-served website assets.
+
+
+
 Scope depends heavily on 0.4. Assumes a Sleeper client exists in `xomper-back-end`; if not, this phase roughly doubles.
 
 - [ ] **5.1** Terraform: DynamoDB tables (`xomper-values`, `xomper-players`, `xomper-stats-current`), S3 `xomper-warehouse`, EventBridge rules, ingest Lambda roles.
