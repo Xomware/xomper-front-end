@@ -131,6 +131,7 @@ export class LeagueSettingsFingerprintService {
       teBonus,
       scoringSettings: scoring,
       rosterPositions,
+      leagueId: league.league_id,
       maxKeepers: this.numberSetting(league, 'max_keepers'),
       startingSlots: rosterPositions.filter(
         (p) => !NON_STARTING_SLOTS.has(p.toUpperCase()),

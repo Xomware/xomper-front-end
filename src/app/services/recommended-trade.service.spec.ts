@@ -29,6 +29,7 @@ const CLT_FORMAT: LeagueFormat = {
   teBonus: 0,
   scoringSettings: { rec: 1 },
   rosterPositions: [],
+  leagueId: 'test-league',
   maxKeepers: 0,
   startingSlots: 0,
 }
