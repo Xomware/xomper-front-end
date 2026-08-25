@@ -15,6 +15,19 @@
     </div>
   }
 
+  <!-- Unsupported league — render an explicit refusal, never a chart.
+       A partial-roster hexagon looks authoritative and is simply wrong. -->
+  @else if (isUnsupportedLeague) {
+    <div class="state-center">
+      <p class="state-msg state-msg--error">This league can't be analyzed.</p>
+      <ul class="unsupported-list">
+        @for (reason of unsupportedReasons; track reason) {
+          <li>{{ reason }}</li>
+        }
+      </ul>
+    </div>
+  }
+
   <!-- No data yet -->
   @else if (analyses.length === 0) {
     <div class="state-center">
@@ -55,6 +68,32 @@
               Comparing your team vs <strong>{{ comparisonAnalysis.teamName }}</strong>. League average underlaid as a dashed reference.
             }
           </p>
+
+          <!-- Coverage — never render a hexagon without it. -->
+          <div
+            class="coverage-bar"
+            [class.coverage-bar--warn]="hasLowCoverage(myAnalysis)"
+          >
+            <span class="coverage-stat">{{ coverageLabel(myAnalysis) }}</span>
+            <span class="coverage-pct">{{ coveragePercent(myAnalysis) }}%</span>
+          </div>
+
+          @if (unvaluedStarterNames(myAnalysis).length > 0) {
+            <p class="coverage-warning">
+              <strong>Missing starters:</strong>
+              {{ unvaluedStarterNames(myAnalysis).join(', ') }}
+              &mdash; no value data for these players, so they count as zero
+              here. Your real team is stronger than this chart shows.
+            </p>
+          }
+
+          @if (isApproximateLeague) {
+            <ul class="approximation-notes">
+              @for (note of approximationNotes; track note) {
+                <li>{{ note }}</li>
+              }
+            </ul>
+          }
 
           <!-- Hexagon chart -->
           <app-hexagon-chart

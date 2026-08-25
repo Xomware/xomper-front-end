@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, EMPTY, map, of, forkJoin, switchMap } from 'rxjs'
+import { Observable, EMPTY, map, of, forkJoin, switchMap, throwError } from 'rxjs'
 import { expand, reduce, tap } from 'rxjs/operators'
 import { Roster } from '../models/roster.interface'
 import { League } from '../models/league.interface'
@@ -52,19 +52,8 @@ export class LeagueService {
   private baseUrl = 'https://api.sleeper.app/v1'
 
   // Whitelisted league from environment
-  private whitelistedLeagueId = environment.myLeagueId
-  private whitelistedLeagueName = environment.myLeagueName
-
-  private leagueMap: Record<string, LeagueConfig> = {
-    'clt-dynasty': {
-      id: this.whitelistedLeagueId,
-      display_name: this.whitelistedLeagueName,
-      dynasty: true,
-      divisions: 3,
-      size: 12,
-      taxi: true,
-    },
-  }
+  /** Transitional default league. Removed in Phase 4 with followed leagues. */
+  private defaultLeagueId: string | null = environment.myLeagueId || null
 
   constructor(
     private http: HttpClient,
@@ -160,20 +149,34 @@ export class LeagueService {
   // WHITELISTED LEAGUE
   // =========================================
 
-  getWhitelistedLeagueId(): string {
-    return this.whitelistedLeagueId
+  /**
+   * The league the app should act on when no explicit id is supplied.
+   *
+   * Replaces `getWhitelistedLeagueId()`, which returned a build-time constant
+   * and made every surface single-league by construction. Resolution order:
+   * explicitly selected league, then the user's own league, then the
+   * configured default.
+   *
+   * The `environment.myLeagueId` fallback is transitional. It disappears in
+   * Phase 4 when followed leagues land; until then it keeps a user with
+   * nothing selected from landing on an empty app.
+   */
+  getActiveLeagueId(): string | null {
+    return (
+      this.getCurrentLeague()?.league_id ??
+      this.getMyLeague()?.league_id ??
+      this.defaultLeagueId ??
+      null
+    )
   }
 
-  getWhitelistedLeagueName(): string {
-    return this.whitelistedLeagueName
-  }
-
-  isWhitelistedLeague(leagueId: string): boolean {
-    return leagueId === this.whitelistedLeagueId
-  }
-
-  loadWhitelistedLeague(): Observable<LeagueModel> {
-    return this.searchLeague(this.whitelistedLeagueId)
+  /** Load the active league, or error if there isn't one. */
+  loadActiveLeague(): Observable<LeagueModel> {
+    const leagueId = this.getActiveLeagueId()
+    if (!leagueId) {
+      return throwError(() => new Error('No league selected'))
+    }
+    return this.searchLeague(leagueId)
   }
 
   // =========================================
@@ -236,7 +239,7 @@ export class LeagueService {
       return of(this.myLeague)
     }
 
-    return this.searchLeague(this.whitelistedLeagueId).pipe(
+    return this.loadActiveLeague().pipe(
       switchMap((league) => {
         league.setDivisions()
         return forkJoin({
@@ -364,22 +367,4 @@ export class LeagueService {
   // LEAGUE MAP
   // =========================================
 
-  getAllowedLeagueId(leagueName: string): string | null {
-    return this.leagueMap[leagueName]?.id ?? null
-  }
-
-  getAllowedLeagues(): string[] {
-    return Object.keys(this.leagueMap)
-  }
-
-  getLeagueMap(): Record<string, LeagueConfig> {
-    return this.leagueMap
-  }
-
-  getLeagueConfig(leagueId: string): LeagueConfig | null {
-    return (
-      Object.values(this.leagueMap).find((config) => config.id === leagueId) ||
-      null
-    )
-  }
 }

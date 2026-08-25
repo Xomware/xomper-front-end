@@ -3,10 +3,46 @@
  * Services are instantiated with stubbed constructor args — no Angular DI needed.
  */
 import { TeamAnalysisService } from './team-analysis.service'
-import { PlayerValuesService } from './player-values.service'
 import { TeamAnalysis } from '../models/team-analysis.model'
 import { Roster } from '../models/roster.interface'
 import { User } from '../models/user.interface'
+import {
+  LeagueFormat,
+  MapValueBook,
+  ValueBook,
+  emptyCoverage,
+} from '../models/value-book.model'
+
+/** CLT's format: dynasty, superflex, 12-team, full PPR. */
+const CLT_FORMAT: LeagueFormat = {
+  fingerprint: { isDynasty: true, numQbs: 2, numTeams: 12, ppr: 1 },
+  clamps: [],
+  unsupportedReasons: [],
+  approximations: [],
+  isKeeper: false,
+  teBonus: 0,
+  scoringSettings: { rec: 1 },
+  rosterPositions: [],
+}
+
+/**
+ * Build a book from a plain value map. Ids absent from the map are UNKNOWN,
+ * which is the distinction the old bare-number API could not express.
+ */
+function makeBook(
+  valueMap: Record<string, number> = {},
+  positions: Record<string, string> = {},
+  picks: Record<string, number> = {},
+): ValueBook {
+  return new MapValueBook(
+    CLT_FORMAT,
+    new Map(Object.entries(valueMap)),
+    new Map(Object.entries(positions)),
+    new Map(Object.entries(picks)),
+    new Map(),
+    Date.now(),
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -43,15 +79,12 @@ function makeTeam(
     rosterId, teamName: `Team ${rosterId}`, userId: `u${rosterId}`, avatarId: null,
     qbValue: vals.qb ?? 0, rbValue: vals.rb ?? 0, wrValue: vals.wr ?? 0, teValue: vals.te ?? 0,
     benchValue: vals.bench ?? 0, taxiValue: vals.taxi ?? 0,
+    coverage: emptyCoverage(),
   }
 }
 
-function makeService(valueMap: Record<string, number> = {}): TeamAnalysisService {
-  const valuesStub = {
-    value: (id: string) => valueMap[id] ?? 0,
-    position: (_id: string): string | null => null,
-  } as unknown as PlayerValuesService
-  return new TeamAnalysisService(null as any, null as any, valuesStub)
+function makeService(): TeamAnalysisService {
+  return new TeamAnalysisService(null as any, null as any, null as any)
 }
 
 const playerMap: Record<string, { position: string; first_name: string; last_name: string }> = {
@@ -73,11 +106,12 @@ const defaultValues: Record<string, number> = {
 // ---------------------------------------------------------------------------
 
 describe('TeamAnalysisService.build()', () => {
-  const service = makeService(defaultValues)
+  const service = makeService()
+  const book = makeBook(defaultValues)
 
   it('buckets starters by position', () => {
     const roster = makeRoster(1, 'u1', ['qb1', 'rb1', 'wr1', 'te1'], ['qb1', 'rb1', 'wr1', 'te1'])
-    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap)
+    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap, book)
     expect(a.qbValue).toBe(5000)
     expect(a.rbValue).toBe(4000)
     expect(a.wrValue).toBe(3500)
@@ -88,7 +122,7 @@ describe('TeamAnalysisService.build()', () => {
 
   it('puts non-starter players on bench', () => {
     const roster = makeRoster(1, 'u1', ['qb1', 'rb1', 'bench_qb'], ['qb1', 'rb1'])
-    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap)
+    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap, book)
     expect(a.qbValue).toBe(5000)
     expect(a.rbValue).toBe(4000)
     expect(a.benchValue).toBe(1000) // bench_qb not a starter → bench
@@ -96,14 +130,14 @@ describe('TeamAnalysisService.build()', () => {
 
   it('excludes reserve players from bench', () => {
     const roster = makeRoster(1, 'u1', ['qb1', 'rb1'], ['qb1'], [], ['rb1'])
-    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap)
+    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap, book)
     expect(a.benchValue).toBe(0)
     expect(a.rbValue).toBe(0) // reserve not counted anywhere
   })
 
   it('puts taxi players in taxiValue only', () => {
     const roster = makeRoster(1, 'u1', ['qb1', 'taxi_rb'], ['qb1'], ['taxi_rb'])
-    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap)
+    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap, book)
     expect(a.taxiValue).toBe(800)
     expect(a.rbValue).toBe(0)
     expect(a.benchValue).toBe(0)
@@ -111,30 +145,93 @@ describe('TeamAnalysisService.build()', () => {
 
   it('puts FLEX/unknown position players in bench regardless of starter status', () => {
     const roster = makeRoster(1, 'u1', ['flex1'], ['flex1'])
-    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap)
+    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap, book)
     expect(a.benchValue).toBe(1500)
     expect(a.qbValue + a.rbValue + a.wrValue + a.teValue).toBe(0)
   })
 
   it('uses team_name metadata over display_name', () => {
-    const [a] = service.build([makeRoster(1, 'u1', [])], [makeUser('u1', 'JohnDoe', 'The Champs')], playerMap)
+    const [a] = service.build([makeRoster(1, 'u1', [])], [makeUser('u1', 'JohnDoe', 'The Champs')], playerMap, book)
     expect(a.teamName).toBe('The Champs')
   })
 
   it('falls back to display_name when no team_name metadata', () => {
-    const [a] = service.build([makeRoster(1, 'u1', [])], [makeUser('u1', 'JohnDoe')], playerMap)
+    const [a] = service.build([makeRoster(1, 'u1', [])], [makeUser('u1', 'JohnDoe')], playerMap, book)
     expect(a.teamName).toBe('JohnDoe')
   })
 
   it('falls back to Roster #N when no user found', () => {
-    const [a] = service.build([makeRoster(1, 'u_missing', [])], [], playerMap)
+    const [a] = service.build([makeRoster(1, 'u_missing', [])], [], playerMap, book)
     expect(a.teamName).toBe('Roster #1')
   })
 
-  it('skips players with value 0', () => {
-    const zeroService = makeService({})
-    const [a] = zeroService.build([makeRoster(1, 'u1', ['qb1', 'rb1'], ['qb1', 'rb1'])], [makeUser('u1', 'Team A')], playerMap)
+  it('contributes nothing for players the source does not carry', () => {
+    const emptyBook = makeBook({})
+    const [a] = service.build(
+      [makeRoster(1, 'u1', ['qb1', 'rb1'], ['qb1', 'rb1'])],
+      [makeUser('u1', 'Team A')],
+      playerMap,
+      emptyBook,
+    )
     expect(a.qbValue + a.rbValue).toBe(0)
+  })
+
+  // --- coverage: the silent-zero fix ---------------------------------------
+
+  it('records unknown players as uncovered instead of dropping them', () => {
+    const partial = makeBook({ qb1: 5000 })
+    const [a] = service.build(
+      [makeRoster(1, 'u1', ['qb1', 'rb1', 'wr1'], ['qb1', 'rb1'])],
+      [makeUser('u1', 'Team A')],
+      playerMap,
+      partial,
+    )
+    expect(a.coverage.rostered).toBe(3)
+    expect(a.coverage.valued).toBe(1)
+    expect(a.coverage.unvaluedIds).toEqual(['rb1', 'wr1'])
+  })
+
+  it('flags uncovered players who are in the starting lineup', () => {
+    const partial = makeBook({ qb1: 5000 })
+    const [a] = service.build(
+      [makeRoster(1, 'u1', ['qb1', 'rb1', 'wr1'], ['qb1', 'rb1'])],
+      [makeUser('u1', 'Team A')],
+      playerMap,
+      partial,
+    )
+    expect(a.coverage.unvaluedStarterIds).toEqual(['rb1'])
+  })
+
+  it('distinguishes a known zero value from an unknown player', () => {
+    const zeroBook = makeBook({ qb1: 0 })
+    const [a] = service.build(
+      [makeRoster(1, 'u1', ['qb1'], ['qb1'])],
+      [makeUser('u1', 'Team A')],
+      playerMap,
+      zeroBook,
+    )
+    expect(a.coverage.valued).toBe(1)
+    expect(a.coverage.unvaluedIds).toEqual([])
+  })
+
+  // --- regression gate (PLAN.md 2.6) ---------------------------------------
+  // CLT's numbers must not move as a result of the multi-league refactor.
+
+  it('produces unchanged position sums for a fully covered roster', () => {
+    const roster = makeRoster(
+      1, 'u1',
+      ['qb1', 'rb1', 'wr1', 'te1', 'bench_qb', 'taxi_rb'],
+      ['qb1', 'rb1', 'wr1', 'te1'],
+      ['taxi_rb'],
+    )
+    const [a] = service.build([roster], [makeUser('u1', 'Team A')], playerMap, book)
+    expect(a.qbValue).toBe(5000)
+    expect(a.rbValue).toBe(4000)
+    expect(a.wrValue).toBe(3500)
+    expect(a.teValue).toBe(2000)
+    expect(a.benchValue).toBe(1000)
+    expect(a.taxiValue).toBe(800)
+    expect(a.coverage.unvaluedIds).toEqual([])
   })
 })
 

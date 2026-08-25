@@ -33,7 +33,8 @@ export class LandingDraftCountdownCardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const leagueId = this.leagueService.getWhitelistedLeagueId()
+    const leagueId = this.leagueService.getActiveLeagueId()
+    if (!leagueId) return
     this.draftService.getDraftsForLeague(leagueId).subscribe({
       next: (drafts) => {
         // Find a pre_draft or drafting draft for the current/upcoming season

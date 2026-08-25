@@ -272,8 +272,17 @@ const routes: Routes = [
     ],
   },
   // s8b: Team Analyzer — replaced placeholder redirect with real component
+  // Bare path analyzes the active league; :leagueId analyzes any league.
   {
     path: 'team-analyzer',
+    loadComponent: () =>
+      import('./pages/team-analyzer/team-analyzer.component').then(
+        (m) => m.TeamAnalyzerComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'team-analyzer/:leagueId',
     loadComponent: () =>
       import('./pages/team-analyzer/team-analyzer.component').then(
         (m) => m.TeamAnalyzerComponent,

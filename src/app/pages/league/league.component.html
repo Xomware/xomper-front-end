@@ -11,6 +11,15 @@
         class="league-pic"
       />
       <h1 class="league-name">{{ leagueName }}</h1>
+
+      <!-- Entry point into multi-league analysis: works for any league
+           reached via Search, not just the user's own. -->
+      @if (analyzerLeagueId) {
+        <a
+          class="league-analyze-link"
+          [routerLink]="['/team-analyzer', analyzerLeagueId]"
+        >Analyze teams</a>
+      }
     </div>
 
     <!-- Child route surface -->

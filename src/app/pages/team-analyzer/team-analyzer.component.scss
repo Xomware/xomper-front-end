@@ -842,3 +842,74 @@
   font-family: $font-mono;
   flex-shrink: 0;
 }
+
+
+// ---------------------------------------------------------------------------
+// Coverage + approximation honesty
+//
+// A hexagon built from a partially-covered roster looks exactly as
+// authoritative as a complete one. These make the difference visible.
+// ---------------------------------------------------------------------------
+
+.coverage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius-sm, 4px);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+
+  &--warn {
+    background: rgba(224, 168, 0, 0.12);
+    border: 1px solid rgba(224, 168, 0, 0.35);
+  }
+}
+
+.coverage-stat {
+  opacity: 0.85;
+}
+
+.coverage-pct {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.coverage-warning {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm, 4px);
+  background: rgba(224, 92, 92, 0.12);
+  border: 1px solid rgba(224, 92, 92, 0.35);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.approximation-notes {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem 0.5rem 1.6rem;
+  border-radius: var(--radius-sm, 4px);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  opacity: 0.8;
+
+  li + li {
+    margin-top: 0.3rem;
+  }
+}
+
+.unsupported-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  text-align: left;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  opacity: 0.85;
+
+  li + li {
+    margin-top: 0.4rem;
+  }
+}
