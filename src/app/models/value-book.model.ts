@@ -117,6 +117,8 @@ export interface ValueBook {
   readonly loadedAt: number
   /** Number of valued players (excludes picks). */
   readonly size: number
+  /** Every player id this book prices. Lets a caller rebuild an adjusted book. */
+  readonly playerIds: string[]
   value(playerId: string): ValueLookup
   position(playerId: string): string | null
   pickValue(name: string): ValueLookup
@@ -137,6 +139,10 @@ export class MapValueBook implements ValueBook {
 
   get size(): number {
     return this.valuesById.size
+  }
+
+  get playerIds(): string[] {
+    return [...this.valuesById.keys()]
   }
 
   value(playerId: string): ValueLookup {
