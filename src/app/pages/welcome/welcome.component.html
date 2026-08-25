@@ -1,56 +1,92 @@
 <div class="welcome">
-  <div class="welcome-inner">
 
-    <header class="welcome-header">
-      <h1 class="welcome-title">{{ appName }}</h1>
-
-      <!-- CLT only: the app is the league's, the engine behind it is Xomper. -->
-      <p class="powered-by" *ngIf="showPoweredBy">
-        <span class="powered-by-label">powered by</span>
-        <img
-          class="powered-by-logo"
-          src="assets/img/xomper-logo-transparent.jpg"
-          alt="Xomper"
-          width="96"
-          height="24"
-        />
+  <section class="hero">
+    <div class="hero__copy">
+      <p class="pill">
+        <span class="pill__dot" aria-hidden="true"></span>{{ eyebrow }}
       </p>
 
-      <p class="welcome-tagline">{{ tagline }}</p>
-    </header>
+      <h1 class="hero__title">
+        <span class="hero__title-accent">{{ titleLead }}</span>
+        <span class="hero__title-rest" *ngIf="titleRest">{{ titleRest }}</span>
+      </h1>
 
-    <div class="welcome-actions">
-      <a class="btn btn--primary" routerLink="/login">Sign in</a>
-      <a class="btn btn--ghost" routerLink="/search">Browse leagues</a>
+      <!-- CLT only: the app is the league's, the engine behind it is Xomper. -->
+      <div class="powered" *ngIf="showPoweredBy">
+        <span class="powered__label">powered by</span>
+        <img
+          class="powered__mark"
+          src="assets/img/xomper-banner.png"
+          alt="Xomper"
+        />
+      </div>
+
+      <p class="hero__lede">{{ tagline }}</p>
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" routerLink="/login">Sign in</a>
+        <a class="btn btn--ghost" [routerLink]="secondaryCta.route">{{ secondaryCta.label }}</a>
+      </div>
     </div>
 
-    <ul class="welcome-features">
-      <li>
-        <span class="feature-title">Team analysis</span>
-        <span class="feature-copy">
-          Positional strength scored against your league, using your league's
-          own scoring rules — not a generic approximation.
-        </span>
-      </li>
-      <li>
-        <span class="feature-title">Trade evaluation</span>
-        <span class="feature-copy">
-          Grade any trade before you accept it, and see what would make a
-          lopsided one fair.
-        </span>
-      </li>
-      <li>
-        <span class="feature-title">Draft board</span>
-        <span class="feature-copy">
-          Follow your live draft pick by pick, with your own board alongside it.
-        </span>
-      </li>
+    <!-- Shows the actual output rather than describing it. Static sample:
+         the landing page makes no network calls, so it never hangs on a
+         cold API or shows a spinner to a first-time visitor. -->
+    <aside class="sample" aria-label="Sample team analysis">
+      <header class="sample__head">
+        <span class="sample__dot" aria-hidden="true"></span>
+        <span class="sample__title">Sample analysis</span>
+        <span class="sample__tag">SUPERFLEX · TE+</span>
+      </header>
+
+      <ul class="sample__bars">
+        <li class="bar" *ngFor="let row of sample">
+          <span class="bar__pos">{{ row.position }}</span>
+          <span class="bar__track">
+            <span class="bar__fill" [style.width.%]="row.mine"></span>
+            <span class="bar__avg" [style.left.%]="row.league" title="league average"></span>
+          </span>
+          <span class="bar__value">{{ row.value }}</span>
+        </li>
+      </ul>
+
+      <footer class="sample__foot">
+        <span class="sample__legend"><i class="key key--mine"></i>your team</span>
+        <span class="sample__legend"><i class="key key--avg"></i>league avg</span>
+        <span class="sample__coverage">Valued 24 of 25 rostered</span>
+      </footer>
+    </aside>
+  </section>
+
+  <!-- Numbers, not adjectives. Each is measured; the note says from what. -->
+  <section class="stats" aria-label="What the engine covers">
+    <div class="stat" *ngFor="let stat of stats">
+      <span class="stat__value">{{ stat.value }}</span>
+      <span class="stat__label">{{ stat.label }}</span>
+      <span class="stat__note">{{ stat.note }}</span>
+    </div>
+  </section>
+
+  <section class="features" aria-label="What it does">
+    <article class="feature" *ngFor="let feature of features">
+      <h2 class="feature__title">{{ feature.title }}</h2>
+      <p class="feature__copy">{{ feature.copy }}</p>
+      <ul class="feature__points">
+        <li *ngFor="let point of feature.points">{{ point }}</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="honesty">
+    <h2 class="honesty__title">What it will not do</h2>
+    <ul class="honesty__list">
+      <li *ngFor="let item of limits">{{ item }}</li>
     </ul>
-
-    <p class="welcome-footnote">
-      Read-only. {{ appName }} never makes a move on your behalf &mdash; no
-      trades sent, no lineups set, no picks made.
+    <p class="honesty__footnote">
+      {{ appName }} is read-only. It never makes a move on your behalf &mdash;
+      no trades sent, no lineups set, no picks made. It tells you what it
+      thinks, and you decide.
     </p>
+  </section>
 
-  </div>
 </div>

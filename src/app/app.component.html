@@ -1,19 +1,29 @@
 <a class="skip-to-content" href="#main-content">Skip to main content</a>
-<app-ambient-background></app-ambient-background>
+<app-space-backdrop></app-space-backdrop>
 
-<!-- Legacy chrome — rendered when ?newShell=1 is NOT active (default prod path) -->
-<ng-container *xomperNewShell="false">
-  <div class="app-container">
-    <app-toolbar></app-toolbar>
-    <main id="main-content" class="content" role="main">
-      <app-toast></app-toast>
-      <router-outlet></router-outlet>
-    </main>
-    <app-footer></app-footer>
-  </div>
+<!-- Public landing: no sidebar, toolbar or footer. Signed-in chrome in front
+     of a visitor who has never signed in reads as a broken dashboard. -->
+<ng-container *ngIf="isPublicLanding; else appChrome">
+  <main id="main-content" class="content content--bare" role="main">
+    <router-outlet></router-outlet>
+  </main>
 </ng-container>
 
-<!-- New shell — rendered when ?newShell=1 is active -->
-<ng-container *xomperNewShell="true">
-  <app-shell-layout></app-shell-layout>
-</ng-container>
+<ng-template #appChrome>
+  <!-- Legacy chrome — rendered when ?newShell=1 is NOT active (default prod path) -->
+  <ng-container *xomperNewShell="false">
+    <div class="app-container">
+      <app-toolbar></app-toolbar>
+      <main id="main-content" class="content" role="main">
+        <app-toast></app-toast>
+        <router-outlet></router-outlet>
+      </main>
+      <app-footer></app-footer>
+    </div>
+  </ng-container>
+
+  <!-- New shell — rendered when ?newShell=1 is active -->
+  <ng-container *xomperNewShell="true">
+    <app-shell-layout></app-shell-layout>
+  </ng-container>
+</ng-template>
