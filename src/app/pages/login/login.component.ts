@@ -14,6 +14,7 @@ import { UserModel } from 'src/app/models/user.model'
 import { RosterModel } from 'src/app/models/roster.model'
 import { StandingsTeamModel } from 'src/app/models/standings.model'
 import { LeagueModel } from 'src/app/models/league.model'
+import { environment } from 'src/environments/environment'
 
 /**
  * Login page at /login — lifted verbatim from the old HomeComponent.
@@ -29,6 +30,10 @@ import { LeagueModel } from 'src/app/models/league.model'
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  /** Branding comes from environment: this component ships in two apps. */
+  readonly appName = environment.appName
+  readonly tagline = environment.appTagline
+
   loading = false
   checkingAuth = true
 

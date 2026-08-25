@@ -1,12 +1,17 @@
 <a class="skip-to-content" href="#main-content">Skip to main content</a>
 <app-space-backdrop></app-space-backdrop>
 
-<!-- Public landing: no sidebar, toolbar or footer. Signed-in chrome in front
-     of a visitor who has never signed in reads as a broken dashboard. -->
+<!-- Public landing: toolbar and footer, but no sidebar. The sidebar is
+     signed-in navigation and reads as a broken dashboard to a visitor who has
+     never signed in; the toolbar and footer are the front door's own chrome. -->
 <ng-container *ngIf="isPublicLanding; else appChrome">
-  <main id="main-content" class="content content--bare" role="main">
-    <router-outlet></router-outlet>
-  </main>
+  <div class="app-container app-container--landing">
+    <app-toolbar></app-toolbar>
+    <main id="main-content" class="content" role="main">
+      <router-outlet></router-outlet>
+    </main>
+    <app-footer></app-footer>
+  </div>
 </ng-container>
 
 <ng-template #appChrome>

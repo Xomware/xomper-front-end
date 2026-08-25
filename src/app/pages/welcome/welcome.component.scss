@@ -80,6 +80,14 @@
   animation: beacon 3.2s ease-in-out infinite;
 }
 
+.hero__mark {
+  display: block;
+  height: clamp(4.5rem, 11vw, 6.5rem);
+  width: auto;
+  margin-bottom: 1.25rem;
+  filter: drop-shadow(0 0 1.5rem rgba(0, 255, 171, 0.2));
+}
+
 .hero__title {
   margin: 0;
   font-size: clamp(2.75rem, 7.5vw, 4.75rem);
@@ -430,4 +438,282 @@
 
 @media (max-width: 30rem) {
   .btn { width: 100%; }
+}
+
+// --- showcase ----------------------------------------------------------------
+// The real charts and the real artwork, not mockups of them.
+
+.showcase {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  // Panels size to their own content. Stretching them all to the tallest left
+  // large dead areas under the shorter ones.
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: clamp(2.5rem, 6vh, 4rem);
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) 0.2s both;
+}
+
+.panel {
+  padding: 1.35rem 1.3rem;
+  border: 1px solid $surface-light;
+  border-radius: $radius-xl;
+  background: rgba(10, 22, 16, 0.55);
+  backdrop-filter: blur(6px);
+  transition: border-color 0.2s ease;
+
+  &:hover { border-color: rgba(0, 255, 171, 0.32); }
+}
+
+// The radar needs room to breathe next to its legend.
+.panel--wide { grid-column: span 2; }
+
+@media (max-width: 46rem) {
+  .panel--wide { grid-column: span 1; }
+}
+
+.panel__head { margin-bottom: 1rem; }
+
+.panel__title {
+  margin: 0;
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+  letter-spacing: $tracking-wide;
+  text-transform: uppercase;
+  color: $champion-gold;
+}
+
+.panel__sub {
+  margin: 0.35rem 0 0;
+  font-size: $text-3xs;
+  line-height: 1.5;
+  color: $text-muted;
+}
+
+.panel__body--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+@media (max-width: 34rem) {
+  .panel__body--split { grid-template-columns: 1fr; }
+}
+
+.legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: $text-3xs;
+  color: $text-secondary;
+}
+
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+
+  & + & { margin-top: 0.5rem; }
+}
+
+.legend__key {
+  width: 0.7rem;
+  height: 0.35rem;
+  border-radius: $radius-sm;
+  flex: none;
+}
+
+// --- trade -------------------------------------------------------------------
+
+.trade {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.trade__label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: $text-3xs;
+  letter-spacing: $tracking-wide;
+  text-transform: uppercase;
+  color: $text-muted;
+}
+
+.asset {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+
+  & + & { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+}
+
+.asset__face {
+  width: 2rem;
+  height: 2rem;
+  border-radius: $radius-full;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+  flex: none;
+}
+
+// Picks have no headshot; a labelled token reads better than a blank circle.
+.asset__pick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px dashed rgba(0, 255, 171, 0.45);
+  border-radius: $radius-full;
+  font-size: $text-3xs;
+  color: $champion-gold;
+  flex: none;
+}
+
+.asset__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.asset__name {
+  font-size: $text-2xs;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.asset__meta {
+  font-size: $text-3xs;
+  color: $text-muted;
+}
+
+.asset__value {
+  margin-left: auto;
+  font-size: $text-2xs;
+  font-variant-numeric: tabular-nums;
+  color: $text-secondary;
+}
+
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid $surface-light;
+  font-size: $text-3xs;
+  color: $text-muted;
+}
+
+.verdict__pill {
+  padding: 0.15rem 0.5rem;
+  border-radius: $radius-sm;
+  background: rgba(0, 255, 171, 0.15);
+  color: $champion-gold;
+  font-weight: $font-weight-semibold;
+  letter-spacing: $tracking-wide;
+}
+
+// --- draft board -------------------------------------------------------------
+
+.board {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.board__row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0;
+
+  & + & { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+}
+
+.board__round {
+  width: 2.1rem;
+  font-size: $text-3xs;
+  font-variant-numeric: tabular-nums;
+  color: $text-muted;
+  flex: none;
+}
+
+.board__team {
+  width: 1.15rem;
+  height: 1.15rem;
+  object-fit: contain;
+  flex: none;
+}
+
+.board__face {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: $radius-full;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+  flex: none;
+}
+
+.board__name {
+  font-size: $text-2xs;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.board__pos {
+  margin-left: auto;
+  font-size: $text-3xs;
+  color: $text-muted;
+}
+
+.board__row--onclock { opacity: 0.8; }
+
+.board__onclock {
+  font-size: $text-3xs;
+  color: $champion-gold;
+}
+
+// --- trend -------------------------------------------------------------------
+
+.trend-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.trend-head__face {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: $radius-full;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+  flex: none;
+}
+
+.trend-head__text { display: flex; flex-direction: column; }
+
+.trend-head__name {
+  font-size: $text-2xs;
+  color: $text-primary;
+}
+
+.trend-head__meta {
+  font-size: $text-3xs;
+  color: $text-muted;
+}
+
+.trend-head__delta {
+  margin-left: auto;
+  font-size: $text-2xs;
+  font-weight: $font-weight-semibold;
+  color: $champion-gold;
 }
