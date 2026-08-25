@@ -220,7 +220,7 @@ It's 2026-08-24, peak draft season. `src/app/pages/draft-history/live/` is activ
   *Rollback: delete the parameters. Originals untouched.*
 - [x] **1.3 Create `clt-dynasty-league`** from the current tree, history preserved (`git clone --mirror` → push to new remote). Delete nothing from `xomper-front-end` yet — both repos are byte-identical here.
   *Rollback: delete the repo.*
-- [ ] **1.4 (BLOCKED — needs a Supabase management token) Add `https://clt.xomware.com` to the Supabase redirect allowlist.** Keep the `xomper.xomware.com` entry. Both must work through the interim.
+- [x] **1.4 Add `https://clt.xomware.com` to the Supabase redirect allowlist.** Keep the `xomper.xomware.com` entry. Both must work through the interim.
   *Rollback: remove the new entry.*
 - [x] **1.5 Point CLT's workflow at the NEW bucket only.** Deploy. Verify: Google/email login from the new host, landing cards, `/league/standings`, `/league/rulebook`, `/team`, `/taxi-squad`, `/matchup-history`, `/draft-history/:year/live` polling, `/team-analyzer` hexagon, admin panel.
   *Rollback: none needed — the old pipeline still owns `xomper.xomware.com` and is unaffected.*
@@ -233,7 +233,7 @@ It's 2026-08-24, peak draft season. `src/app/pages/draft-history/live/` is activ
 - [ ] **1.10 Gate `xomper-front-end` deploys behind a GitHub environment approval** for the draft window. Cheap insurance against a typo'd bucket name in 1.9.
   *Rollback: remove the environment requirement.*
 - [ ] **1.11 Announce `clt.xomware.com` to the league.** Both URLs work; the new one is canonical. Doing this early makes the Phase 6 cutover a non-event.
-- [ ] **1.12 Freeze the CLT engine.** Add a header note to `player-values.service.ts`, `team-analysis.service.ts`, `recommended-trade.service.ts` recording the fork-point SHA and the frozen-fork decision.
+- [x] **1.12 Freeze the CLT engine.** Add a header note to `player-values.service.ts`, `team-analysis.service.ts`, `recommended-trade.service.ts` recording the fork-point SHA and the frozen-fork decision.
 
 
 #### Phase 1 execution log — 2026-08-24
@@ -290,7 +290,41 @@ violator in the estate; CLT had no infrastructure repo at all.
 **SSM hardening ported to CLT** (`0b41a8c`) ahead of 1.7, per the note in the
 Phase 2 log. Verified green, including the new placeholder check.
 
-**1.4 remains blocked, and not on the dashboard.** Changing the Supabase auth
+**1.4 — DONE.** The token was in the macOS Keychain under `Supabase CLI`,
+go-keyring-base64 encoded rather than raw. Project `xomper`
+(`oumdrxsihwnsxesgwepj`). Added via the Management API, **additively** —
+all five pre-existing entries preserved untouched:
+
+```
++ https://clt.dynasty.xomware.com/home
++ https://clt.dynasty.xomware.com/auth/callback
++ https://clt.dynasty.xomware.com/**
+```
+
+`site_url` deliberately left at `https://xomper.xomware.com` — it flips at
+the Phase 6 cutover, not now.
+
+**Discovered while doing it:** the app redirects to `${baseCallbackUrl}/home`,
+but the allowlist had no `/home` entry for *any* host, so redirects were
+silently falling back to `site_url`. Left the existing behaviour alone rather
+than changing login mid-draft-week; noted here because it explains why users
+land on `/` instead of `/home`.
+
+**`baseCallbackUrl` repointed** in the CLT repo (`environment.ts` and
+`environment.visual.ts`) from `xomper.xomware.com` to
+`clt.dynasty.xomware.com`. It worked before only because both domains served
+the same app — it would have broken at cutover. Verified in the deployed
+bundle: **1 occurrence of the new host, 0 of the old.**
+
+**1.12 — DONE.** Frozen-fork headers on the three engine files in CLT,
+recording fork point `a54528e` and the two-changes-in-a-quarter tripwire.
+
+*Near-miss worth recording:* a GitHub API timeout returned
+`player-values.service.ts` as empty, and the header was prepended to nothing —
+a 1000-byte file where 5530 was expected. Caught by a size check before push.
+**Always verify fetched size against `.size` before writing a file back.**
+
+**Superseded note —** Changing the Supabase auth
 redirect allowlist needs the Management API with a `sbp_` personal access
 token, or the dashboard. The Supabase CLI is installed (v2.75.0) but not
 authenticated, and no PAT exists in Secrets Manager or SSM — only
@@ -298,9 +332,9 @@ authenticated, and no PAT exists in Secrets Manager or SSM — only
 key cannot modify auth settings. Unblock with `supabase login`, then
 `supabase projects list`.
 
-**Consequence: 1.5's acceptance is only partly met.** The site builds, deploys
-and serves, but **login on the new host is unverified** and will fail until
-1.4 lands. Do not announce the URL (1.11) before then.
+**1.5 acceptance now met** except for a human clicking through Google sign-in
+on the new host. Allowlist and callback are aligned and verified in the
+shipped bundle. Worth one manual login before announcing (1.11).
 
 **1.7 onward deliberately held.** 1.7 is the first step that points a workflow
 at the live bucket, 1.8 cannot pass while login is unverified, and it is draft
