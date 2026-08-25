@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Observable, forkJoin, map } from 'rxjs'
+import { Observable, catchError, forkJoin, map } from 'rxjs'
 import {
   LeagueFormat,
   MapValueBook,
@@ -12,6 +12,7 @@ import { positionAdjustments } from '../../models/scoring-adjustment.model'
 import { ProjectionsService } from '../projections.service'
 import { FantasyCalcDirectProvider } from './fantasy-calc.provider'
 import { ProjectionsValueProvider } from './projections.provider'
+import { WarehouseProvider } from './warehouse.provider'
 import { ValueProvider } from './value-provider'
 
 /**
@@ -49,6 +50,7 @@ export class CompositeValueProvider implements ValueProvider {
     private fantasyCalc: FantasyCalcDirectProvider,
     private projections: ProjectionsValueProvider,
     private projectionsService: ProjectionsService,
+    private warehouse: WarehouseProvider,
   ) {}
 
   /** Which source will answer for this format. Exposed so the UI can say so. */
@@ -58,7 +60,7 @@ export class CompositeValueProvider implements ValueProvider {
 
   bookFor(format: LeagueFormat, season?: string | number): Observable<ValueBook> {
     if (!format.fingerprint.isDynasty) {
-      return this.projections.bookFor(format, season)
+      return this.projectionsBook(format, season)
     }
 
     // Keeper is not dynasty-lite; how far it sits between the two depends on
@@ -73,6 +75,28 @@ export class CompositeValueProvider implements ValueProvider {
       this.fantasyCalc.bookFor(format),
       this.projectionsService.forSeason(targetSeason),
     ]).pipe(map(([book, players]) => this.corrected(format, book, players)))
+  }
+
+  /**
+   * Projections values, from the warehouse where possible.
+   *
+   * The warehouse already holds the nightly projections as Parquet and prices
+   * a league in about 10 ms, so the browser does not have to fetch ~3,300
+   * projection records and score them on the main thread.
+   *
+   * It falls back to computing client-side rather than surfacing an error.
+   * Both paths were diffed against the same TypeScript engine and produce
+   * identical numbers, so the fallback is a slower route to the same answer —
+   * not a degraded one. Losing values entirely because an API call failed
+   * would be far worse than losing the speedup.
+   */
+  private projectionsBook(
+    format: LeagueFormat,
+    season?: string | number,
+  ): Observable<ValueBook> {
+    return this.warehouse.bookFor(format).pipe(
+      catchError(() => this.projections.bookFor(format, season)),
+    )
   }
 
   /**
@@ -111,7 +135,7 @@ export class CompositeValueProvider implements ValueProvider {
 
     return forkJoin([
       this.fantasyCalc.bookFor(format),
-      this.projections.bookFor(format, season),
+      this.projectionsBook(format, season),
     ]).pipe(
       map(([dynastyBook, redraftBook]) => {
         const values = new Map<string, number>()

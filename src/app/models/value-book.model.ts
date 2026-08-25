@@ -53,6 +53,15 @@ export interface LeagueFormat {
   rosterPositions: string[]
 
   /**
+   * Sleeper league id.
+   *
+   * Client-side providers derive everything from the fields above and never
+   * need this. A warehouse-backed provider does: it asks the API to value a
+   * named league rather than shipping the whole scoring table over the wire.
+   */
+  leagueId: string
+
+  /**
    * `settings.max_keepers` — how much of a keeper league actually carries over.
    *
    * Keeping 1 of 10 starters is nearly redraft; keeping 8 is nearly dynasty.

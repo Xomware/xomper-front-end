@@ -7,7 +7,7 @@
  * 194 (97%). Of the 34 the dynasty source missed, 31 had projections and 15
  * were defenses — every one silently worth zero.
  */
-import { of } from 'rxjs'
+import { of, throwError } from 'rxjs'
 import { CompositeValueProvider } from './composite.provider'
 import {
   LeagueFormat,
@@ -25,6 +25,7 @@ function format(overrides: Partial<LeagueFormat> = {}): LeagueFormat {
     teBonus: 0,
     scoringSettings: {},
     rosterPositions: [],
+  leagueId: 'test-league',
     maxKeepers: 0,
     startingSlots: 0,
     ...overrides,
@@ -56,7 +57,18 @@ function build(dynastyValues: Record<string, number>, redraftValues: Record<stri
     bookFor: (f: LeagueFormat) => of(book(f, redraftValues)),
   } as any
   const projectionsService = { forSeason: () => of([]) } as any
-  return new CompositeValueProvider(fantasyCalc, projections, projectionsService)
+  // The warehouse is deliberately made to fail here so these tests exercise
+  // the client-side fallback path, which is what they are actually about.
+  // Warehouse mapping has its own spec.
+  const warehouse = {
+    bookFor: () => throwError(() => new Error('warehouse unavailable')),
+  } as any
+  return new CompositeValueProvider(
+    fantasyCalc,
+    projections,
+    projectionsService,
+    warehouse,
+  )
 }
 
 describe('CompositeValueProvider keeper handling', () => {
