@@ -61,12 +61,113 @@ export class CompositeValueProvider implements ValueProvider {
       return this.projections.bookFor(format, season)
     }
 
+    // Keeper is not dynasty-lite; how far it sits between the two depends on
+    // how many players actually carry over. See keeperBlend().
+    if (format.isKeeper) {
+      return this.keeperBlend(format, season)
+    }
+
     const targetSeason = season ?? new Date().getFullYear()
 
     return forkJoin([
       this.fantasyCalc.bookFor(format),
       this.projectionsService.forSeason(targetSeason),
     ]).pipe(map(([book, players]) => this.corrected(format, book, players)))
+  }
+
+  /**
+   * How much of a keeper league carries over, 0..1.
+   *
+   * A league keeping 1 of 10 starters is 90% a redraft league. Routing it to
+   * dynasty values, as "keeper implies dynasty" did, is wrong twice over:
+   * dynasty values weight youth that will not be kept, and the dynasty source
+   * carries no kickers or defenses at all.
+   *
+   * Measured on a real 12-team keeper league with `max_keepers: 1` and K and
+   * DEF starting slots: dynasty priced 165 of 199 rostered players (83%),
+   * projections priced 194 (97%). Of the 34 the dynasty source missed, 31 had
+   * projections and 15 were defenses — every one of them silently worth zero.
+   */
+  keeperWeight(format: LeagueFormat): number {
+    const slots = format.startingSlots
+    const keepers = format.maxKeepers
+    if (!slots || keepers <= 0) return 0
+    return Math.min(1, Math.max(0, keepers / slots))
+  }
+
+  /**
+   * Blend redraft and dynasty values by how much of the roster carries over.
+   *
+   * Coverage takes the union: a player either source can price gets a value,
+   * rather than being zeroed because the dynasty source has never heard of
+   * kickers. Where only one source knows a player, that source's value is
+   * used outright rather than blended toward a number that does not exist.
+   */
+  private keeperBlend(
+    format: LeagueFormat,
+    season?: string | number,
+  ): Observable<ValueBook> {
+    const weight = this.keeperWeight(format)
+
+    return forkJoin([
+      this.fantasyCalc.bookFor(format),
+      this.projections.bookFor(format, season),
+    ]).pipe(
+      map(([dynastyBook, redraftBook]) => {
+        const values = new Map<string, number>()
+        const positions = new Map<string, string>()
+
+        const ids = new Set([...dynastyBook.playerIds, ...redraftBook.playerIds])
+        for (const id of ids) {
+          const dynasty = dynastyBook.value(id)
+          const redraft = redraftBook.value(id)
+
+          let value: number
+          if (dynasty.known && redraft.known) {
+            value = redraft.value * (1 - weight) + dynasty.value * weight
+          } else if (dynasty.known) {
+            value = dynasty.value
+          } else {
+            value = redraft.value
+          }
+
+          values.set(id, Math.round(value))
+          const position = dynastyBook.position(id) ?? redraftBook.position(id)
+          if (position) positions.set(id, position)
+        }
+
+        // Picks only exist in the dynasty source, and only matter to the
+        // degree the league is a dynasty league.
+        const pickValues = new Map<string, number>()
+        const pickYears = new Map<string, number>()
+        for (const name of dynastyBook.allPickNames) {
+          const lookup = dynastyBook.pickValue(name)
+          if (!lookup.known) continue
+          pickValues.set(name, Math.round(lookup.value * weight))
+          const year = parseYearPrefix(name)
+          if (year !== null) pickYears.set(name, year)
+        }
+
+        const pct = Math.round(weight * 100)
+        return new MapValueBook(
+          {
+            ...format,
+            approximations: [
+              ...format.approximations,
+              `Keeper league: values are ${100 - pct}% redraft and ${pct}% ` +
+                `dynasty, based on keeping ${format.maxKeepers} of ` +
+                `${format.startingSlots} starters. This is an estimate — no ` +
+                'source publishes keeper values.',
+            ],
+          },
+          values,
+          positions,
+          pickValues,
+          pickYears,
+          Date.now(),
+        )
+      }),
+    )
   }
 
   /**
