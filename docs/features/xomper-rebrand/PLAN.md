@@ -566,6 +566,61 @@ further.
 
 ### Phase 3 — Decision gate (explicit stop)
 
+#### Phase 3 evidence — 2026-08-25 (measured, not estimated)
+
+Sixteen real 2026 leagues discovered by probing CLT members' own league lists.
+Good natural spread: 9 redraft, 1 keeper, 6 dynasty; 6 to 16 teams; four
+TE-premium; one half-PPR.
+
+**The gate cannot be closed yet, and not because the thesis failed.** It is
+August: **9 of 10 redraft leagues are still `pre_draft` with zero rostered
+players.** Only one redraft league has drafted. Re-run this in ~2 weeks once
+drafts finish.
+
+Coverage across the 7 leagues that HAVE drafted:
+
+| type | n | roster | starters | worst |
+|---|---|---|---|---|
+| dynasty | 5 | 92.6% | 92.0% | PC17 Dynasty 89% |
+| keeper | 1 | 82.9% | 79.0% | — |
+| redraft | 1 | 100% | 100% | — |
+
+Dynasty is healthy (89–96%), with starters at 99–100% for the top three.
+Keeper is the weakest at 83/79%, which is consistent with it being an
+explicit approximation rather than a measured format.
+
+**The redraft result validates the composite routing on a real roster.**
+Champions League, 14-team full-PPR, 198 rostered players:
+
+```
+projections   pool 636  ->  198/198  (100%)
+fantasycalc   pool 192  ->  165/198  ( 83%)
+```
+
+**33 players would have been priced at zero under the old path, 13 of them
+defenses.** That is the silent-zero bug this work removed, measured on live
+data rather than argued from first principles. n=1, so it is a strong signal
+and not yet a conclusion.
+
+**Correction to an earlier figure in this doc.** The projections pool was
+described as 3,302 players. That is the raw entry count; only **636 carry
+non-zero projected points** and are usable for valuation (TE 127, WR 216,
+RB 138, QB 77, K 44, DEF 32). The comparison against FantasyCalc's 193 for
+redraft still holds — 3.3x, with K and DEF that FantasyCalc lacks entirely —
+but the headline number was overstated.
+
+**Gotcha for Phase 5 ingest.** `api.sleeper.com` rejects the default urllib
+User-Agent and returns nothing. During this measurement every redraft league
+silently scored 0% coverage until a User-Agent header was added. The warehouse
+ingest cron must set one, and must treat an empty projections response as a
+hard failure rather than an empty pool — otherwise a nightly job will happily
+write a warehouse full of nothing.
+
+**Also observed:** a 6-team league (FTB) clamps to `numTeams=8`, FantasyCalc's
+floor. Small leagues sit outside the supported range and should say so.
+
+
+
 - [ ] **3.1** Run the analyzer against at least 6 real non-CLT leagues: 10-team half-PPR redraft, 12-team full-PPR redraft, 12-team 1QB dynasty, superflex dynasty, a 14-team, and a deep-bench league.
 - [ ] **3.2** Record coverage % and believability for each. Get a second opinion from at least one league owner who isn't you.
 - [ ] **3.3 Go / no-go, written into this doc.** If derived values don't produce believable analysis for redraft, the thesis needs rethinking *before* warehouse or Cognito spend. Do not proceed on vibes.
