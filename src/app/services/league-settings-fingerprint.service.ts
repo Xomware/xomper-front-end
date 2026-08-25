@@ -36,6 +36,9 @@ const LEAGUE_TYPE_DYNASTY = 2
  * roster has no value coverage at all, so these leagues are refused outright
  * rather than charted from a fraction of the roster.
  */
+/** Slots that hold no starter. */
+const NON_STARTING_SLOTS = new Set(['BN', 'IR', 'TAXI', 'RES'])
+
 const IDP_SLOTS = new Set([
   'DL', 'LB', 'DB', 'IDP_FLEX', 'DE', 'DT', 'CB', 'S', 'IDP',
 ])
@@ -128,6 +131,10 @@ export class LeagueSettingsFingerprintService {
       teBonus,
       scoringSettings: scoring,
       rosterPositions,
+      maxKeepers: this.numberSetting(league, 'max_keepers'),
+      startingSlots: rosterPositions.filter(
+        (p) => !NON_STARTING_SLOTS.has(p.toUpperCase()),
+      ).length,
     }
   }
 
@@ -135,6 +142,11 @@ export class LeagueSettingsFingerprintService {
   key(fingerprint: FormatFingerprint): string {
     const { isDynasty, numQbs, numTeams, ppr } = fingerprint
     return `d${isDynasty ? 1 : 0}_q${numQbs}_t${numTeams}_p${ppr}`
+  }
+
+  private numberSetting(league: League, key: string): number {
+    const raw = league.settings?.[key]
+    return typeof raw === 'number' ? raw : 0
   }
 
   private leagueType(league: League): number {

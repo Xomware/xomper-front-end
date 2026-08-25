@@ -23,6 +23,8 @@ const CLT_FORMAT: LeagueFormat = {
   teBonus: 0,
   scoringSettings: { rec: 1 },
   rosterPositions: [],
+  maxKeepers: 0,
+  startingSlots: 0,
 }
 
 /**

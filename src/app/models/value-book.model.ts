@@ -51,6 +51,17 @@ export interface LeagueFormat {
   scoringSettings: Record<string, number>
   /** The league's raw roster slots. Drives replacement level. */
   rosterPositions: string[]
+
+  /**
+   * `settings.max_keepers` — how much of a keeper league actually carries over.
+   *
+   * Keeping 1 of 10 starters is nearly redraft; keeping 8 is nearly dynasty.
+   * Treating every keeper league as dynasty gets both the values and the
+   * coverage wrong. See `CompositeValueProvider`.
+   */
+  maxKeepers: number
+  /** Count of starting slots, excluding BN / IR / TAXI. */
+  startingSlots: number
 }
 
 /** True when the league cannot be analyzed honestly at all. */

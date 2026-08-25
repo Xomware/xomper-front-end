@@ -163,8 +163,16 @@ def measure(league_id, season):
     rosters = get(f"{SLEEPER}/league/{league_id}/rosters") or []
 
     # CompositeValueProvider routing.
-    source = "fantasycalc" if fp["isDynasty"] else "projections"
-    priced = fantasycalc_ids(fp) if fp["isDynasty"] else projection_ids(season)
+    #   redraft -> projections
+    #   keeper  -> union of both, blended by keeper depth
+    #   dynasty -> FantasyCalc
+    if not fp["isDynasty"]:
+        source, priced = "projections", projection_ids(season)
+    elif fp["isKeeper"]:
+        source = "keeper-blend"
+        priced = fantasycalc_ids(fp) | projection_ids(season)
+    else:
+        source, priced = "fantasycalc", fantasycalc_ids(fp)
 
     rostered = starters_total = 0
     valued = starters_valued = 0
