@@ -220,11 +220,11 @@ It's 2026-08-24, peak draft season. `src/app/pages/draft-history/live/` is activ
   *Rollback: delete the parameters. Originals untouched.*
 - [x] **1.3 Create `clt-dynasty-league`** from the current tree, history preserved (`git clone --mirror` → push to new remote). Delete nothing from `xomper-front-end` yet — both repos are byte-identical here.
   *Rollback: delete the repo.*
-- [~] **1.4 (BLOCKED — needs Supabase dashboard) Add `https://clt.xomware.com` to the Supabase redirect allowlist.** Keep the `xomper.xomware.com` entry. Both must work through the interim.
+- [ ] **1.4 (BLOCKED — needs a Supabase management token) Add `https://clt.xomware.com` to the Supabase redirect allowlist.** Keep the `xomper.xomware.com` entry. Both must work through the interim.
   *Rollback: remove the new entry.*
-- [~] **1.5 (workflow repointed + pushed; deploy BLOCKED on GitHub secrets) Point CLT's workflow at the NEW bucket only.** Deploy. Verify: Google/email login from the new host, landing cards, `/league/standings`, `/league/rulebook`, `/team`, `/taxi-squad`, `/matchup-history`, `/draft-history/:year/live` polling, `/team-analyzer` hexagon, admin panel.
+- [x] **1.5 Point CLT's workflow at the NEW bucket only.** Deploy. Verify: Google/email login from the new host, landing cards, `/league/standings`, `/league/rulebook`, `/team`, `/taxi-squad`, `/matchup-history`, `/draft-history/:year/live` polling, `/team-analyzer` hexagon, admin panel.
   *Rollback: none needed — the old pipeline still owns `xomper.xomware.com` and is unaffected.*
-- [ ] **1.6 Snapshot `s3://xomper.xomware.com`** to a dated backup prefix. This is the rollback artifact for every step that follows.
+- [x] **1.6 Snapshot `s3://xomper.xomware.com`** to a dated backup prefix. This is the rollback artifact for every step that follows.
 - [ ] **1.7 Make CLT's workflow dual-target.** Sync to `s3://clt.xomware.com` **and** `s3://xomper.xomware.com`; invalidate both distributions. Sync failures must fail the job — no `|| true`. CLT now owns the legacy domain.
   *Rollback: revert the workflow to single-target; restore the 1.6 snapshot if the legacy bucket was corrupted.*
 - [ ] **1.8 Verify dual-target end-to-end.** Push a trivially visible change (version string in the footer) from `clt-dynasty-league`. Confirm it lands on **both** hosts. **Hard gate — do not proceed until this passes.**
@@ -268,6 +268,44 @@ In both runs, `Retrieve SSM Parameters` reported **success with no AWS credentia
 
 This means a credential or SSM-permission problem produces a **silently broken deploy**, not a failed build. Fix before 1.7 — it is the same class of hazard as the `|| true` the plan already bans. Applies to `xomper-front-end` too.
 
+
+#### Phase 1 execution log — 2026-08-25 (continued)
+
+Repos renamed to the house `<app>-<role>` convention. Xomper was the only
+violator in the estate; CLT had no infrastructure repo at all.
+
+| Before | After |
+|---|---|
+| `xomper-front-end` | `xomper-frontend` |
+| `xomper-back-end` | `xomper-backend` |
+| `clt-dynasty-league` | `clt-dynasty-league-frontend` |
+
+| Step | Status | Result |
+|---|---|---|
+| 1.1 | amended | **`clt-dynasty-league-infrastructure` created for real.** The earlier log claimed this repo existed; it did not. The 17 AWS resources were live with state in S3 and **no Terraform in any Xomware repo** — an org-wide code search found nothing. Source reconstructed from the state file, verified in CI: `terraform plan` AND `terraform apply` both report "No changes. Your infrastructure matches the configuration." |
+| 1.2 | done | `/clt-dynasty/api/*` confirmed present (4 params). |
+| 1.5 | **done** | GitHub secrets seeded on both new repos from Secrets Manager (`access_key`, `secret_key`). Deploy green. **`clt.dynasty.xomware.com` serves HTTP 200.** `xomper.xomware.com` untouched and still 200. |
+| 1.6 | **done — differently than planned** | Both buckets already have **S3 versioning enabled**, which is a stronger rollback than a prefix copy: `--delete` writes delete markers rather than destroying objects. Verified 350 retained versions on the live bucket, `index.html` recoverable back to 2026-08-05. A dated-prefix snapshot is redundant; do not add one inside a bucket that a `--delete` sync targets. |
+
+**SSM hardening ported to CLT** (`0b41a8c`) ahead of 1.7, per the note in the
+Phase 2 log. Verified green, including the new placeholder check.
+
+**1.4 remains blocked, and not on the dashboard.** Changing the Supabase auth
+redirect allowlist needs the Management API with a `sbp_` personal access
+token, or the dashboard. The Supabase CLI is installed (v2.75.0) but not
+authenticated, and no PAT exists in Secrets Manager or SSM — only
+`SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_KEY`. The service
+key cannot modify auth settings. Unblock with `supabase login`, then
+`supabase projects list`.
+
+**Consequence: 1.5's acceptance is only partly met.** The site builds, deploys
+and serves, but **login on the new host is unverified** and will fail until
+1.4 lands. Do not announce the URL (1.11) before then.
+
+**1.7 onward deliberately held.** 1.7 is the first step that points a workflow
+at the live bucket, 1.8 cannot pass while login is unverified, and it is draft
+week. `xomper-frontend` master still deploys to `s3://xomper.xomware.com` —
+1.9 has not run, so that branch must stay unmerged.
 
 **No platform code is written until 1.8 passes.**
 
