@@ -251,6 +251,22 @@ export class SupabaseService {
     )
   }
 
+  /**
+   * Current session access token, or null when signed out.
+   *
+   * The API authorizer verifies these against Supabase's published JWKS, so
+   * this is what has to reach API Gateway — not the static build-time token
+   * the services used to send.
+   */
+  async getAccessToken(): Promise<string | null> {
+    try {
+      const { data } = await this.supabase.auth.getSession()
+      return data.session?.access_token ?? null
+    } catch {
+      return null
+    }
+  }
+
   isAuthenticated(): boolean {
     return !!this.currentUser.value
   }

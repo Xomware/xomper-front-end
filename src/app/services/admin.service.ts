@@ -48,13 +48,11 @@ export interface AdminTestSendResponse {
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly apiUrl = `https://${environment.apiId}.execute-api.us-east-1.amazonaws.com/dev`
-  private readonly apiAuthToken = environment.apiAuthToken
 
   constructor(private http: HttpClient) {}
 
   private get headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${this.apiAuthToken}`,
       'Content-Type': 'application/json',
     })
   }
