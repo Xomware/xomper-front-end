@@ -687,11 +687,41 @@ are, most of them encrypting publicly-served website assets.
 
 Scope depends heavily on 0.4. Assumes a Sleeper client exists in `xomper-back-end`; if not, this phase roughly doubles.
 
-- [ ] **5.1** Terraform: DynamoDB tables (`xomper-values`, `xomper-players`, `xomper-stats-current`), S3 `xomper-warehouse`, EventBridge rules, ingest Lambda roles.
-- [ ] **5.2 Values ingest cron (nightly).** Fetch the full FantasyCalc grid sized in 0.2. Write to `xomper-values` keyed PK `player_id` / SK `format_fingerprint` — the frozen Phase 3 fingerprint. Store picks in the same table under a pick-key convention. Snapshot each night's full payload to S3/Parquet **so a FantasyCalc outage degrades to stale-but-present rather than broken.**
+> **REVISED after the DuckDB spikes — 2026-08-25.** The steps below were
+> written around a stored cross product of formats keyed by fingerprint. Two
+> measurements superseded that; the design is smaller now. Read this box before
+> the steps.
+>
+> **There is no values grid.** Values compute on demand in **~10 ms per
+> league** (median across 16 real leagues) from a 168 KB Parquet of
+> projections. So `xomper-values` — the DynamoDB table keyed PK `player_id` /
+> SK `format_fingerprint` — **is not built.** Store projections once; compute
+> per request.
+>
+> **The fingerprint survives, much smaller.** It is still the cache key for
+> FantasyCalc, which is an external API parameterised on
+> `isDynasty × numQbs × numTeams × ppr`. Per Phase 0.2 only `isDynasty ×
+> numQbs` move values meaningfully, so that is roughly **4 cache entries, not
+> 200 stored combinations**.
+>
+> **Phase 3's stakes drop.** Its gate exists to freeze the fingerprint before
+> it becomes a DynamoDB sort key. It is now a cache key for 4 entries — worth
+> getting right, but no longer a migration risk. Do not let it block Phase 5.
+>
+> **DuckDB reads the API directly.** `read_json_auto()` over the Sleeper URL
+> returned 3,302 rows in 597 ms, so the ingest job needs no download-then-parse
+> step.
+>
+> **Build on DuckDB 1.5.x and keep Parquet as the on-disk format.** 2.0 is
+> announced but not on PyPI; its breaking changes are the native storage format
+> and the C API, neither of which reaches us through Python bindings over
+> Parquet. Size the Lambda at **1024 MB or above** — peak RSS was 517 MB.
+
+- [ ] **5.1** Terraform: DynamoDB tables (`xomper-players`, `xomper-stats-current`), S3 `xomper-warehouse`, EventBridge rules, ingest Lambda roles. **No `xomper-values` table** — see the revision box.
+- [ ] **5.2 Projections ingest cron (nightly).** Read the Sleeper projections endpoint directly in DuckDB, normalise to a long `(player_id, position, stat_key, stat_value)` table, write to S3 as Parquet. Measured: 540 ms, 216,209 rows, **168 KB**. Also cache the ~4 meaningful FantasyCalc fingerprints for the dynasty path, and snapshot each night's payload **so a FantasyCalc outage degrades to stale-but-present rather than broken.**
 - [ ] **5.3 Player ingest cron (daily).** Slimmed `/players/nfl` projection into `xomper-players`, including the `espn_id`/`yahoo_id` crosswalk already present on `player.interface.ts`. This is what kills the ~5MB-per-browser-session problem.
 - [ ] **5.4 Stats ingest cron (weekly, in-season).** `/stats/nfl/regular/{season}/{week}` + projections. Current week to `xomper-stats-current`; full history appended to S3/Parquet. Athena over S3 for analytics — **never on a user-facing path.**
-- [ ] **5.5 Warehouse API.** `GET /values?fingerprint=…`, `GET /values/player/{id}?fingerprint=…`, `GET /picks?fingerprint=…`, `GET /players`, `GET /stats/{season}/{week}`. Responses carry `requestedFormat`, `servedFormat`, and `ignoredSettings[]` so clients can report the approximation honestly. Cognito authorizer for the platform; API-key usage plan for CLT and future clients.
+- [ ] **5.5 Warehouse API.** `POST /values` taking the league's `scoring_settings` + `roster_positions` + `total_rosters` and computing on demand (~10 ms), rather than a fingerprint lookup against a stored grid. Plus `GET /picks?fingerprint=…` (dynasty, FantasyCalc-backed), `GET /players`, `GET /stats/{season}/{week}`. Responses carry `requestedFormat`, `servedFormat`, and `ignoredSettings[]` so clients can report the approximation honestly. Cognito authorizer for the platform; API-key usage plan for CLT and future clients.
 - [ ] **5.6 Cached Sleeper proxy** on the same API for the surface already consumed: `/league/{id}`, `/users`, `/rosters`, `/matchups`, `/transactions`, `/drafts`.
 - [ ] **5.7 Swap the provider.** Replace `FantasyCalcDirectProvider` with `WarehouseProvider` behind the Phase 2.3 seam. Repoint `user`, `draft`, `player`, `player-points`, `league` service `baseUrl`s to the proxy.
 - [ ] **5.8** Reuse the cron-settings admin pattern (`cron.service.ts`, `admin-cron-settings.component.ts`, `cron-setting.model.ts`) as the warehouse job ops surface — schedule, last-run, last-error, manual trigger.
