@@ -11,8 +11,10 @@
 export const environment = {
   production: true,
   appName: 'Xomper',
+  appEyebrow: 'Fantasy football, measured',
   appTagline: 'Fantasy football analysis for every league you are in.',
   poweredByXomper: false,
+  secondaryCta: { label: 'Look up a league', route: '/search' },
   baseCallbackUrl: 'https://xomper.xomware.com',
   apiAuthToken: '---',
   apiId: '---',
