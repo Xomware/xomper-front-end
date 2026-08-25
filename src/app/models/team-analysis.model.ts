@@ -1,3 +1,5 @@
+import { ValueCoverage } from './value-book.model'
+
 /**
  * Per-team aggregate of dynasty value broken down by position group +
  * roster slot. Drives the hexagon chart on TeamAnalyzerComponent.
@@ -31,6 +33,13 @@ export interface TeamAnalysis {
   benchValue: number
   /** Players on taxi squad. */
   taxiValue: number
+
+  /**
+   * How much of this roster the value source actually covered.
+   * Never render a chart from this analysis without also showing coverage —
+   * an uncovered starter produces a plausible-looking but wrong hexagon.
+   */
+  coverage: ValueCoverage
 }
 
 /** Compute total value across all axes. */

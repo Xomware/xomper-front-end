@@ -3,7 +3,6 @@
  * Services are instantiated with stubbed constructor args — no Angular DI needed.
  */
 import { RecommendedTradeService } from './recommended-trade.service'
-import { PlayerValuesService } from './player-values.service'
 import { TeamAnalysisService } from './team-analysis.service'
 import {
   FAIR_THRESHOLD,
@@ -14,6 +13,37 @@ import {
   emptyTradeSide,
 } from '../models/team-analysis.model'
 import { Roster } from '../models/roster.interface'
+import {
+  LeagueFormat,
+  MapValueBook,
+  ValueBook,
+  emptyCoverage,
+} from '../models/value-book.model'
+
+const CLT_FORMAT: LeagueFormat = {
+  fingerprint: { isDynasty: true, numQbs: 2, numTeams: 12, ppr: 1 },
+  clamps: [],
+  unsupportedReasons: [],
+  approximations: [],
+  isKeeper: false,
+  teBonus: 0,
+  scoringSettings: { rec: 1 },
+  rosterPositions: [],
+}
+
+function bookOf(
+  valueMap: Record<string, number> = {},
+  pickMap: Record<string, number> = {},
+): ValueBook {
+  return new MapValueBook(
+    CLT_FORMAT,
+    new Map(Object.entries(valueMap)),
+    new Map(),
+    new Map(Object.entries(pickMap)),
+    new Map(),
+    Date.now(),
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -36,20 +66,20 @@ function makeTeam(
     rosterId, teamName: `Team ${rosterId}`, userId: `u${rosterId}`, avatarId: null,
     qbValue: vals.qb ?? 0, rbValue: vals.rb ?? 0, wrValue: vals.wr ?? 0, teValue: vals.te ?? 0,
     benchValue: vals.bench ?? 0, taxiValue: vals.taxi ?? 0,
+    coverage: emptyCoverage(),
   }
 }
 
+/**
+ * Binds a service to one `ValueBook` so the tests read the same as before the
+ * multi-league refactor. The book is a real `MapValueBook`, so an id absent
+ * from `valueMap` is genuinely UNKNOWN rather than silently worth zero.
+ */
 function makeService(
   valueMap: Record<string, number> = {},
   pickMap: Record<string, number> = {},
   leagueAvg?: HexAxis[],
-): RecommendedTradeService {
-  const valuesStub = {
-    value: (id: string) => valueMap[id] ?? 0,
-    pickValue: (name: string) => pickMap[name] ?? 0,
-    position: (_id: string): string | null => null,
-  } as unknown as PlayerValuesService
-
+) {
   const avg5k = (): HexAxis[] =>
     ['QB', 'RB', 'WR', 'TE', 'Bench', 'Taxi'].map((label) => ({ label, value: 0 }))
 
@@ -57,7 +87,29 @@ function makeService(
     leagueAverageAxes: (_: TeamAnalysis[]) => leagueAvg ?? avg5k(),
   } as unknown as TeamAnalysisService
 
-  return new RecommendedTradeService(valuesStub, teamAnalysisStub)
+  const service = new RecommendedTradeService(null as any, teamAnalysisStub)
+  const book = bookOf(valueMap, pickMap)
+
+  return {
+    book,
+    evaluate: (trade: ProposedTrade) => service.evaluate(trade, book),
+    sideValue: (side: TradeSide) => service.sideValue(side, book),
+    unvaluedAssets: (trade: ProposedTrade) => service.unvaluedAssets(trade, book),
+    suggestBalance: (
+      trade: Parameters<RecommendedTradeService['suggestBalance']>[0],
+      evaluation: Parameters<RecommendedTradeService['suggestBalance']>[1],
+      rosters: Parameters<RecommendedTradeService['suggestBalance']>[2],
+      playerMap: Parameters<RecommendedTradeService['suggestBalance']>[3],
+      limit?: number,
+    ) => service.suggestBalance(trade, evaluation, rosters, playerMap, book, limit),
+    recommend: (
+      myAnalysis: Parameters<RecommendedTradeService['recommend']>[0],
+      analyses: Parameters<RecommendedTradeService['recommend']>[1],
+      rosters: Parameters<RecommendedTradeService['recommend']>[2],
+      playerMap: Parameters<RecommendedTradeService['recommend']>[3],
+      limit?: number,
+    ) => service.recommend(myAnalysis, analyses, rosters, playerMap, book, limit),
+  }
 }
 
 function avg5000(): HexAxis[] {
@@ -79,6 +131,36 @@ function tradeOf(aIds: string[], bIds: string[]): ProposedTrade {
 describe('FAIR_THRESHOLD', () => {
   it('is 0.05 (5%)', () => {
     expect(FAIR_THRESHOLD).toBe(0.05)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// unvaluedAssets() — a trade containing an unpriceable asset can't be graded
+// ---------------------------------------------------------------------------
+
+describe('RecommendedTradeService.unvaluedAssets()', () => {
+  it('returns nothing when every asset is covered', () => {
+    const svc = makeService({ p1: 5000, p2: 4000 })
+    expect(svc.unvaluedAssets(tradeOf(['p1'], ['p2']))).toEqual([])
+  })
+
+  it('reports players the source does not carry', () => {
+    const svc = makeService({ p1: 5000 })
+    expect(svc.unvaluedAssets(tradeOf(['p1'], ['kicker1']))).toEqual(['kicker1'])
+  })
+
+  it('reports unvalued picks as well as players', () => {
+    const svc = makeService({ p1: 5000 })
+    const trade: ProposedTrade = {
+      sideA: { rosterId: 1, teamName: 'A', playerIds: ['p1'], pickNames: [] },
+      sideB: { rosterId: 2, teamName: 'B', playerIds: [], pickNames: ['2099 1st'] },
+    }
+    expect(svc.unvaluedAssets(trade)).toEqual(['2099 1st'])
+  })
+
+  it('treats a known zero-valued asset as covered', () => {
+    const svc = makeService({ p1: 5000, p2: 0 })
+    expect(svc.unvaluedAssets(tradeOf(['p1'], ['p2']))).toEqual([])
   })
 })
 

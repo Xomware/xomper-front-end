@@ -116,9 +116,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private loadMyLeague(userId: string): void {
-    const whitelistedLeagueId = this.leagueService.getWhitelistedLeagueId()
+    const activeLeagueId = this.leagueService.getActiveLeagueId()
+    if (!activeLeagueId) {
+      this.loading = false
+      return
+    }
 
-    this.leagueService.loadWhitelistedLeague()
+    this.leagueService.loadActiveLeague()
       .pipe(
         take(1),
         switchMap((league) => {
@@ -126,8 +130,8 @@ export class LoginComponent implements OnInit, OnDestroy {
           league.setDivisions()
 
           return forkJoin({
-            users: this.leagueService.findLeagueUsers(whitelistedLeagueId),
-            rosters: this.leagueService.findLeagueRosters(whitelistedLeagueId),
+            users: this.leagueService.findLeagueUsers(activeLeagueId),
+            rosters: this.leagueService.findLeagueRosters(activeLeagueId),
             nflState: this.leagueService.getLeagueState(),
           })
         }),

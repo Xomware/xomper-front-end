@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core'
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router'
+import { ActivatedRoute, Router, RouterOutlet, RouterLink } from '@angular/router'
 import { Subscription, take } from 'rxjs'
 import { LeagueService } from 'src/app/services/league.service'
 import { ToastService } from 'src/app/services/toast.service'
@@ -19,7 +19,7 @@ import { NgIf } from '@angular/common'
     templateUrl: './league.component.html',
     styleUrls: ['./league.component.scss'],
     standalone: true,
-    imports: [
+    imports: [RouterLink, 
         LoaderComponent,
         NgIf,
         RouterOutlet,
@@ -31,6 +31,8 @@ export class LeagueComponent implements OnInit, OnDestroy {
   league!: LeagueModel
   leaguePicture = ''
   leagueName = ''
+  /** League id to analyze. Drives the "Analyze teams" header link. */
+  analyzerLeagueId: string | null = null
   leagueId = ''
   leagueUsers: UserModel[] = []
   leagueRosters: RosterModel[] = []
@@ -98,6 +100,7 @@ export class LeagueComponent implements OnInit, OnDestroy {
   private setupLeague(): void {
     this.leaguePicture = this.league.getProfilePicture()
     this.leagueName = this.league.getDisplayName()
+    this.analyzerLeagueId = this.league.getId()
     this.leagueId = this.league.getId()
     this.leagueUsers = this.league.getUsers()
     this.league.setDivisions()

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { forkJoin } from 'rxjs'
+import { ActivatedRoute } from '@angular/router'
+import { forkJoin, switchMap } from 'rxjs'
 
 import { TeamAnalysisService } from '../../services/team-analysis.service'
 import { RecommendedTradeService } from '../../services/recommended-trade.service'
@@ -27,6 +28,15 @@ import {
 } from '../../models/team-analysis.model'
 import { Roster } from '../../models/roster.interface'
 import { Player } from '../../models/player.interface'
+import {
+  LeagueFormat,
+  ValueBook,
+  ValueCoverage,
+  coverageRatio,
+  isApproximate,
+  isLowCoverage,
+  isSupported,
+} from '../../models/value-book.model'
 
 import { HexagonChartComponent } from './hexagon-chart/hexagon-chart.component'
 import { PositionBreakdownCardComponent } from './position-breakdown-card/position-breakdown-card.component'
@@ -75,6 +85,15 @@ export class TeamAnalyzerComponent implements OnInit {
   analyses: TeamAnalysis[] = []
   rosters: Roster[] = []
   playerMap: Record<string, Player> = {}
+
+  /** League currently being analyzed. Route param, not the CLT constant. */
+  leagueId: string | null = null
+  /** Values scoped to this league's format. Null until loaded. */
+  book: ValueBook | null = null
+  /** Resolved format, including clamps and approximations for the UI. */
+  format: LeagueFormat | null = null
+  /** Assets in the current trade the value source can't price. */
+  tradeUnvalued: string[] = []
   axisMaxes: Record<string, number> = {}
   leagueAverages: HexAxis[] = []
   myUserId: string | null = null
@@ -104,6 +123,7 @@ export class TeamAnalyzerComponent implements OnInit {
     private leagueService: LeagueService,
     private playerService: PlayerService,
     private userService: UserService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -115,18 +135,41 @@ export class TeamAnalyzerComponent implements OnInit {
     this.loading = true
     this.error = null
 
-    const leagueId = this.leagueService.getWhitelistedLeagueId()
+    // League comes from the route. Falls back to the user's selected league so
+    // the page still works when reached without an explicit id.
+    const leagueId =
+      this.route.snapshot.paramMap.get('leagueId') ??
+      this.leagueService.getCurrentLeague()?.league_id ??
+      this.leagueService.getMyLeague()?.league_id ??
+      null
 
-    forkJoin([
-      this.leagueService.findLeagueRosters(leagueId),
-      this.leagueService.findLeagueUsers(leagueId),
-      this.playerValuesService.load(),
-      this.playerService.getPlayerMap(),
-    ]).subscribe({
-      next: ([rosters, users, _values, playerMap]) => {
+    if (!leagueId) {
+      this.error = 'No league selected.'
+      this.loading = false
+      return
+    }
+
+    this.leagueId = leagueId
+
+    this.leagueService
+      .searchLeague(leagueId)
+      .pipe(
+        switchMap((league) => {
+          this.format = this.playerValuesService.formatFor(league)
+          return forkJoin([
+            this.leagueService.findLeagueRosters(leagueId),
+            this.leagueService.findLeagueUsers(leagueId),
+            this.playerValuesService.bookFor(league),
+            this.playerService.getPlayerMap(),
+          ])
+        }),
+      )
+      .subscribe({
+      next: ([rosters, users, book, playerMap]) => {
         this.rosters = rosters
-        this.playerMap = playerMap as Record<string, Player>
-        this.analyses = this.teamAnalysisService.build(rosters, users, playerMap)
+        this.book = book
+        this.playerMap = playerMap as unknown as Record<string, Player>
+        this.analyses = this.teamAnalysisService.build(rosters, users, playerMap, book)
         this.axisMaxes = this.teamAnalysisService.axisMaxes(this.analyses)
         this.leagueAverages = this.teamAnalysisService.leagueAverageAxes(this.analyses)
         this.recommendations = this.buildRecommendations()
@@ -282,13 +325,77 @@ export class TeamAnalyzerComponent implements OnInit {
       this.tradeBalance = []
       return
     }
-    this.tradeEvaluation = this.recommendedTradeService.evaluate(trade)
+    if (!this.book) {
+      this.tradeEvaluation = null
+      this.tradeBalance = []
+      return
+    }
+    this.tradeEvaluation = this.recommendedTradeService.evaluate(trade, this.book)
+    this.tradeUnvalued = this.recommendedTradeService.unvaluedAssets(trade, this.book)
     this.tradeBalance = this.recommendedTradeService.suggestBalance(
       trade,
       this.tradeEvaluation,
       this.rosters,
       this.playerMap,
+      this.book,
     )
+  }
+
+  // ---------------------------------------------------------------------------
+  // Coverage + format honesty
+  //
+  // The old page rendered a hexagon from whatever values happened to resolve,
+  // silently dropping anyone the source didn't carry. On CLT that was
+  // invisible. On a redraft league it means every K and DEF scores zero and
+  // the chart is confidently wrong. These drive the warnings that prevent it.
+  // ---------------------------------------------------------------------------
+
+  /** True when this league can't be analyzed honestly at all. */
+  get isUnsupportedLeague(): boolean {
+    return !!this.format && !isSupported(this.format)
+  }
+
+  get unsupportedReasons(): string[] {
+    return this.format?.unsupportedReasons ?? []
+  }
+
+  /** Caveats to show alongside a chart we DO render (keeper, TE premium). */
+  get approximationNotes(): string[] {
+    if (!this.format) return []
+    const notes = [...this.format.approximations]
+    for (const clamp of this.format.clamps) {
+      notes.push(
+        `This league's ${clamp.axis} is ${clamp.requested}; the closest ` +
+          `available values are for ${clamp.served}.`,
+      )
+    }
+    return notes
+  }
+
+  get isApproximateLeague(): boolean {
+    return !!this.format && isApproximate(this.format)
+  }
+
+  coverageFor(analysis: TeamAnalysis): ValueCoverage {
+    return analysis.coverage
+  }
+
+  coveragePercent(analysis: TeamAnalysis): number {
+    return Math.round(coverageRatio(analysis.coverage) * 100)
+  }
+
+  coverageLabel(analysis: TeamAnalysis): string {
+    const { valued, rostered } = analysis.coverage
+    return `Valued ${valued} of ${rostered} rostered`
+  }
+
+  hasLowCoverage(analysis: TeamAnalysis): boolean {
+    return isLowCoverage(analysis.coverage)
+  }
+
+  /** The serious case: a player in the STARTING lineup that we can't price. */
+  unvaluedStarterNames(analysis: TeamAnalysis): string[] {
+    return analysis.coverage.unvaluedStarterIds.map((pid) => this.playerName(pid))
   }
 
   get verdictLabel(): string {
@@ -335,11 +442,16 @@ export class TeamAnalyzerComponent implements OnInit {
   }
 
   playerValue(pid: string): number {
-    return this.playerValuesService.value(pid)
+    return this.book?.value(pid).value ?? 0
+  }
+
+  /** True when the value source has no entry for this player. */
+  isUnvalued(pid: string): boolean {
+    return !this.book || !this.book.value(pid).known
   }
 
   pickValue(name: string): number {
-    return this.playerValuesService.pickValue(name)
+    return this.book?.pickValue(name).value ?? 0
   }
 
   playerName(pid: string): string {
@@ -350,7 +462,7 @@ export class TeamAnalyzerComponent implements OnInit {
 
   playerPosition(pid: string): string {
     const p = this.playerMap[pid]
-    return (p as any)?.position ?? this.playerValuesService.position(pid) ?? '?'
+    return (p as any)?.position ?? this.book?.position(pid) ?? '?'
   }
 
   addBalanceSuggestion(suggestion: SuggestedAddOn): void {
@@ -374,7 +486,14 @@ export class TeamAnalyzerComponent implements OnInit {
   private buildRecommendations(): RecommendedTrade[] {
     const my = this.myAnalysis
     if (!my) return []
-    return this.recommendedTradeService.recommend(my, this.analyses, this.rosters, this.playerMap)
+    if (!this.book) return []
+    return this.recommendedTradeService.recommend(
+      my,
+      this.analyses,
+      this.rosters,
+      this.playerMap,
+      this.book,
+    )
   }
 
   loadRecommendation(rec: RecommendedTrade): void {
@@ -399,9 +518,14 @@ export class TeamAnalyzerComponent implements OnInit {
     this.pickerPlayerEntries = (roster?.players ?? [])
       .flatMap((pid) => {
         if (alreadyPicked.has(pid)) return []
-        const value = this.playerValuesService.value(pid)
-        if (value <= 0) return []
-        return [{ playerId: pid, name: this.playerName(pid), position: this.playerPosition(pid), value }]
+        const lookup = this.book?.value(pid)
+        if (!lookup?.known || lookup.value <= 0) return []
+        return [{
+          playerId: pid,
+          name: this.playerName(pid),
+          position: this.playerPosition(pid),
+          value: lookup.value,
+        }]
       })
       .sort((a, b) => b.value - a.value)
 
@@ -414,9 +538,9 @@ export class TeamAnalyzerComponent implements OnInit {
       ...this.tradeSideBPickNames,
     ])
     const currentYear = new Date().getFullYear()
-    this.pickerPickEntries = this.playerValuesService
-      .pickNames(new Set([currentYear, currentYear + 1, currentYear + 2]))
-      .filter((n) => !alreadyPicked.has(n))
+    this.pickerPickEntries = (
+      this.book?.pickNames(new Set([currentYear, currentYear + 1, currentYear + 2])) ?? []
+    ).filter((n: string) => !alreadyPicked.has(n))
 
     this.sidePicker = { side, kind: 'pick', rosterId, teamName, show: true }
   }

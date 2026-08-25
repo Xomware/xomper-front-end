@@ -30,10 +30,32 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
         run: |
-          echo "API_AUTH_TOKEN=$(aws ssm get-parameter --name "/xomper/api/API_AUTH_TOKEN" --with-decryption --query "Parameter.Value" --output text)" >> xomper_credentials.env
-          echo "API_ID=$(aws ssm get-parameter --name "/xomper/api/API_ID" --with-decryption --query "Parameter.Value" --output text)" >> xomper_credentials.env
-          echo "SUPABASE_URL=$(aws ssm get-parameter --name "/xomper/api/SUPABASE_URL" --with-decryption --query "Parameter.Value" --output text)" >> xomper_credentials.env
-          echo "SUPABASE_ANON_KEY=$(aws ssm get-parameter --name "/xomper/api/SUPABASE_ANON_KEY" --with-decryption --query "Parameter.Value" --output text)" >> xomper_credentials.env
+          # Without `set -e` plus an explicit emptiness check, a failed
+          # get-parameter still exits 0: the command substitution yields "",
+          # `echo` succeeds, and the job proceeds to build and DEPLOY an app
+          # with blank credentials. Observed live on 2026-08-24 — missing AWS
+          # credentials produced a green "Retrieve SSM Parameters" step.
+          set -euo pipefail
+
+          fetch_param() {
+            local name="$1"
+            local value
+            value="$(aws ssm get-parameter \
+              --name "/xomper/api/${name}" \
+              --with-decryption \
+              --query "Parameter.Value" \
+              --output text)"
+            if [ -z "$value" ] || [ "$value" = "None" ]; then
+              echo "::error::SSM parameter /xomper/api/${name} resolved empty. Refusing to build with blank credentials."
+              exit 1
+            fi
+            echo "${name}=${value}" >> xomper_credentials.env
+          }
+
+          fetch_param API_AUTH_TOKEN
+          fetch_param API_ID
+          fetch_param SUPABASE_URL
+          fetch_param SUPABASE_ANON_KEY
 
       - name: Mask sensitive values
         run: |
@@ -54,6 +76,15 @@ jobs:
           sed -i "s|apiId: '---'|apiId: '$(grep 'API_ID' xomper_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
           sed -i "s|supabaseUrl: '---'|supabaseUrl: '$(grep 'SUPABASE_URL' xomper_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
           sed -i "s|supabaseAnonKey: '---'|supabaseAnonKey: '$(grep 'SUPABASE_ANON_KEY' xomper_credentials.env | cut -d'=' -f2)'|g" src/environments/environment.ts
+
+      - name: Verify no placeholder values survived injection
+        run: |
+          set -euo pipefail
+          if grep -q "'---'" src/environments/environment.ts; then
+            echo "::error::environment.ts still contains '---' placeholders after injection."
+            grep -n "'---'" src/environments/environment.ts
+            exit 1
+          fi
 
       - name: Clean up credentials
         if: always()
