@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core'
 import { NgClass, NgFor, NgIf } from '@angular/common'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
-import { RouterLink, RouterLinkActive } from '@angular/router'
+import { Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { CognitoService } from 'src/app/services/cognito.service'
 import { UserProfileService, UserProfile } from 'src/app/services/user-profile.service'
 import { UserService } from 'src/app/services/user.service'
 import { SidebarSection, SidebarEntry } from './sidebar.entries'
@@ -19,9 +20,14 @@ export class SidebarComponent {
   /** Emitted when an entry is activated (mobile drawer uses this to close). */
   @Output() entryActivated = new EventEmitter<void>()
 
+  /** Whether the account dropdown is showing. */
+  profileMenuOpen = false
+
   constructor(
     public profiles: UserProfileService,
     public userService: UserService,
+    private cognito: CognitoService,
+    private router: Router,
     private sanitizer: DomSanitizer,
   ) {}
 
@@ -50,6 +56,45 @@ export class SidebarComponent {
   /** Bypass Angular's HTML sanitizer for trusted inline SVG strings. */
   safeIcon(entry: SidebarEntry): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(entry.svg)
+  }
+
+  toggleProfileMenu(event: Event): void {
+    // Stop the document listener below from seeing this click and closing
+    // the menu in the same tick it opens.
+    event.stopPropagation()
+    this.profileMenuOpen = !this.profileMenuOpen
+  }
+
+  closeProfileMenu(): void {
+    this.profileMenuOpen = false
+  }
+
+  /** Any click outside the menu dismisses it. */
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.closeProfileMenu()
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeProfileMenu()
+  }
+
+  signOut(): void {
+    this.closeProfileMenu()
+    this.cognito.signOut().subscribe({
+      next: () => this.afterSignOut(),
+      // Amplify can reject if the session is already gone. The user asked to
+      // leave either way, so clear local state and go rather than stranding
+      // them on a page they no longer have a session for.
+      error: () => this.afterSignOut(),
+    })
+  }
+
+  private afterSignOut(): void {
+    this.profiles.clear()
+    this.userService.reset()
+    this.router.navigate(['/login'])
   }
 
   onEntryClick(): void {
