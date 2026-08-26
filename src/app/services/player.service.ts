@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, map, of, shareReplay } from 'rxjs'
+import { Observable, catchError, map, of, shareReplay } from 'rxjs'
 import { Player } from '../models/player.interface'
 import { PlayerModel } from '../models/player.model'
+import { environment } from '../../environments/environment'
+
+interface WarehousePlayersResponse {
+  count: number
+  players: Record<string, Player>
+}
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +16,7 @@ import { PlayerModel } from '../models/player.model'
 export class PlayerService {
   private currentPlayer: PlayerModel | null = null
   private baseUrl = 'https://api.sleeper.app/v1'
+  private readonly warehouseUrl = `https://${environment.apiId}.execute-api.us-east-1.amazonaws.com/dev`
 
   // Cached player map - fetched once per session
   private playersCache$: Observable<Record<string, Player>> | null = null
@@ -18,11 +25,32 @@ export class PlayerService {
 
   // -------- PLAYER MAP CACHE --------
 
+  /**
+   * The player map, from the warehouse where possible.
+   *
+   * Sleeper's `/players/nfl` is **14.6 MB** and this used to download all of
+   * it on every session just to resolve names and positions. The warehouse
+   * serves the same map, carrying only the fields this app actually reads, at
+   * roughly 758 KB — about 19x smaller.
+   *
+   * Falls back to Sleeper if the warehouse is unreachable. Without a player
+   * map almost every surface breaks: rosters render as ids, position
+   * bucketing collapses, and the analyzer has nothing to group by. A slower
+   * load is a far better failure than a blank app.
+   */
   private loadAllPlayers(): Observable<Record<string, Player>> {
     if (!this.playersCache$) {
       this.playersCache$ = this.http
-        .get<Record<string, Player>>(`${this.baseUrl}/players/nfl`)
-        .pipe(shareReplay(1))
+        .get<WarehousePlayersResponse>(`${this.warehouseUrl}/players/list`)
+        .pipe(
+          map((response) => response?.players ?? {}),
+          catchError(() =>
+            this.http.get<Record<string, Player>>(
+              `${this.baseUrl}/players/nfl`,
+            ),
+          ),
+          shareReplay(1),
+        )
     }
     return this.playersCache$
   }
