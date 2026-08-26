@@ -30,6 +30,18 @@ const routes: Routes = [
   // to /home inside LoginComponent.ngOnInit.
   { path: 'login', component: LoginComponent },
 
+  // Cognito hosted redirect lands here after Google sign-in. Deliberately
+  // NOT guarded: AuthGuard would run before Amplify finishes exchanging the
+  // code, redirect to /login, and strip the `?code=` so it can never be
+  // redeemed.
+  {
+    path: 'auth/callback',
+    loadComponent: () =>
+      import('./pages/auth-callback/auth-callback.component').then(
+        (m) => m.AuthCallbackComponent,
+      ),
+  },
+
   // Landing hub — auth-gated. AuthGuard redirects unauthed → /login.
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
 

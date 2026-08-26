@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core'
 import { Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { Subject } from 'rxjs'
-import { SupabaseService } from 'src/app/services/supabase.service'
+import { CognitoService } from 'src/app/services/cognito.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { TeamService } from 'src/app/services/team.service'
 import { UserService } from 'src/app/services/user.service'
@@ -32,7 +32,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
     private leagueService: LeagueService,
     private userService: UserService,
     private teamService: TeamService,
-    private supabaseService: SupabaseService
+    private cognito: CognitoService
   ) {
     this.checkIfMobile()
   }
@@ -89,7 +89,7 @@ export class ToolbarComponent implements OnInit, OnDestroy {
 
   isLeagueRouteActive(): boolean {
     const url = this.router.url
-    return url.includes('/my-league') || url.includes('/taxi-squad') || url.includes('/draft-history') || url.includes('/matchup-history')
+    return url.includes('/my-league') || url.includes('/draft-history')
   }
 
   get leagueId(): string | undefined {
@@ -109,11 +109,11 @@ export class ToolbarComponent implements OnInit, OnDestroy {
   }
 
   isLoggedIn(): boolean {
-    return this.supabaseService.isAuthenticated()
+    return this.cognito.isAuthenticated()
   }
 
   signOut(): void {
-    this.supabaseService.signOut().subscribe(() => {
+    this.cognito.signOut().subscribe(() => {
       this.leagueService.reset()
       this.userService.reset()
       this.teamService.reset()

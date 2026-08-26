@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { NgClass, NgFor, NgIf } from '@angular/common'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { RouterLink, RouterLinkActive } from '@angular/router'
-import { SupabaseService, Profile } from 'src/app/services/supabase.service'
+import { UserProfileService, UserProfile } from 'src/app/services/user-profile.service'
 import { UserService } from 'src/app/services/user.service'
 import { SidebarSection, SidebarEntry } from './sidebar.entries'
 
@@ -20,21 +20,21 @@ export class SidebarComponent {
   @Output() entryActivated = new EventEmitter<void>()
 
   constructor(
-    public supabase: SupabaseService,
+    public profiles: UserProfileService,
     public userService: UserService,
     private sanitizer: DomSanitizer,
   ) {}
 
-  get profile(): Profile | null {
-    return this.supabase.getProfile()
+  get profile(): UserProfile | null {
+    return this.profiles.getProfile()
   }
 
   get displayName(): string {
-    return this.profile?.display_name ?? this.profile?.email ?? 'My Profile'
+    return this.profile?.sleeperUsername || this.profile?.email || 'My Profile'
   }
 
   get avatarUrl(): string | null {
-    const avatar = this.profile?.sleeper_avatar
+    const avatar = this.profile?.sleeperAvatar
     if (!avatar) return null
     return this.userService.buildAvatar(avatar)
   }

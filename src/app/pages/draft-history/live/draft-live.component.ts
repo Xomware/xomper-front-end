@@ -11,7 +11,7 @@ import { DraftPick } from 'src/app/models/draft.interface'
 import { User } from 'src/app/models/user.interface'
 import { Roster } from 'src/app/models/roster.interface'
 import { LoaderComponent } from '../../../components/loader/loader.component'
-import { SupabaseService } from 'src/app/services/supabase.service'
+import { UserProfileService } from 'src/app/services/user-profile.service'
 
 type ViewMode = 'rounds' | 'board'
 type PickFilter = 'all' | 'mine'
@@ -83,7 +83,7 @@ export class DraftLiveComponent implements OnInit {
   constructor(
     private leagueService: LeagueService,
     private draftService: DraftService,
-    private supabase: SupabaseService,
+    private profiles: UserProfileService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
@@ -98,8 +98,8 @@ export class DraftLiveComponent implements OnInit {
     this.year = this.route.parent?.snapshot.paramMap.get('year') ?? ''
 
     // Resolve my sleeper user id from profile
-    const profile = this.supabase.getProfile()
-    this.mySleeperUserId = profile?.sleeper_user_id ?? null
+    const profile = this.profiles.getProfile()
+    this.mySleeperUserId = profile?.sleeperUserId || null
 
     this.loadDraft()
   }

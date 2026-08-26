@@ -2,37 +2,34 @@ import { Injectable } from '@angular/core'
 import { CanActivate, Router } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
 import { filter, take } from 'rxjs/operators'
-import { SupabaseService } from '../services/supabase.service'
+import { CognitoService } from '../services/cognito.service'
 
 /**
  * AdminGuard — async canActivate that avoids the cold-load race.
  *
- * Problem: SupabaseService.isAdmin is derived from _whitelistedUser which
- * resolves asynchronously after session init. Reading it synchronously on
- * cold nav returns false → incorrect redirect to /home for valid admins.
+ * `isAdmin` is derived from the `cognito:groups` claim, which is only
+ * available once the session has resolved. Reading it synchronously on a cold
+ * navigation returns false and redirects a valid admin to /home.
  *
- * Fix: wait for initialized$ to emit true, THEN read isAdmin$ (Observable).
- * Both are BehaviorSubject-backed so they replay the current value immediately
- * once initialized — no extra round-trip.
+ * Waiting on `isReady$` first fixes that. It is BehaviorSubject-backed, so
+ * once resolved it replays immediately and costs nothing on warm nav.
+ *
+ * Admin used to mean a `whitelisted_users` row with `role = 'admin'`. It now
+ * means membership of the `admin` group on the shared pool, which is checked
+ * again server-side from the same claim — the guard only decides what to
+ * render.
  */
 @Injectable({ providedIn: 'root' })
 export class AdminGuard implements CanActivate {
   constructor(
-    private supabaseService: SupabaseService,
+    private cognito: CognitoService,
     private router: Router,
   ) {}
 
   async canActivate(): Promise<boolean> {
-    // Wait until the Supabase session + whitelisted_user row have resolved.
-    await firstValueFrom(
-      this.supabaseService.initialized$.pipe(filter((v) => v === true)),
-    )
+    await firstValueFrom(this.cognito.isReady$.pipe(filter((v) => v === true)))
 
-    // Read the current admin state (replays immediately from BehaviorSubject).
-    const isAdmin = await firstValueFrom(
-      this.supabaseService.isAdmin$.pipe(take(1)),
-    )
-
+    const isAdmin = await firstValueFrom(this.cognito.isAdmin$.pipe(take(1)))
     if (isAdmin) return true
 
     this.router.navigate(['/home'])

@@ -1,127 +1,174 @@
 /**
- * Regression tests for the cold-load race that broke Google sign-in.
+ * Tests for AuthGuard.
  *
- * With PKCE, OAuth returns the user to `/home?code=...` and supabase-js has to
- * exchange that code before a session exists. The guard used to read the
- * session synchronously, find nothing, and redirect to /login — which dropped
- * `?code=` from the URL so the exchange could never complete. The user landed
- * back on the login page having signed in successfully, with no error shown.
+ * Each case here corresponds to a way the app has actually broken:
+ *
+ *  - deciding before the session resolved bounced authenticated users to
+ *    /login and discarded the OAuth code
+ *  - nothing routed unlinked accounts to /link-sleeper, so they sat on an
+ *    empty app that looked broken
+ *  - `myUser` was only ever set on the login path, so a refresh emptied the
+ *    app for a perfectly valid session
  */
 import { BehaviorSubject, of, throwError } from 'rxjs'
 import { AuthGuard } from './auth.guard'
-import { SupabaseService } from '../services/supabase.service'
-import { LeagueService } from '../services/league.service'
+import { UserProfile } from '../services/user-profile.service'
 
-/** The guard now takes (route, state); tests only care about the url. */
-function canActivate(guard: AuthGuard, url = '/home') {
-  return guard.canActivate({} as any, { url } as any)
+function profile(overrides: Partial<UserProfile> = {}): UserProfile {
+  return {
+    userId: 'cog-1',
+    email: 'd@x.com',
+    sleeperUserId: '594625531702460416',
+    sleeperUsername: 'domgiordano',
+    sleeperAvatar: '',
+    hasLinkedSleeper: true,
+    createdAt: '',
+    updatedAt: '',
+    ...overrides,
+  }
 }
 
-describe('AuthGuard', () => {
-  let initialized: BehaviorSubject<boolean>
-  let authenticated: boolean
-  let hasLink: boolean
-  let navigate: jasmine.Spy
-  let guard: AuthGuard
+interface Harness {
+  guard: AuthGuard
+  router: { navigate: jasmine.Spy }
+  userService: { myUserSelected: () => boolean; setMyUser: jasmine.Spy; searchUser: jasmine.Spy }
+  ready$: BehaviorSubject<boolean>
+}
 
-  function build(loadMyLeague = () => of({} as any)) {
-    const supabase = {
-      initialized$: initialized.asObservable(),
-      isAuthenticated: () => authenticated,
-      hasLinkedSleeper: () => Promise.resolve(hasLink),
-    } as unknown as SupabaseService
+function harness(options: {
+  authenticated?: boolean
+  profile?: UserProfile | null
+  profileErrors?: boolean
+  myUserAlreadySet?: boolean
+  ready?: boolean
+} = {}): Harness {
+  const {
+    authenticated = true,
+    profile: prof = profile(),
+    profileErrors = false,
+    myUserAlreadySet = false,
+    ready = true,
+  } = options
 
-    const league = { loadMyLeague } as unknown as LeagueService
-    navigate = jasmine.createSpy('navigate')
-    guard = new AuthGuard(supabase, league, { navigate } as any)
+  const ready$ = new BehaviorSubject<boolean>(ready)
+  const router = { navigate: jasmine.createSpy('navigate') }
+
+  const userService = {
+    myUserSelected: () => myUserAlreadySet,
+    setMyUser: jasmine.createSpy('setMyUser'),
+    searchUser: jasmine.createSpy('searchUser').and.returnValue(
+      of({ user_id: '594625531702460416', display_name: 'Dom' }),
+    ),
   }
 
-  beforeEach(() => {
-    initialized = new BehaviorSubject<boolean>(false)
-    authenticated = false
-    hasLink = true
+  const guard = new AuthGuard(
+    {
+      isReady$: ready$.asObservable(),
+      isAuthenticated: () => authenticated,
+    } as never,
+    {
+      load: () =>
+        profileErrors ? throwError(() => new Error('boom')) : of(prof),
+    } as never,
+    userService as never,
+    { loadMyLeague: () => of({}) } as never,
+    router as never,
+  )
+
+  return { guard, router, userService, ready$ }
+}
+
+const route = {} as never
+const state = (url: string) => ({ url }) as never
+
+describe('AuthGuard', () => {
+  it('allows a signed-in, linked user through', async () => {
+    const { guard, router } = harness()
+
+    await expectAsync(guard.canActivate(route, state('/home'))).toBeResolvedTo(true)
+    expect(router.navigate).not.toHaveBeenCalled()
   })
 
-  it('waits for session init instead of deciding on an unresolved session', async () => {
-    build()
+  it('redirects an unauthenticated user to /login', async () => {
+    const { guard, router } = harness({ authenticated: false })
+
+    await expectAsync(guard.canActivate(route, state('/home'))).toBeResolvedTo(false)
+    expect(router.navigate).toHaveBeenCalledWith(['/login'])
+  })
+
+  it('waits for the session before deciding', async () => {
+    const { guard, router, ready$ } = harness({ ready: false })
+
     let settled = false
-    const result = canActivate(guard).then((v) => {
+    const decision = guard.canActivate(route, state('/home')).then((v) => {
       settled = true
       return v
     })
 
-    // Session has not resolved yet: the guard must not have decided anything,
-    // and above all must not have navigated away and dropped the PKCE code.
     await Promise.resolve()
+    // Deciding here would send an authenticated user to /login and drop the
+    // OAuth code before it could be redeemed.
     expect(settled).toBe(false)
-    expect(navigate).not.toHaveBeenCalled()
+    expect(router.navigate).not.toHaveBeenCalled()
 
-    // The code exchange completes and a session appears.
-    authenticated = true
-    initialized.next(true)
-
-    expect(await result).toBe(true)
-    expect(navigate).not.toHaveBeenCalled()
+    ready$.next(true)
+    await expectAsync(decision).toBeResolvedTo(true)
   })
 
-  it('redirects to login once init settles with no session', async () => {
-    build()
-    const result = canActivate(guard)
-    initialized.next(true)
+  it('sends an unlinked account to /link-sleeper', async () => {
+    const { guard, router } = harness({
+      profile: profile({ hasLinkedSleeper: false, sleeperUserId: '' }),
+    })
 
-    expect(await result).toBe(false)
-    expect(navigate).toHaveBeenCalledWith(['/login'])
+    await expectAsync(guard.canActivate(route, state('/home'))).toBeResolvedTo(false)
+    expect(router.navigate).toHaveBeenCalledWith(['/link-sleeper'])
   })
 
-  it('allows an already-initialized authenticated user straight through', async () => {
-    initialized.next(true)
-    authenticated = true
-    build()
+  it('does not redirect when already on the link page', async () => {
+    const { guard, router } = harness({
+      profile: profile({ hasLinkedSleeper: false, sleeperUserId: '' }),
+    })
 
-    expect(await canActivate(guard)).toBe(true)
-    expect(navigate).not.toHaveBeenCalled()
+    // The link page is itself guarded, so redirecting from it loops forever.
+    await expectAsync(
+      guard.canActivate(route, state('/link-sleeper')),
+    ).toBeResolvedTo(true)
+    expect(router.navigate).not.toHaveBeenCalled()
   })
 
-  it('does not lock out an authenticated user when the league fails to load', async () => {
-    initialized.next(true)
-    authenticated = true
-    build(() => throwError(() => new Error('league unavailable')))
+  it('resolves myUser from the profile', async () => {
+    const { guard, userService } = harness()
 
-    expect(await canActivate(guard)).toBe(true)
-    expect(navigate).not.toHaveBeenCalled()
+    await guard.canActivate(route, state('/home'))
+
+    // Without this a refresh or deep link leaves every getMyUser() consumer
+    // looking at null for a perfectly valid session.
+    expect(userService.searchUser).toHaveBeenCalledWith('594625531702460416')
+    expect(userService.setMyUser).toHaveBeenCalled()
   })
 
-  // --- Sleeper link gate ----------------------------------------------------
-  // All six accounts sat unlinked because nothing ever routed anyone to the
-  // link page, and the app rendered empty rather than incomplete.
+  it('does not refetch myUser when it is already set', async () => {
+    const { guard, userService } = harness({ myUserAlreadySet: true })
 
-  it('sends a signed-in account with no Sleeper link to the link page', async () => {
-    initialized.next(true)
-    authenticated = true
-    hasLink = false
-    build()
+    await guard.canActivate(route, state('/home'))
 
-    expect(await canActivate(guard)).toBe(false)
-    expect(navigate).toHaveBeenCalledWith(['/link-sleeper'])
+    expect(userService.searchUser).not.toHaveBeenCalled()
   })
 
-  it('does not bounce the link page to itself', async () => {
-    initialized.next(true)
-    authenticated = true
-    hasLink = false
-    build()
+  it('lets the user through when Sleeper cannot be reached', async () => {
+    const { guard, userService, router } = harness()
+    userService.searchUser.and.returnValue(throwError(() => new Error('down')))
 
-    expect(await canActivate(guard, '/link-sleeper')).toBe(true)
-    expect(navigate).not.toHaveBeenCalled()
+    await expectAsync(guard.canActivate(route, state('/home'))).toBeResolvedTo(true)
+    expect(router.navigate).not.toHaveBeenCalled()
   })
 
-  it('lets a linked account straight through', async () => {
-    initialized.next(true)
-    authenticated = true
-    hasLink = true
-    build()
+  it('lets the user through when the profile load fails', async () => {
+    const { guard, router } = harness({ profileErrors: true })
 
-    expect(await canActivate(guard)).toBe(true)
-    expect(navigate).not.toHaveBeenCalled()
+    // A sparse app beats trapping someone in a redirect to a page they have
+    // already completed.
+    await expectAsync(guard.canActivate(route, state('/home'))).toBeResolvedTo(true)
+    expect(router.navigate).not.toHaveBeenCalled()
   })
 })

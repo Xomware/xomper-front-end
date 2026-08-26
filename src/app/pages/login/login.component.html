@@ -98,13 +98,21 @@
               (keydown)="onEmailKeydown($event)"
               autocomplete="new-password"
             />
+            <p class="field-hint">
+              At least 8 characters, with an uppercase letter, a lowercase letter and a number.
+            </p>
           </ng-container>
 
           <p class="auth-error" *ngIf="authError" role="alert">{{ authError }}</p>
+          <p class="auth-notice" *ngIf="authNotice" role="status">{{ authNotice }}</p>
 
           <button class="auth-btn submit-btn" (click)="submitEmailAuth()">
             {{ emailMode === 'signin' ? 'Sign In' : 'Sign Up' }}
           </button>
+
+          <p class="toggle-mode" *ngIf="emailMode === 'signin'">
+            <a (click)="showForgotPassword()" (keydown.enter)="showForgotPassword()" tabindex="0">Forgot your password?</a>
+          </p>
 
           <p class="toggle-mode">
             <ng-container *ngIf="emailMode === 'signin'">
@@ -116,6 +124,107 @@
               <a (click)="toggleEmailMode()" (keydown.enter)="toggleEmailMode()" tabindex="0">Sign in</a>
             </ng-container>
           </p>
+        </div>
+      </ng-container>
+
+      <!-- ==================== VERIFY MODE ==================== -->
+      <ng-container *ngIf="authMode === 'verify'">
+        <button class="back-btn" (click)="backToOptions()" aria-label="Back to sign in options">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+          Back
+        </button>
+
+        <h2 class="login-title">Confirm your email</h2>
+
+        <div class="email-form" role="form">
+          <p class="auth-notice" *ngIf="authNotice" role="status">{{ authNotice }}</p>
+
+          <label for="code-input" class="sr-only">Confirmation code</label>
+          <input
+            id="code-input"
+            type="text"
+            class="form-input"
+            placeholder="Confirmation code"
+            [(ngModel)]="code"
+            (keydown)="onVerifyKeydown($event)"
+            autocomplete="one-time-code"
+            inputmode="numeric"
+          />
+
+          <p class="auth-error" *ngIf="authError" role="alert">{{ authError }}</p>
+
+          <button class="auth-btn submit-btn" (click)="submitVerification()">Confirm</button>
+
+          <p class="toggle-mode">
+            Didn't get it?
+            <a (click)="resendCode()" (keydown.enter)="resendCode()" tabindex="0">Send a new code</a>
+          </p>
+        </div>
+      </ng-container>
+
+      <!-- ==================== FORGOT PASSWORD MODE ==================== -->
+      <ng-container *ngIf="authMode === 'forgot'">
+        <button class="back-btn" (click)="showEmailForm()" aria-label="Back to sign in">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+          Back
+        </button>
+
+        <h2 class="login-title">Reset your password</h2>
+
+        <div class="email-form" role="form">
+          <label for="reset-email-input" class="sr-only">Email address</label>
+          <input
+            id="reset-email-input"
+            type="email"
+            class="form-input"
+            placeholder="Email address"
+            [(ngModel)]="email"
+            autocomplete="email"
+          />
+
+          <button class="auth-btn email-btn" (click)="startPasswordReset()">Email me a code</button>
+
+          <p class="auth-notice" *ngIf="authNotice" role="status">{{ authNotice }}</p>
+
+          <label for="reset-code-input" class="sr-only">Reset code</label>
+          <input
+            id="reset-code-input"
+            type="text"
+            class="form-input"
+            placeholder="Reset code"
+            [(ngModel)]="code"
+            autocomplete="one-time-code"
+            inputmode="numeric"
+          />
+          <label for="new-password-input" class="sr-only">New password</label>
+          <input
+            id="new-password-input"
+            type="password"
+            class="form-input"
+            placeholder="New password"
+            [(ngModel)]="password"
+            autocomplete="new-password"
+          />
+          <label for="confirm-new-password-input" class="sr-only">Confirm new password</label>
+          <input
+            id="confirm-new-password-input"
+            type="password"
+            class="form-input"
+            placeholder="Confirm new password"
+            [(ngModel)]="confirmPassword"
+            autocomplete="new-password"
+          />
+          <p class="field-hint">
+            At least 8 characters, with an uppercase letter, a lowercase letter and a number.
+          </p>
+
+          <p class="auth-error" *ngIf="authError" role="alert">{{ authError }}</p>
+
+          <button class="auth-btn submit-btn" (click)="confirmPasswordReset()">Set new password</button>
         </div>
       </ng-container>
 

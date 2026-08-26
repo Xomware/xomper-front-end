@@ -225,6 +225,20 @@
   margin: 0;
 }
 
+.auth-notice {
+  color: $success-green;
+  font-size: $text-sm;
+  text-align: center;
+  margin: 0;
+}
+
+.field-hint {
+  color: $text-secondary;
+  font-size: $text-xs;
+  text-align: center;
+  margin: 0;
+}
+
 .toggle-mode {
   font-size: $text-sm;
   color: $text-secondary;

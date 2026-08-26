@@ -19,6 +19,12 @@ export const environment = {
   apiId: '---',
   supabaseUrl: 'https://visual-tests.invalid',
   supabaseAnonKey: 'visual-tests-placeholder',
+  // Structurally valid so Amplify.configure() does not throw during the
+  // visual run; no request is ever made against them.
+  awsRegion: 'us-east-1',
+  cognitoUserPoolId: 'us-east-1_visualtest',
+  cognitoClientId: 'visualtestsplaceholderclientid',
+  cognitoDomain: 'visual-tests.invalid',
   // Default league (transitional — removed in Phase 4 with the follow table).
   // 2026 season id. The 2025 id 1181789700187090944 is status=complete;
   // Sleeper mints a new league id each season.
