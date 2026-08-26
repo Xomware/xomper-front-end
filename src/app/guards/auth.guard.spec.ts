@@ -12,9 +12,15 @@ import { AuthGuard } from './auth.guard'
 import { SupabaseService } from '../services/supabase.service'
 import { LeagueService } from '../services/league.service'
 
+/** The guard now takes (route, state); tests only care about the url. */
+function canActivate(guard: AuthGuard, url = '/home') {
+  return guard.canActivate({} as any, { url } as any)
+}
+
 describe('AuthGuard', () => {
   let initialized: BehaviorSubject<boolean>
   let authenticated: boolean
+  let hasLink: boolean
   let navigate: jasmine.Spy
   let guard: AuthGuard
 
@@ -22,6 +28,7 @@ describe('AuthGuard', () => {
     const supabase = {
       initialized$: initialized.asObservable(),
       isAuthenticated: () => authenticated,
+      hasLinkedSleeper: () => Promise.resolve(hasLink),
     } as unknown as SupabaseService
 
     const league = { loadMyLeague } as unknown as LeagueService
@@ -32,12 +39,13 @@ describe('AuthGuard', () => {
   beforeEach(() => {
     initialized = new BehaviorSubject<boolean>(false)
     authenticated = false
+    hasLink = true
   })
 
   it('waits for session init instead of deciding on an unresolved session', async () => {
     build()
     let settled = false
-    const result = guard.canActivate().then((v) => {
+    const result = canActivate(guard).then((v) => {
       settled = true
       return v
     })
@@ -58,7 +66,7 @@ describe('AuthGuard', () => {
 
   it('redirects to login once init settles with no session', async () => {
     build()
-    const result = guard.canActivate()
+    const result = canActivate(guard)
     initialized.next(true)
 
     expect(await result).toBe(false)
@@ -70,7 +78,7 @@ describe('AuthGuard', () => {
     authenticated = true
     build()
 
-    expect(await guard.canActivate()).toBe(true)
+    expect(await canActivate(guard)).toBe(true)
     expect(navigate).not.toHaveBeenCalled()
   })
 
@@ -79,7 +87,41 @@ describe('AuthGuard', () => {
     authenticated = true
     build(() => throwError(() => new Error('league unavailable')))
 
-    expect(await guard.canActivate()).toBe(true)
+    expect(await canActivate(guard)).toBe(true)
+    expect(navigate).not.toHaveBeenCalled()
+  })
+
+  // --- Sleeper link gate ----------------------------------------------------
+  // All six accounts sat unlinked because nothing ever routed anyone to the
+  // link page, and the app rendered empty rather than incomplete.
+
+  it('sends a signed-in account with no Sleeper link to the link page', async () => {
+    initialized.next(true)
+    authenticated = true
+    hasLink = false
+    build()
+
+    expect(await canActivate(guard)).toBe(false)
+    expect(navigate).toHaveBeenCalledWith(['/link-sleeper'])
+  })
+
+  it('does not bounce the link page to itself', async () => {
+    initialized.next(true)
+    authenticated = true
+    hasLink = false
+    build()
+
+    expect(await canActivate(guard, '/link-sleeper')).toBe(true)
+    expect(navigate).not.toHaveBeenCalled()
+  })
+
+  it('lets a linked account straight through', async () => {
+    initialized.next(true)
+    authenticated = true
+    hasLink = true
+    build()
+
+    expect(await canActivate(guard)).toBe(true)
     expect(navigate).not.toHaveBeenCalled()
   })
 })
