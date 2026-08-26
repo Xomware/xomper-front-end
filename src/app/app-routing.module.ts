@@ -11,9 +11,7 @@ import { AuthGuard } from './guards/auth.guard'
 import { AdminGuard } from './guards/admin.guard'
 import { MyTeamComponent } from './pages/my-team/my-team.component'
 import { SelectedTeamComponent } from './pages/selected-team/selected-team.component'
-import { TaxiSquadComponent } from './pages/taxi-squad/taxi-squad.component'
 import { DraftHistoryComponent } from './pages/draft-history/draft-history.component'
-import { MatchupHistoryComponent } from './pages/matchup-history/matchup-history.component'
 import { SettingsComponent } from './pages/settings/settings.component'
 
 import { LinkSleeperComponent } from './pages/link-sleeper/link-sleeper.component'
@@ -68,48 +66,6 @@ const routes: Routes = [
         loadComponent: () =>
           import('./pages/league/playoffs/playoffs.component').then(
             (m) => m.PlayoffsComponent,
-          ),
-      },
-      {
-        path: 'world-cup',
-        loadComponent: () =>
-          import('./pages/league/world-cup/world-cup.component').then(
-            (m) => m.WorldCupComponent,
-          ),
-      },
-      {
-        path: 'rulebook',
-        loadComponent: () =>
-          import('./pages/league/rules/rulebook/rulebook.component').then(
-            (m) => m.RulebookComponent,
-          ),
-      },
-      {
-        path: 'scoring',
-        loadComponent: () =>
-          import('./pages/league/rules/scoring/scoring.component').then(
-            (m) => m.ScoringComponent,
-          ),
-      },
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('./pages/league/rules/league-settings/league-settings.component').then(
-            (m) => m.LeagueSettingsComponent,
-          ),
-      },
-      {
-        path: 'payouts',
-        loadComponent: () =>
-          import('./pages/league/rules/payouts/payouts.component').then(
-            (m) => m.PayoutsComponent,
-          ),
-      },
-      {
-        path: 'rule-proposals',
-        loadComponent: () =>
-          import('./pages/league/rules/rule-proposals/rule-proposals.component').then(
-            (m) => m.RuleProposalsComponent,
           ),
       },
       {
@@ -302,7 +258,6 @@ const routes: Routes = [
   { path: 'my-team', redirectTo: 'team', pathMatch: 'full' },
 
   // Authenticated — taxi squad and other non-redirected MY routes
-  { path: 'taxi-squad', component: TaxiSquadComponent, canActivate: [AuthGuard] },
 
   // Account setup (authenticated)
   { path: 'link-sleeper', component: LinkSleeperComponent, canActivate: [AuthGuard] },
@@ -350,7 +305,6 @@ const routes: Routes = [
       { path: '', redirectTo: 'live', pathMatch: 'full' },
     ],
   },
-  { path: 'matchup-history', component: MatchupHistoryComponent, canActivate: [AuthGuard] },
 
   // Catch-all
   { path: '**', redirectTo: '/home' },
