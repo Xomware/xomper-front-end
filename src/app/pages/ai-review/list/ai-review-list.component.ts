@@ -10,7 +10,7 @@ import {
 import { NgFor, NgIf } from '@angular/common'
 import { Router } from '@angular/router'
 import { AiReviewService } from 'src/app/services/ai-review.service'
-import { SupabaseService } from 'src/app/services/supabase.service'
+import { CognitoService } from 'src/app/services/cognito.service'
 import { AiReport } from 'src/app/models/ai-report.model'
 import { AiReportCardRowComponent } from 'src/app/components/ai-report-card-row/ai-report-card-row.component'
 
@@ -41,7 +41,7 @@ export class AiReviewListComponent implements OnInit, OnDestroy, AfterViewChecke
 
   constructor(
     private aiReview: AiReviewService,
-    private supabase: SupabaseService,
+    private cognito: CognitoService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -61,7 +61,7 @@ export class AiReviewListComponent implements OnInit, OnDestroy, AfterViewChecke
   loadFirst(): void {
     this.isLoading = true
     this.hasError = false
-    this.aiReview.list({ forUser: { isAdmin: this.supabase.isAdmin } }).subscribe({
+    this.aiReview.list({ forUser: { isAdmin: this.cognito.isAdmin } }).subscribe({
       next: result => {
         this.reports = result.rows
         this.nextCursor = result.nextCursor
@@ -83,7 +83,7 @@ export class AiReviewListComponent implements OnInit, OnDestroy, AfterViewChecke
   private loadMore(): void {
     if (!this.nextCursor || this.isLoadingMore) return
     this.isLoadingMore = true
-    this.aiReview.loadMore(this.nextCursor, { forUser: { isAdmin: this.supabase.isAdmin } }).subscribe({
+    this.aiReview.loadMore(this.nextCursor, { forUser: { isAdmin: this.cognito.isAdmin } }).subscribe({
       next: result => {
         this.reports = [...this.reports, ...result.rows]
         this.nextCursor = result.nextCursor

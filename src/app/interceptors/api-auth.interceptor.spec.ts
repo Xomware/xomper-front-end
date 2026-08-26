@@ -1,68 +1,89 @@
 /**
  * Tests for the API auth interceptor.
  *
- * This is the fix for a live break: the backend authorizer verifies Supabase
- * ES256 tokens against the project JWKS, while the frontend was sending a
- * static HS256 token baked into the bundle. CloudWatch recorded zero Allow
- * decisions in seven days — every admin, email, announcements, audit, cron and
- * AI-review call was returning 403.
+ * The failure this guards against is silent: sending the wrong token, or no
+ * token, produces a 403 from API Gateway that looks like a backend problem.
+ * That is exactly what happened before the interceptor existed — a static
+ * build-time token went up, the authorizer could not find a signing key for
+ * it, and every authenticated endpoint returned 403 for seven days.
  */
 import { HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http'
 import { TestBed } from '@angular/core/testing'
-import { Observable, of, lastValueFrom } from 'rxjs'
+import { Observable, of, firstValueFrom } from 'rxjs'
 import { apiAuthInterceptor } from './api-auth.interceptor'
-import { SupabaseService } from '../services/supabase.service'
+import { CognitoService } from '../services/cognito.service'
 
-const API_URL = 'https://abc123.execute-api.us-east-1.amazonaws.com/dev/admin/list'
-const SLEEPER_URL = 'https://api.sleeper.app/v1/league/123'
-
-function runWith(token: string | null, url: string) {
-  TestBed.configureTestingModule({
-    providers: [
-      {
-        provide: SupabaseService,
-        useValue: { getAccessToken: () => Promise.resolve(token) },
-      },
-    ],
-  })
-
-  const req = new HttpRequest('GET', url)
-  let seen: HttpRequest<unknown> | null = null
-
-  const next: HttpHandlerFn = (r): Observable<HttpEvent<unknown>> => {
-    seen = r
-    return of({} as HttpEvent<unknown>)
-  }
-
-  return TestBed.runInInjectionContext(async () => {
-    await lastValueFrom(apiAuthInterceptor(req, next))
-    return seen!
-  })
-}
+const API_URL = 'https://abc123.execute-api.us-east-1.amazonaws.com/dev/me/profile'
+const SLEEPER_URL = 'https://api.sleeper.app/v1/user/12345'
 
 describe('apiAuthInterceptor', () => {
-  it('attaches the Supabase session token to Xomper API requests', async () => {
-    const seen = await runWith('session-jwt', API_URL)
-    expect(seen.headers.get('Authorization')).toBe('Bearer session-jwt')
+  let captured: HttpRequest<unknown> | null
+
+  function run(url: string, token: string | null): Promise<HttpEvent<unknown>> {
+    TestBed.resetTestingModule()
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: CognitoService,
+          useValue: { getJwt: () => Promise.resolve(token) },
+        },
+      ],
+    })
+
+    captured = null
+    const next: HttpHandlerFn = (req): Observable<HttpEvent<unknown>> => {
+      captured = req
+      return of({} as HttpEvent<unknown>)
+    }
+
+    return TestBed.runInInjectionContext(() =>
+      firstValueFrom(apiAuthInterceptor(new HttpRequest('GET', url), next)),
+    )
+  }
+
+  it('attaches the token to Xomper API requests', async () => {
+    await run(API_URL, 'id-token-123')
+
+    expect(captured!.headers.get('Authorization')).toBe('Bearer id-token-123')
   })
 
-  it('leaves Sleeper requests untouched', async () => {
-    // Sleeper is public and rejects unexpected auth headers.
-    const seen = await runWith('session-jwt', SLEEPER_URL)
-    expect(seen.headers.has('Authorization')).toBe(false)
+  it('leaves Sleeper requests alone', async () => {
+    await run(SLEEPER_URL, 'id-token-123')
+
+    // Sleeper's endpoints are public and reject an unexpected Authorization
+    // header, so touching them breaks reads that currently work.
+    expect(captured!.headers.has('Authorization')).toBe(false)
   })
 
-  it('sends no Authorization header when signed out', async () => {
-    // The API should answer with its own 401/403 rather than the interceptor
-    // silently swallowing the call.
-    const seen = await runWith(null, API_URL)
-    expect(seen.headers.has('Authorization')).toBe(false)
+  it('passes the request through unchanged when signed out', async () => {
+    await run(API_URL, null)
+
+    // Forwarding without a header lets the API return its own 401 rather than
+    // the interceptor swallowing the call and hiding the reason.
+    expect(captured!.headers.has('Authorization')).toBe(false)
   })
 
-  it('never sends a static build-time token', async () => {
-    const seen = await runWith('session-jwt', API_URL)
-    const auth = seen.headers.get('Authorization') ?? ''
-    expect(auth).not.toContain('---')
-    expect(auth.startsWith('Bearer ')).toBe(true)
+  it('does not mutate the original request', async () => {
+    const original = new HttpRequest('GET', API_URL)
+    TestBed.resetTestingModule()
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: CognitoService,
+          useValue: { getJwt: () => Promise.resolve('tok') },
+        },
+      ],
+    })
+
+    const next: HttpHandlerFn = (req) => {
+      captured = req
+      return of({} as HttpEvent<unknown>)
+    }
+    await TestBed.runInInjectionContext(() =>
+      firstValueFrom(apiAuthInterceptor(original, next)),
+    )
+
+    expect(original.headers.has('Authorization')).toBe(false)
+    expect(captured).not.toBe(original)
   })
 })

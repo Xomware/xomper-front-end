@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core'
 import { Router } from '@angular/router'
 import { Subject, take } from 'rxjs'
-import { SupabaseService } from 'src/app/services/supabase.service'
+import { CognitoService } from 'src/app/services/cognito.service'
+import { UserProfileService } from 'src/app/services/user-profile.service'
 import { UserService } from 'src/app/services/user.service'
 import { ToastService } from 'src/app/services/toast.service'
 import { UserModel } from 'src/app/models/user.model'
@@ -24,21 +25,26 @@ export class LinkSleeperComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>()
 
   constructor(
-    private supabaseService: SupabaseService,
+    private cognito: CognitoService,
+    private profiles: UserProfileService,
     private userService: UserService,
     private router: Router,
     private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
-    if (!this.supabaseService.isAuthenticated()) {
+    if (!this.cognito.isAuthenticated()) {
       this.router.navigate(['/'])
+      return
     }
 
-    const profile = this.supabaseService.getProfile()
-    if (profile?.sleeper_user_id) {
-      this.completeLogin(profile.sleeper_user_id)
-    }
+    // Fetch rather than read the cache: arriving here straight from sign-up
+    // means nothing has loaded the record yet, and this call also creates it.
+    this.profiles.load().pipe(take(1)).subscribe((profile) => {
+      if (profile?.sleeperUserId) {
+        this.completeLogin(profile.sleeperUserId)
+      }
+    })
   }
 
   ngOnDestroy(): void {
@@ -80,25 +86,23 @@ export class LinkSleeperComponent implements OnInit, OnDestroy {
 
     this.loading = true
 
-    this.supabaseService.linkSleeperAccount(
-      this.foundUser.getUserId(),
-      this.foundUser.getUserName(),
-      this.foundUser.avatar
-    ).pipe(take(1)).subscribe({
-      next: (success) => {
-        if (success) {
+    // Only the username goes up. The API re-resolves it against Sleeper and
+    // stores the numeric id itself, so the id this page found cannot drift
+    // from the one that gets saved.
+    this.profiles.linkSleeper(this.foundUser.getUserName())
+      .pipe(take(1))
+      .subscribe({
+        next: (profile) => {
           this.toastService.showPositiveToast('Sleeper account linked!')
-          this.completeLogin(this.foundUser!.getUserId())
-        } else {
-          this.error = 'Failed to link account. Please try again.'
+          this.completeLogin(profile.sleeperUserId)
+        },
+        error: (err) => {
+          this.error =
+            err?.error?.error?.message ??
+            'Failed to link account. Please try again.'
           this.loading = false
         }
-      },
-      error: () => {
-        this.error = 'Failed to link account. Please try again.'
-        this.loading = false
-      }
-    })
+      })
   }
 
   private completeLogin(sleeperUserId: string): void {
@@ -125,9 +129,10 @@ export class LinkSleeperComponent implements OnInit, OnDestroy {
   }
 
   signOut(): void {
-    this.supabaseService.signOut()
+    this.cognito.signOut()
       .pipe(take(1))
       .subscribe(() => {
+        this.profiles.clear()
         this.router.navigate(['/'])
       })
   }

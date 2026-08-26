@@ -7,7 +7,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component'
 import { MobileDrawerComponent } from '../mobile-drawer/mobile-drawer.component'
 import { ToastComponent } from '../toast/toast.component'
 import { SIDEBAR_SECTIONS, SidebarSection } from '../sidebar/sidebar.entries'
-import { SupabaseService } from 'src/app/services/supabase.service'
+import { CognitoService } from 'src/app/services/cognito.service'
 
 const MOBILE_BREAKPOINT = 768
 
@@ -36,7 +36,7 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   private mqListener!: (e: MediaQueryListEvent) => void
   private chromeSub!: Subscription
 
-  constructor(private supabase: SupabaseService, private router: Router) {}
+  constructor(private cognito: CognitoService, private router: Router) {}
 
   ngOnInit(): void {
     this.mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`)
@@ -57,7 +57,7 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
 
     // showChrome is true only when the user is authenticated AND not on /login.
     this.chromeSub = combineLatest([
-      this.supabase.currentUser$,
+      this.cognito.user$,
       url$,
     ]).subscribe(([user, url]) => {
       this.showChrome = !!user && !url.startsWith('/login')
@@ -70,7 +70,7 @@ export class ShellLayoutComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    return this.supabase.isAdmin
+    return this.cognito.isAdmin
   }
 
   toggleDrawer(): void {

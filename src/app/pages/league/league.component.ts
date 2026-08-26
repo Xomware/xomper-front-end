@@ -6,7 +6,7 @@ import { ToastService } from 'src/app/services/toast.service'
 import { TeamService } from 'src/app/services/team.service'
 import { UserService } from 'src/app/services/user.service'
 import { StandingsService } from 'src/app/services/standings.service'
-import { SupabaseService } from 'src/app/services/supabase.service'
+import { CognitoService } from 'src/app/services/cognito.service'
 import { UserModel } from 'src/app/models/user.model'
 import { LeagueModel } from 'src/app/models/league.model'
 import { RosterModel } from 'src/app/models/roster.model'
@@ -45,12 +45,12 @@ export class LeagueComponent implements OnInit, OnDestroy {
     private standingsService: StandingsService,
     private teamService: TeamService,
     private userService: UserService,
-    private supabaseService: SupabaseService,
+    private cognito: CognitoService,
     private route: ActivatedRoute,
   ) {}
 
   get currentUserId(): string | undefined {
-    return this.supabaseService.getUser()?.id
+    return this.cognito.currentUser?.userId
   }
 
   ngOnInit(): void {

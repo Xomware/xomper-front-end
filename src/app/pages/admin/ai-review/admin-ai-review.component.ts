@@ -6,7 +6,7 @@ import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'
 import { AiReviewService } from '../../../services/ai-review.service'
 import { AdminService } from '../../../services/admin.service'
-import { SupabaseService } from '../../../services/supabase.service'
+import { UserProfileService } from '../../../services/user-profile.service'
 import { AiReportType } from '../../../models/ai-report-type.enum'
 import { AiReviewTriggerResponse, AiReviewPreview } from '../../../models/ai-review-trigger.model'
 import { AdminNotificationLogEntry } from '../../../models/admin-notification-log.model'
@@ -92,7 +92,7 @@ export class AdminAiReviewComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private aiReviewService: AiReviewService,
     private adminService: AdminService,
-    private supabaseService: SupabaseService,
+    private profiles: UserProfileService,
     private router: Router,
   ) {}
 
@@ -111,11 +111,11 @@ export class AdminAiReviewComponent implements OnInit, OnDestroy {
     }
 
     // Load activity feed
-    this.supabaseService.profile$
+    this.profiles.profile$
       .pipe(takeUntil(this.destroy$))
       .subscribe((profile) => {
-        if (profile?.sleeper_user_id) {
-          this.sleeperUserId = profile.sleeper_user_id
+        if (profile?.sleeperUserId) {
+          this.sleeperUserId = profile.sleeperUserId
           this.loadActivity()
         }
       })

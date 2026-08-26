@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router'
 import { OctagonChartComponent, RadarSeries } from './showcase/octagon-chart.component'
 import { TrendChartComponent, TrendPoint } from './showcase/trend-chart.component'
 import { environment } from '../../../environments/environment'
-import { SupabaseService } from '../../services/supabase.service'
+import { CognitoService } from '../../services/cognito.service'
 
 interface Stat {
   value: string
@@ -206,12 +206,12 @@ export class WelcomeComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private supabaseService: SupabaseService,
+    private cognito: CognitoService,
   ) {}
 
   ngOnInit(): void {
     // Someone already signed in has no use for a front door.
-    if (this.supabaseService.isAuthenticated()) {
+    if (this.cognito.isAuthenticated()) {
       this.router.navigate(['/home'])
     }
   }

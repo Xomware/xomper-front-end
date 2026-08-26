@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { take } from 'rxjs'
 import { AiReviewService } from 'src/app/services/ai-review.service'
-import { SupabaseService } from 'src/app/services/supabase.service'
+import { CognitoService } from 'src/app/services/cognito.service'
 import { AiReport, aiReportFormattedPeriod } from 'src/app/models/ai-report.model'
 import { StyledMarkdownComponent } from 'src/app/components/styled-markdown/styled-markdown.component'
 import { LoaderComponent } from '../../../components/loader/loader.component'
@@ -32,11 +32,11 @@ export class DraftMocksComponent implements OnInit {
 
   constructor(
     private aiReviewService: AiReviewService,
-    private supabase: SupabaseService,
+    private cognito: CognitoService,
   ) {}
 
   ngOnInit(): void {
-    this.isAdmin = this.supabase.isAdmin
+    this.isAdmin = this.cognito.isAdmin
     this.loadMocks()
   }
 

@@ -1,31 +1,38 @@
 import { Component, OnInit, OnDestroy } from '@angular/core'
 import { Router } from '@angular/router'
-import { Subject, forkJoin } from 'rxjs'
-import { takeUntil, filter, take, switchMap } from 'rxjs/operators'
-import { NgIf, NgClass } from '@angular/common'
+import { Subject } from 'rxjs'
+import { takeUntil, filter, take } from 'rxjs/operators'
+import { NgIf } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { SupabaseService } from 'src/app/services/supabase.service'
-import { UserService } from 'src/app/services/user.service'
-import { LeagueService } from 'src/app/services/league.service'
-import { TeamService } from 'src/app/services/team.service'
-import { StandingsService } from 'src/app/services/standings.service'
+import { CognitoService } from 'src/app/services/cognito.service'
 import { ToastService } from 'src/app/services/toast.service'
-import { UserModel } from 'src/app/models/user.model'
-import { RosterModel } from 'src/app/models/roster.model'
-import { StandingsTeamModel } from 'src/app/models/standings.model'
-import { LeagueModel } from 'src/app/models/league.model'
 import { environment } from 'src/environments/environment'
 
+type AuthMode = 'options' | 'email' | 'verify' | 'forgot'
+type EmailMode = 'signin' | 'signup'
+
 /**
- * Login page at /login — lifted verbatim from the old HomeComponent.
- * On successful login navigates to /home (Landing hub).
- * Authed users visiting /login are redirected to /home by AuthedGuard (if added)
- * or the router; for now the AuthGuard on /home is the primary gate.
+ * Login page at /login.
+ *
+ * Sign-in only. Once Cognito reports a session this navigates to /home and
+ * `AuthGuard` does the rest — the Sleeper link check, resolving `myUser`,
+ * loading the league. That work used to live here, which meant it happened on
+ * the login path and nowhere else: a refresh or a deep link skipped all of it
+ * and left the app empty for a perfectly valid session.
+ *
+ * The old `whitelisted_users` gate is gone with it. It signed out anyone
+ * without a row, which was the right behaviour for a single invited league
+ * and exactly wrong for a platform anyone can sign up for.
+ *
+ * Email and password run against Cognito directly over SRP — the password is
+ * never sent, and no hosted page is involved. Google is the one flow that
+ * redirects, because Cognito has no federated sign-in API outside its hosted
+ * domain.
  */
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [NgIf, NgClass, FormsModule],
+  imports: [NgIf, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
@@ -37,44 +44,41 @@ export class LoginComponent implements OnInit, OnDestroy {
   loading = false
   checkingAuth = true
 
-  authMode: 'options' | 'email' = 'options'
-  emailMode: 'signin' | 'signup' = 'signin'
+  authMode: AuthMode = 'options'
+  emailMode: EmailMode = 'signin'
   email = ''
   password = ''
   confirmPassword = ''
+  code = ''
   authError = ''
+  authNotice = ''
+
+  /**
+   * The opaque Cognito username minted at sign-up.
+   *
+   * The pool aliases on email, but an alias only resolves once an account is
+   * confirmed — so the verify step has to quote the username sign-up
+   * returned, not the address the user typed.
+   */
+  private pendingUsername = ''
 
   private destroy$ = new Subject<void>()
 
   constructor(
-    private supabaseService: SupabaseService,
-    private userService: UserService,
-    private leagueService: LeagueService,
-    private teamService: TeamService,
-    private standingsService: StandingsService,
+    private cognito: CognitoService,
     private router: Router,
     private toastService: ToastService,
   ) {}
 
   ngOnInit(): void {
-    this.supabaseService.initialized$
-      .pipe(filter((init) => init), take(1), takeUntil(this.destroy$))
+    this.cognito.isReady$
+      .pipe(filter((ready) => ready), take(1), takeUntil(this.destroy$))
       .subscribe(() => {
-        const user = this.supabaseService.getUser()
         this.checkingAuth = false
-
-        if (user) {
-          // Already authed — redirect to Landing
+        if (this.cognito.isAuthenticated()) {
           this.router.navigate(['/home'])
-          return
         }
       })
-
-    setTimeout(() => {
-      if (this.checkingAuth) {
-        this.checkingAuth = false
-      }
-    }, 3000)
   }
 
   ngOnDestroy(): void {
@@ -82,186 +86,62 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.destroy$.complete()
   }
 
-  handleAuthenticatedUser(): void {
-    this.loading = true
-
-    this.supabaseService.getWhitelistedUser()
-      .pipe(take(1))
-      .subscribe((whitelistedUser) => {
-        if (whitelistedUser && whitelistedUser.sleeper_username) {
-          this.userService.searchUser(whitelistedUser.sleeper_username)
-            .pipe(take(1))
-            .subscribe({
-              next: (sleeperUser) => {
-                if (sleeperUser) {
-                  this.userService.setMyUser(sleeperUser)
-                  this.loadMyLeague(sleeperUser.user_id)
-                } else {
-                  this.toastService.showNegativeToast('Sleeper user not found')
-                  this.supabaseService.signOut().subscribe()
-                  this.loading = false
-                }
-              },
-              error: () => {
-                this.toastService.showNegativeToast('Error loading profile')
-                this.supabaseService.signOut().subscribe()
-                this.loading = false
-              },
-            })
-        } else if (whitelistedUser && !whitelistedUser.sleeper_username) {
-          this.toastService.showNegativeToast('Sleeper username not configured. Contact admin.')
-          this.supabaseService.signOut().subscribe()
-          this.loading = false
-        } else {
-          this.toastService.showNegativeToast('Your email is not authorized.')
-          this.supabaseService.signOut().subscribe()
-          this.loading = false
-        }
-      })
-  }
-
-  private loadMyLeague(userId: string): void {
-    const activeLeagueId = this.leagueService.getActiveLeagueId()
-    if (!activeLeagueId) {
-      this.loading = false
-      return
-    }
-
-    this.leagueService.loadActiveLeague()
-      .pipe(
-        take(1),
-        switchMap((league) => {
-          this.leagueService.setMyLeague(league)
-          league.setDivisions()
-
-          return forkJoin({
-            users: this.leagueService.findLeagueUsers(activeLeagueId),
-            rosters: this.leagueService.findLeagueRosters(activeLeagueId),
-            nflState: this.leagueService.getLeagueState(),
-          })
-        }),
-      )
-      .subscribe({
-        next: ({ users, rosters, nflState }) => {
-          const league = this.leagueService.getMyLeague()!
-
-          this.leagueService.setNflState(nflState)
-
-          const userModels = users.map((user) => new UserModel(user))
-          league.setUsers(userModels)
-
-          const rosterModels = rosters.map((roster) => new RosterModel(roster))
-          league.setRosters(rosterModels)
-
-          const standings = this.buildStandings(league, userModels, rosterModels)
-          league.setStandingsTeams(standings)
-
-          const myUser = this.userService.getMyUser()
-          const myTeam = standings.find((team) => team.user?.user_id === myUser?.getUserId())
-
-          if (myTeam) {
-            this.teamService.setMyTeam(myTeam)
-          }
-
-          this.leagueService.setMyLeague(league)
-
-          this.toastService.showPositiveToast('Welcome back!')
-          this.loading = false
-
-          // Navigate to Landing hub post-login
-          this.router.navigate(['/home'])
-        },
-        error: () => {
-          this.toastService.showNegativeToast('Error loading league data')
-          this.loading = false
-          this.router.navigate(['/home'])
-        },
-      })
-  }
-
-  private buildStandings(league: LeagueModel, users: UserModel[], rosters: RosterModel[]): StandingsTeamModel[] {
-    const standings = rosters.map((roster) => {
-      const user = users.find((u) => u.user_id === roster.owner_id)
-
-      let streakTotal = 0
-      let streakType: '' | 'win' | 'loss' = ''
-      const streakStr = roster.metadata?.streak as string | undefined
-      if (streakStr) {
-        const match = streakStr.match(/(\d+)([WL])/)
-        if (match) {
-          streakTotal = parseInt(match[1], 10)
-          streakType = match[2] === 'W' ? 'win' : 'loss'
-        }
-      }
-
-      const divisionIndex = roster.settings?.division != null
-        ? `division_${roster.settings.division}`
-        : null
-      const divisionName = divisionIndex
-        ? String(league.metadata?.[divisionIndex] ?? 'Unknown Division')
-        : 'Unknown Division'
-      const divisionAvatar = divisionIndex
-        ? String(league.metadata?.[`${divisionIndex}_avatar`] ?? 'assets/img/nfl.png')
-        : 'assets/img/nfl.png'
-
-      return new StandingsTeamModel({
-        roster,
-        players: [],
-        user: user ? new UserModel(user) : null!,
-        league,
-        teamName: (user?.metadata?.team_name as string) || `${user?.display_name}'s Team`,
-        userName: user?.display_name || 'Unknown User',
-        avatar: user?.avatar ? this.userService.buildAvatar(user.avatar) : 'assets/img/nfl.png',
-        wins: roster.settings?.wins ?? 0,
-        losses: roster.settings?.losses ?? 0,
-        fpts: (roster.settings?.fpts ?? 0) + (roster.settings?.fpts_decimal ?? 0) / 100,
-        fptsAgainst: (roster.settings?.fpts_against ?? 0) + (roster.settings?.fpts_against_decimal ?? 0) / 100,
-        streak: { type: streakType, total: streakTotal },
-        divisionName,
-        divisionAvatar,
-        leagueRank: -1,
-        divisionRank: -1,
-      })
-    })
-
-    return this.standingsService.buildStandings(standings)
-  }
-
-  signInWithGoogle(): void {
-    this.loading = true
-    this.supabaseService.signInWithGoogle()
-      .pipe(take(1))
-      .subscribe((success) => {
-        if (!success) {
-          this.loading = false
-          this.toastService.showNegativeToast('Failed to start sign in')
-        }
-      })
-  }
+  // ---- mode switching ----
 
   showEmailForm(): void {
     this.authMode = 'email'
     this.emailMode = 'signin'
-    this.authError = ''
-    this.email = ''
-    this.password = ''
-    this.confirmPassword = ''
+    this.resetForm()
   }
 
   backToOptions(): void {
     this.authMode = 'options'
-    this.authError = ''
+    this.resetForm()
   }
 
   toggleEmailMode(): void {
     this.emailMode = this.emailMode === 'signin' ? 'signup' : 'signin'
-    this.authError = ''
+    this.clearMessages()
     this.password = ''
     this.confirmPassword = ''
   }
 
-  submitEmailAuth(): void {
+  showForgotPassword(): void {
+    this.authMode = 'forgot'
+    this.clearMessages()
+    this.code = ''
+    this.password = ''
+    this.confirmPassword = ''
+  }
+
+  private resetForm(): void {
+    this.clearMessages()
+    this.email = ''
+    this.password = ''
+    this.confirmPassword = ''
+    this.code = ''
+  }
+
+  private clearMessages(): void {
     this.authError = ''
+    this.authNotice = ''
+  }
+
+  // ---- sign in ----
+
+  signInWithGoogle(): void {
+    this.loading = true
+    this.cognito.signInWithGoogle().pipe(take(1)).subscribe({
+      // The page navigates away on success, so there is nothing to do here.
+      error: () => {
+        this.loading = false
+        this.toastService.showNegativeToast('Failed to start sign in')
+      },
+    })
+  }
+
+  submitEmailAuth(): void {
+    this.clearMessages()
 
     if (!this.email.trim() || !this.password) {
       this.authError = 'Email and password are required.'
@@ -269,53 +149,221 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     if (this.emailMode === 'signup') {
-      if (this.password.length < 6) {
-        this.authError = 'Password must be at least 6 characters.'
-        return
-      }
-      if (this.password !== this.confirmPassword) {
-        this.authError = 'Passwords do not match.'
-        return
-      }
-
-      this.loading = true
-      this.supabaseService.signUpWithEmail(this.email.trim(), this.password)
-        .pipe(take(1))
-        .subscribe((result) => {
-          this.loading = false
-          if (result.success) {
-            this.toastService.showPositiveToast(result.message)
-            if (result.message.includes('Check your email')) {
-              this.emailMode = 'signin'
-              this.password = ''
-              this.confirmPassword = ''
-            }
-          } else {
-            this.authError = result.message
-          }
-        })
-    } else {
-      this.loading = true
-      this.supabaseService.signInWithEmail(this.email.trim(), this.password)
-        .pipe(take(1))
-        .subscribe((result) => {
-          if (result.success) {
-            this.handleAuthenticatedUser()
-          } else {
-            this.loading = false
-            this.authError = result.message
-          }
-        })
+      this.submitSignUp()
+      return
     }
+
+    this.loading = true
+    this.cognito.signIn(this.email.trim(), this.password).pipe(take(1)).subscribe({
+      next: () => this.router.navigate(['/home']),
+      error: (err: Error) => {
+        this.loading = false
+
+        // An unconfirmed account is a normal state, not a failure — send them
+        // to the code screen instead of showing an error they cannot act on.
+        if (err.message === 'CONFIRM_SIGN_UP') {
+          this.pendingUsername = this.email.trim()
+          this.authMode = 'verify'
+          this.authNotice = 'Enter the code we emailed you to finish signing up.'
+          return
+        }
+
+        this.authError = this.readableError(err)
+      },
+    })
   }
 
-  onEmailKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.submitEmailAuth()
+  private submitSignUp(): void {
+    // Matches the pool's password policy: 8+, upper, lower, number. Checking
+    // here keeps the failure inline rather than as a Cognito exception after
+    // a round trip.
+    if (!this.isPasswordAcceptable(this.password)) {
+      this.authError =
+        'Password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.'
+      return
     }
+    if (this.password !== this.confirmPassword) {
+      this.authError = 'Passwords do not match.'
+      return
+    }
+
+    this.loading = true
+    this.cognito.signUp(this.email.trim(), this.password).pipe(take(1)).subscribe({
+      next: ({ userConfirmed, username }) => {
+        this.loading = false
+        this.pendingUsername = username
+
+        if (userConfirmed) {
+          this.authMode = 'email'
+          this.emailMode = 'signin'
+          this.authNotice = 'Account created. Sign in to continue.'
+          return
+        }
+
+        this.authMode = 'verify'
+        this.authNotice = `We emailed a code to ${this.email.trim()}.`
+      },
+      error: (err: Error) => {
+        this.loading = false
+        this.authError = this.readableError(err)
+      },
+    })
+  }
+
+  // ---- verify ----
+
+  submitVerification(): void {
+    this.clearMessages()
+    if (!this.code.trim()) {
+      this.authError = 'Enter the code from your email.'
+      return
+    }
+
+    this.loading = true
+    this.cognito
+      .confirmSignUp(this.pendingUsername, this.code.trim())
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.loading = false
+          this.authMode = 'email'
+          this.emailMode = 'signin'
+          this.code = ''
+          this.authNotice = 'Email confirmed. Sign in to continue.'
+        },
+        error: (err: Error) => {
+          this.loading = false
+          this.authError = this.readableError(err)
+        },
+      })
+  }
+
+  resendCode(): void {
+    this.clearMessages()
+    this.cognito.resendCode(this.pendingUsername).pipe(take(1)).subscribe({
+      next: () => this.toastService.showPositiveToast('New code sent.'),
+      error: (err: Error) => (this.authError = this.readableError(err)),
+    })
+  }
+
+  // ---- password reset ----
+
+  startPasswordReset(): void {
+    this.clearMessages()
+    if (!this.email.trim()) {
+      this.authError = 'Enter your email address first.'
+      return
+    }
+
+    this.loading = true
+    this.cognito.startPasswordReset(this.email.trim()).pipe(take(1)).subscribe({
+      next: () => {
+        this.loading = false
+        this.authNotice = `We emailed a reset code to ${this.email.trim()}.`
+      },
+      error: (err: Error) => {
+        this.loading = false
+        this.authError = this.readableError(err)
+      },
+    })
+  }
+
+  confirmPasswordReset(): void {
+    this.clearMessages()
+
+    if (!this.code.trim()) {
+      this.authError = 'Enter the reset code from your email.'
+      return
+    }
+    if (!this.isPasswordAcceptable(this.password)) {
+      this.authError =
+        'Password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.'
+      return
+    }
+    if (this.password !== this.confirmPassword) {
+      this.authError = 'Passwords do not match.'
+      return
+    }
+
+    this.loading = true
+    this.cognito
+      .confirmPasswordReset(this.email.trim(), this.code.trim(), this.password)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.loading = false
+          this.authMode = 'email'
+          this.emailMode = 'signin'
+          this.password = ''
+          this.confirmPassword = ''
+          this.code = ''
+          this.authNotice = 'Password updated. Sign in to continue.'
+        },
+        error: (err: Error) => {
+          this.loading = false
+          this.authError = this.readableError(err)
+        },
+      })
+  }
+
+  // ---- helpers ----
+
+  onEmailKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') this.submitEmailAuth()
+  }
+
+  onVerifyKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') this.submitVerification()
   }
 
   goToGuestSearch(): void {
     this.router.navigate(['/search'])
+  }
+
+  private isPasswordAcceptable(password: string): boolean {
+    return (
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[0-9]/.test(password)
+    )
+  }
+
+  /**
+   * Turn an Amplify error into something a person can act on.
+   *
+   * Amplify surfaces Cognito's exception names, which are accurate and
+   * useless to a user — `UserNotFoundException` on a sign-in form reads as a
+   * bug. Anything unmapped falls through to its own message rather than a
+   * generic string, so an unfamiliar failure is still debuggable.
+   */
+  private readableError(err: Error): string {
+    const name = err.name || ''
+    const message = err.message || ''
+
+    if (name === 'UserAlreadyAuthenticatedException') {
+      return 'You are already signed in.'
+    }
+    if (name === 'UsernameExistsException' || message.includes('already exists')) {
+      return 'An account with that email already exists. Try signing in.'
+    }
+    if (name === 'NotAuthorizedException' || name === 'UserNotFoundException') {
+      // Deliberately the same message for both: saying which one is wrong
+      // tells anyone with a login form which addresses have accounts.
+      return 'Incorrect email or password.'
+    }
+    if (name === 'CodeMismatchException') {
+      return 'That code is not right. Check it and try again.'
+    }
+    if (name === 'ExpiredCodeException') {
+      return 'That code has expired. Request a new one.'
+    }
+    if (name === 'LimitExceededException' || name === 'TooManyRequestsException') {
+      return 'Too many attempts. Wait a minute and try again.'
+    }
+    if (name === 'InvalidPasswordException') {
+      return 'That password does not meet the requirements.'
+    }
+    return message || 'Something went wrong. Try again.'
   }
 }

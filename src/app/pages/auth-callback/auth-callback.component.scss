@@ -1,0 +1,31 @@
+@import 'styles/variables';
+
+.callback-page {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  justify-content: center;
+  min-height: 60vh;
+
+  p {
+    color: $text-secondary;
+    font-size: $text-sm;
+    margin: 0;
+  }
+}
+
+.spinner {
+  animation: spin 900ms linear infinite;
+  border: 3px solid rgba($surface-light, 0.3);
+  border-radius: 50%;
+  border-top-color: $champion-gold;
+  height: 36px;
+  width: 36px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
