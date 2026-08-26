@@ -6,7 +6,6 @@ import { UserService } from './app/services/user.service';
 import { StandingsService } from './app/services/standings.service';
 import { TeamService } from './app/services/team.service';
 import { PlayerService } from './app/services/player.service';
-import { TaxiSquadService } from './app/services/taxi-squad.service';
 import { DraftService } from './app/services/draft.service';
 import { SupabaseService } from './app/services/supabase.service';
 import { LeagueHistoryService } from './app/services/league-history.service';
@@ -28,7 +27,6 @@ bootstrapApplication(AppComponent, {
         StandingsService,
         TeamService,
         PlayerService,
-        TaxiSquadService,
         DraftService,
         SupabaseService,
         LeagueHistoryService,
