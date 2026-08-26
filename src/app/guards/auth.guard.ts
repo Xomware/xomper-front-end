@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { CanActivate, Router } from '@angular/router'
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router'
 import { firstValueFrom } from 'rxjs'
 import { catchError, filter, map, of } from 'rxjs'
 import { SupabaseService } from '../services/supabase.service'
@@ -39,7 +39,10 @@ export class AuthGuard implements CanActivate {
     private router: Router,
   ) {}
 
-  async canActivate(): Promise<boolean> {
+  async canActivate(
+    _route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Promise<boolean> {
     // Wait until session init (including any PKCE code exchange) has settled.
     await firstValueFrom(
       this.supabaseService.initialized$.pipe(filter((v) => v === true)),
@@ -47,6 +50,19 @@ export class AuthGuard implements CanActivate {
 
     if (!this.supabaseService.isAuthenticated()) {
       this.router.navigate(['/login'])
+      return false
+    }
+
+    // A signed-in account with no linked Sleeper user has no identity in the
+    // app: getMyUser() is null, no roster matches, and every surface renders
+    // empty. The link page existed but nothing ever routed anyone to it, so
+    // all six accounts sat unlinked and the app looked broken rather than
+    // incomplete.
+    // The link page is itself guarded, so exempt it or the redirect loops.
+    const onLinkPage = state.url.split('?')[0] === '/link-sleeper'
+
+    if (!onLinkPage && !(await this.supabaseService.hasLinkedSleeper())) {
+      this.router.navigate(['/link-sleeper'])
       return false
     }
 

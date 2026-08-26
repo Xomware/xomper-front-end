@@ -289,6 +289,38 @@ export class SupabaseService {
     return this.currentUser.value
   }
 
+  /**
+   * Whether this account has linked a Sleeper user yet.
+   *
+   * Everything downstream keys off `profiles.sleeper_user_id` — `getMyUser()`,
+   * the My Profile tab, matching a signed-in account to a roster. Without it
+   * the app renders as if nobody is signed in.
+   *
+   * Reads the table directly rather than the cached profile, because the
+   * cached copy is populated asynchronously after auth and a guard can run
+   * before it lands.
+   */
+  async hasLinkedSleeper(): Promise<boolean> {
+    try {
+      const { data } = await this.supabase.auth.getSession()
+      const userId = data.session?.user?.id
+      if (!userId) return false
+
+      const { data: profile } = await this.supabase
+        .from('profiles')
+        .select('sleeper_user_id')
+        .eq('id', userId)
+        .maybeSingle()
+
+      return !!profile?.sleeper_user_id
+    } catch {
+      // Never block sign-in on a failed lookup. Treating an error as "linked"
+      // lets the user through to an app that may be sparse, which beats
+      // trapping them in a redirect loop they cannot escape.
+      return true
+    }
+  }
+
   getProfile(): Profile | null {
     return this.currentProfile.value
   }
