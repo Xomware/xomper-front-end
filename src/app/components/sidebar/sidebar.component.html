@@ -1,13 +1,34 @@
 <nav class="sidebar" aria-label="Main navigation">
   <!-- Sidebar header: profile chip + search icon -->
   <div class="sidebar-header">
-    <a class="profile-chip" routerLink="/profile" (click)="onEntryClick()" aria-label="My profile">
-      <div class="avatar" [ngClass]="{ 'avatar--placeholder': !avatarUrl }">
-        <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Profile avatar" />
-        <span *ngIf="!avatarUrl" class="avatar-initials">{{ displayName[0]?.toUpperCase() }}</span>
+    <div class="profile-menu">
+      <button
+        type="button"
+        class="profile-chip"
+        (click)="toggleProfileMenu($event)"
+        [attr.aria-expanded]="profileMenuOpen"
+        aria-haspopup="menu"
+        aria-label="Account menu"
+      >
+        <div class="avatar" [ngClass]="{ 'avatar--placeholder': !avatarUrl }">
+          <img *ngIf="avatarUrl" [src]="avatarUrl" alt="" />
+          <span *ngIf="!avatarUrl" class="avatar-initials">{{ displayName[0]?.toUpperCase() }}</span>
+        </div>
+        <span class="profile-name">{{ displayName }}</span>
+        <svg class="chevron" [class.chevron--open]="profileMenuOpen" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      <div *ngIf="profileMenuOpen" class="profile-dropdown" role="menu">
+        <a role="menuitem" routerLink="/profile" (click)="closeProfileMenu(); onEntryClick()">
+          My Profile
+        </a>
+        <button type="button" role="menuitem" class="sign-out" (click)="signOut()">
+          Sign Out
+        </button>
       </div>
-      <span class="profile-name">{{ displayName }}</span>
-    </a>
+    </div>
     <a
       class="sidebar-search-btn"
       routerLink="/search"
