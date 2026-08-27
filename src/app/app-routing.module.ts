@@ -270,6 +270,18 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
+  // Trade analyzer — grades a proposed trade against the active league's own
+  // value book, so the same trade scores differently in a dynasty league than
+  // in a redraft one.
+  {
+    path: 'trades',
+    loadComponent: () =>
+      import('./pages/trade-analyzer/trade-analyzer.component').then(
+        (m) => m.TradeAnalyzerComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+
   // 302 redirects for my-* → flat routes (remove ~14 days post-s5 default flip)
   { path: 'my-profile', redirectTo: 'profile', pathMatch: 'full' },
   { path: 'my-league', redirectTo: 'league', pathMatch: 'full' },

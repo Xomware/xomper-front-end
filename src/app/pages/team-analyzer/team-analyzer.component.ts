@@ -135,13 +135,13 @@ export class TeamAnalyzerComponent implements OnInit {
     this.loading = true
     this.error = null
 
-    // League comes from the route. Falls back to the user's selected league so
-    // the page still works when reached without an explicit id.
+    // League comes from the route when given one, otherwise the active league.
+    // `getActiveLeagueId()` is what respects the switcher — reading
+    // getCurrentLeague/getMyLeague directly skipped the user's selection, so
+    // switching leagues left this page on the old one.
     const leagueId =
       this.route.snapshot.paramMap.get('leagueId') ??
-      this.leagueService.getCurrentLeague()?.league_id ??
-      this.leagueService.getMyLeague()?.league_id ??
-      null
+      this.leagueService.getActiveLeagueId()
 
     if (!leagueId) {
       this.error = 'No league selected.'
