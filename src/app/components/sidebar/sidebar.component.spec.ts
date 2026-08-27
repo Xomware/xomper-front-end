@@ -36,17 +36,27 @@ function build(options: { signOutFails?: boolean; profile?: UserProfile | null }
     signOut: () =>
       options.signOutFails ? throwError(() => new Error('no session')) : of(undefined),
   }
+  const follows = {
+    followed: [],
+    selectedLeagueId: null,
+    selectedLeague: null,
+    select: jasmine.createSpy('select'),
+    clear: jasmine.createSpy('clearFollows'),
+  }
+  const leagueService = { clearForLeagueSwitch: jasmine.createSpy('clearForLeagueSwitch') }
   const router = { navigate: jasmine.createSpy('navigate') }
 
   const component = new SidebarComponent(
     profiles as never,
     userService as never,
     cognito as never,
+    follows as never,
+    leagueService as never,
     router as never,
     { bypassSecurityTrustHtml: (v: string) => v } as never,
   )
 
-  return { component, profiles, userService, router }
+  return { component, profiles, userService, router, follows, leagueService }
 }
 
 describe('SidebarComponent account menu', () => {
@@ -132,5 +142,77 @@ describe('SidebarComponent account menu', () => {
       build({ profile: profile({ sleeperUsername: '' }) }).component.displayName,
     ).toBe('d@x.com')
     expect(build({ profile: null }).component.displayName).toBe('My Profile')
+  })
+})
+
+describe('SidebarComponent league switcher', () => {
+  const LEAGUE = {
+    leagueId: 'abc',
+    name: 'Charlotte Dynasty League',
+    season: '2026',
+    status: 'in_season',
+    totalRosters: 12,
+    avatar: '',
+    isDynasty: true,
+    isFollowed: true,
+  }
+
+  it('shows a placeholder when no league is selected', () => {
+    expect(build().component.selectedLeagueName).toBe('Select a league')
+  })
+
+  it('toggles the menu and stops the click reaching the document listener', () => {
+    const { component } = build()
+    const stopPropagation = jasmine.createSpy('stopPropagation')
+
+    component.toggleLeagueMenu({ stopPropagation } as unknown as Event)
+
+    expect(component.leagueMenuOpen).toBe(true)
+    expect(stopPropagation).toHaveBeenCalled()
+  })
+
+  it('closes on Escape and on an outside click', () => {
+    const { component } = build()
+
+    component.leagueMenuOpen = true
+    component.onEscape()
+    expect(component.leagueMenuOpen).toBe(false)
+
+    component.leagueMenuOpen = true
+    component.onDocumentClick()
+    expect(component.leagueMenuOpen).toBe(false)
+  })
+
+  it('switches league, drops league-scoped caches and navigates', () => {
+    const { component, follows, leagueService, router } = build()
+
+    component.selectLeague(LEAGUE as never)
+
+    expect(follows.select).toHaveBeenCalledWith('abc')
+    // Everything cached in LeagueService is scoped to one league, so leaving
+    // any behind renders the old league's data under the new league's name.
+    expect(leagueService.clearForLeagueSwitch).toHaveBeenCalled()
+    expect(router.navigate).toHaveBeenCalledWith(['/home'])
+  })
+
+  it('does nothing when picking the league already selected', () => {
+    const { component, follows, leagueService } = build()
+    ;(follows as { selectedLeagueId: string | null }).selectedLeagueId = 'abc'
+
+    component.selectLeague(LEAGUE as never)
+
+    // Re-selecting would clear every cache and bounce the user to /home for
+    // no change at all.
+    expect(follows.select).not.toHaveBeenCalled()
+    expect(leagueService.clearForLeagueSwitch).not.toHaveBeenCalled()
+  })
+
+  it('clears followed leagues on sign out', () => {
+    const { component, follows } = build()
+
+    component.signOut()
+
+    // Otherwise the next account on this browser inherits the league list.
+    expect(follows.clear).toHaveBeenCalled()
   })
 })

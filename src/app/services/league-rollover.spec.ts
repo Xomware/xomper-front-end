@@ -12,7 +12,13 @@ import { LeagueService } from './league.service'
 function makeService(): LeagueService {
   // Every network method used by the resolver is stubbed per test, so the
   // collaborators can be null.
-  return new LeagueService(null as any, null as any, null as any, null as any)
+  return new LeagueService(
+    null as any,
+    null as any,
+    null as any,
+    null as any,
+    { selectedLeagueId: null } as any,
+  )
 }
 
 /** Minimal league shape the resolver reads. */

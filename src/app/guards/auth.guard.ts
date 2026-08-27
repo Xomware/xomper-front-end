@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs'
 import { catchError, filter, map, of } from 'rxjs'
 import { CognitoService } from '../services/cognito.service'
 import { UserProfileService } from '../services/user-profile.service'
+import { LeagueFollowsService } from '../services/league-follows.service'
 import { UserService } from '../services/user.service'
 import { LeagueService } from '../services/league.service'
 
@@ -40,6 +41,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private cognito: CognitoService,
     private profiles: UserProfileService,
+    private follows: LeagueFollowsService,
     private userService: UserService,
     private leagueService: LeagueService,
     private router: Router,
@@ -76,6 +78,14 @@ export class AuthGuard implements CanActivate {
     // already completed — a sparse app beats an inescapable loop.
     if (profile?.sleeperUserId && !this.userService.myUserSelected()) {
       await this.resolveMyUser(profile.sleeperUserId)
+    }
+
+    // The league list has to be loaded before `getActiveLeagueId()` is asked
+    // for anything, because the selected league is what it resolves to. One
+    // fetch per session: the service caches, and `load()` swallows failures
+    // so a switcher that cannot populate never blocks navigation.
+    if (profile?.sleeperUserId && !this.follows.leagues.length) {
+      await firstValueFrom(this.follows.load().pipe(catchError(() => of([]))))
     }
 
     // A league that fails to load should not lock an authenticated user out.
