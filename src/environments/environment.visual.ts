@@ -1,13 +1,10 @@
 // Environment for visual regression tests ONLY. Never deployed.
 //
-// The committed environment.ts carries '---' placeholders; the real Supabase
-// credentials are injected at deploy time from SSM by deploy-frontend.yml.
-// That means the app CANNOT BOOT locally: the Supabase client constructor
-// throws "Invalid supabaseUrl" and Angular never renders past the app shell.
-//
-// A syntactically valid dummy URL is enough to get past the constructor so the
-// app boots and pages render. Auth calls fail, which is fine and deterministic
-// for screenshots.
+// The committed environment.ts carries '---' placeholders and the real values
+// are injected at deploy time from SSM, so the app cannot boot from it
+// locally. Structurally valid dummies here get past Amplify.configure() and
+// let pages render; requests fail, which is fine and deterministic for
+// screenshots.
 export const environment = {
   production: true,
   appName: 'Xomper',
@@ -17,8 +14,6 @@ export const environment = {
   secondaryCta: { label: 'Look up a league', route: '/search' },
   baseCallbackUrl: 'https://xomper.xomware.com',
   apiId: '---',
-  supabaseUrl: 'https://visual-tests.invalid',
-  supabaseAnonKey: 'visual-tests-placeholder',
   // Structurally valid so Amplify.configure() does not throw during the
   // visual run; no request is ever made against them.
   awsRegion: 'us-east-1',

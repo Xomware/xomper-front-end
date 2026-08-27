@@ -7,8 +7,6 @@ export const environment = {
   secondaryCta: { label: 'Look up a league', route: '/search' },
   baseCallbackUrl: 'https://xomper.xomware.com',
   apiId: '---',
-  supabaseUrl: '---',
-  supabaseAnonKey: '---',
   // Cognito on the shared `xomware-users` pool. Neither id is a secret --
   // both ship in this bundle -- but they are injected at deploy time from
   // SSM so a pool or client change never touches application code. Same
