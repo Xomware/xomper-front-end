@@ -1,0 +1,95 @@
+<div class="trade-page">
+  <header class="page-header">
+    <h1>Trade Analyzer</h1>
+    <p class="subtitle">Priced against this league's own settings.</p>
+  </header>
+
+  <div class="state" *ngIf="loading" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading league…</p>
+  </div>
+
+  <div class="state state--error" *ngIf="error" role="alert">
+    <p>{{ error }}</p>
+    <button type="button" class="btn" (click)="load()">Try again</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+    <!-- Verdict -->
+    <section class="verdict" [ngClass]="'verdict--' + verdictTone" aria-live="polite">
+      <p class="verdict-text">{{ verdict }}</p>
+
+      <div class="verdict-values" *ngIf="isGradable && evaluation">
+        <div class="value-block">
+          <span class="value-team">{{ teamName(sideARosterId) }}</span>
+          <span class="value-amount">{{ evaluation.sideAValue | number: '1.0-0' }}</span>
+        </div>
+        <span class="value-sep" aria-hidden="true">vs</span>
+        <div class="value-block">
+          <span class="value-team">{{ teamName(sideBRosterId) }}</span>
+          <span class="value-amount">{{ evaluation.sideBValue | number: '1.0-0' }}</span>
+        </div>
+      </div>
+
+      <!-- An unvalued asset scores as 0, which reads as "they gave up
+           nothing". Better to withhold the verdict than show a wrong one. -->
+      <p class="coverage-warning" *ngIf="evaluation && unvalued.length" role="alert">
+        No value for {{ unvaluedNames() }} in this league's format, so this trade can't be graded.
+      </p>
+
+      <button type="button" class="btn btn--ghost" (click)="clear()" *ngIf="evaluation">
+        Clear trade
+      </button>
+    </section>
+
+    <!-- Suggested add-ons -->
+    <section class="suggestions" *ngIf="isGradable && suggestions.length">
+      <h2>Closest to even</h2>
+      <p class="suggestions-hint">Adding one of these would bring the sides within 5%.</p>
+      <ul>
+        <li *ngFor="let s of suggestions">
+          <button type="button" class="suggestion" (click)="addSuggestion(s)">
+            <span class="suggestion-name">{{ s.playerName }}</span>
+            <span class="suggestion-meta">{{ s.position }} · {{ s.value | number: '1.0-0' }}</span>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- The two sides -->
+    <div class="sides">
+      <section class="side" *ngFor="let side of ['A', 'B']">
+        <label class="side-label" [attr.for]="'team-' + side">
+          {{ side === 'A' ? 'Gives' : 'Receives' }}
+        </label>
+        <select
+          class="team-select"
+          [id]="'team-' + side"
+          [value]="side === 'A' ? sideARosterId : sideBRosterId"
+          (change)="side === 'A'
+            ? onSideAChange($any($event.target).value)
+            : onSideBChange($any($event.target).value)"
+        >
+          <option *ngFor="let a of analyses" [value]="a.rosterId">{{ a.teamName }}</option>
+        </select>
+
+        <ul class="roster">
+          <li *ngFor="let p of playersFor(side === 'A' ? sideARosterId : sideBRosterId)">
+            <button
+              type="button"
+              class="player"
+              [class.player--selected]="isSelected($any(side), p.playerId)"
+              [attr.aria-pressed]="isSelected($any(side), p.playerId)"
+              (click)="toggle($any(side), p.playerId)"
+            >
+              <span class="player-pos">{{ p.position }}</span>
+              <span class="player-name">{{ p.name }}</span>
+              <span class="player-value" *ngIf="p.known">{{ p.value | number: '1.0-0' }}</span>
+              <span class="player-value player-value--unknown" *ngIf="!p.known" title="Not covered by this league's value source">—</span>
+            </button>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </ng-container>
+</div>
