@@ -49,14 +49,20 @@ const routes: Routes = [
 
   // Guest accessible (view others)
   { path: 'selected-profile', component: ProfileComponent },
-  { path: 'selected-league', component: LeagueComponent },
+  { path: 'selected-league', component: LeagueComponent, data: { mode: 'selected' } },
   { path: 'selected-team', component: SelectedTeamComponent },
 
-  // League with nested child routes (s3)
+  // League with nested child routes (s3).
+  //
+  // `mode: 'my'` matters: LeagueComponent defaults to 'selected', which reads
+  // a `?leagueId=` query param. The sidebar links here without one, so every
+  // page under /league searched for league `undefined`, 404'd, and sat on
+  // "Loading..." forever. Broken since the s3 split (c3ef084).
   {
     path: 'league',
     component: LeagueComponent,
     canActivate: [AuthGuard],
+    data: { mode: 'my' },
     children: [
       { path: '', redirectTo: 'standings', pathMatch: 'full' },
       {
