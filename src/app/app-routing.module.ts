@@ -16,7 +16,7 @@ import { SettingsComponent } from './pages/settings/settings.component'
 
 import { LinkSleeperComponent } from './pages/link-sleeper/link-sleeper.component'
 
-const routes: Routes = [
+export const routes: Routes = [
   // Public landing. This used to redirect straight to /home, which is
   // auth-gated, so every unauthenticated visitor hit a bare login form.
   {
