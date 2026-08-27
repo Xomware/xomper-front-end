@@ -56,10 +56,17 @@ export class LeagueComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loading = true
 
+    // The route decides which league this shows. An @Input() cannot: this
+    // component is a routed component, so nothing is there to bind one, and
+    // the 'selected' default silently sent /league/* down the query-param
+    // path with no query param.
+    this.mode = (this.route.snapshot.data['mode'] as 'my' | 'selected') ?? this.mode
+
     if (this.mode === 'my') {
       const myLeague = this.leagueService.getMyLeague()
       if (!myLeague) {
         this.loading = false
+        this.toastService.showNegativeToast('No league loaded yet.')
         return
       }
       this.league = myLeague
@@ -83,6 +90,9 @@ export class LeagueComponent implements OnInit, OnDestroy {
               },
               error: () => {
                 this.toastService.showNegativeToast('Error loading league.')
+                // `complete` does not fire after `error`, so clearing the
+                // flag only there left the page on "Loading..." forever.
+                this.loading = false
               },
               complete: () => {
                 this.loading = false
