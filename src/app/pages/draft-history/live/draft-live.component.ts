@@ -1,7 +1,7 @@
 import { Component, OnInit, DestroyRef, inject } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
-import { AsyncPipe, NgIf, NgFor, NgClass, LowerCasePipe } from '@angular/common'
+import { AsyncPipe, DecimalPipe, NgIf, NgFor, NgClass, LowerCasePipe } from '@angular/common'
 import { interval, switchMap, of, forkJoin, BehaviorSubject, Observable } from 'rxjs'
 import { map, take } from 'rxjs/operators'
 import { LeagueService, TradedPick } from 'src/app/services/league.service'
@@ -12,6 +12,17 @@ import { User } from 'src/app/models/user.interface'
 import { Roster } from 'src/app/models/roster.interface'
 import { LoaderComponent } from '../../../components/loader/loader.component'
 import { UserProfileService } from 'src/app/services/user-profile.service'
+import { PlayerService } from 'src/app/services/player.service'
+import { PlayerValuesService } from 'src/app/services/player-values.service'
+import {
+  BoardPrefs,
+  DraftAssistantService,
+  DraftCandidate,
+  emptyPrefs,
+  STRATEGY_LABELS,
+  StrategyPreset,
+} from 'src/app/services/draft-assistant.service'
+import { ValueBook } from 'src/app/models/value-book.model'
 
 type ViewMode = 'rounds' | 'board'
 type PickFilter = 'all' | 'mine'
@@ -50,7 +61,7 @@ interface LiveRound {
   templateUrl: './draft-live.component.html',
   styleUrls: ['./draft-live.component.scss'],
   standalone: true,
-  imports: [LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, LowerCasePipe],
+  imports: [LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, DecimalPipe, LowerCasePipe],
 })
 export class DraftLiveComponent implements OnInit {
   private destroyRef = inject(DestroyRef)
@@ -80,10 +91,28 @@ export class DraftLiveComponent implements OnInit {
   // Per-round override: round → (slot → teamName)
   private slotByRound: Map<number, Map<number, string>> = new Map()
 
+  // ---- assistant ----
+  /** Who to take next, ranked. Empty until the value book lands. */
+  board: DraftCandidate[] = []
+  prefs: BoardPrefs = emptyPrefs()
+  showAssistant = true
+  readonly strategies = Object.keys(STRATEGY_LABELS) as StrategyPreset[]
+
+  strategyLabel(preset: StrategyPreset): string {
+    return STRATEGY_LABELS[preset]
+  }
+
+  private book: ValueBook | null = null
+  private playerMap: Record<string, { first_name?: string; last_name?: string; position?: string }> = {}
+  private latestPicks: DraftPick[] = []
+
   constructor(
     private leagueService: LeagueService,
     private draftService: DraftService,
     private profiles: UserProfileService,
+    private playerService: PlayerService,
+    private playerValuesService: PlayerValuesService,
+    private assistant: DraftAssistantService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
@@ -144,11 +173,96 @@ export class DraftLiveComponent implements OnInit {
         this.startPolling(draft)
 
         this.loading = false
+
+        // The board renders without values; the assistant fills in when the
+        // book arrives. Loading it inside the main forkJoin would hold the
+        // whole page on a request the board does not need.
+        this.loadAssistant()
       },
       error: () => {
         this.loading = false
       },
     })
+  }
+
+  /**
+   * Load what the assistant needs: this league's value book and the player
+   * map. Failure is silent — the draft board is still useful without
+   * suggestions, and an error banner over a working board would be worse
+   * than no panel.
+   */
+  private loadAssistant(): void {
+    forkJoin({
+      league: this.leagueService.searchLeague(this.leagueId),
+      playerMap: this.playerService.getPlayerMap(),
+    })
+      .pipe(
+        switchMap(({ league, playerMap }) => {
+          this.playerMap = playerMap as never
+          return this.playerValuesService.bookFor(league)
+        }),
+        take(1),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (book) => {
+          this.book = book
+          this.refreshBoard()
+        },
+        error: () => {
+          this.book = null
+        },
+      })
+  }
+
+  /** Re-rank against the picks seen so far. Cheap enough to run per poll. */
+  private refreshBoard(): void {
+    if (!this.book) return
+    this.board = this.assistant.suggest(
+      this.latestPicks,
+      this.playerMap,
+      this.book,
+      this.prefs,
+      this.mySleeperUserId,
+    )
+  }
+
+  setStrategy(preset: StrategyPreset): void {
+    this.prefs = { ...this.prefs, preset }
+    this.refreshBoard()
+  }
+
+  toggleLike(playerId: string): void {
+    const likes = new Set(this.prefs.likes)
+    const dislikes = new Set(this.prefs.dislikes)
+    if (likes.has(playerId)) likes.delete(playerId)
+    else {
+      likes.add(playerId)
+      // Liking something you previously buried is a change of mind, not both.
+      dislikes.delete(playerId)
+    }
+    this.prefs = { ...this.prefs, likes, dislikes }
+    this.refreshBoard()
+  }
+
+  toggleDislike(playerId: string): void {
+    const likes = new Set(this.prefs.likes)
+    const dislikes = new Set(this.prefs.dislikes)
+    if (dislikes.has(playerId)) dislikes.delete(playerId)
+    else {
+      dislikes.add(playerId)
+      likes.delete(playerId)
+    }
+    this.prefs = { ...this.prefs, likes, dislikes }
+    this.refreshBoard()
+  }
+
+  isDisliked(playerId: string): boolean {
+    return this.prefs.dislikes.has(playerId)
+  }
+
+  toggleAssistant(): void {
+    this.showAssistant = !this.showAssistant
   }
 
   /**
@@ -313,6 +427,11 @@ export class DraftLiveComponent implements OnInit {
   }
 
   private buildRounds(draft: DraftModel, picks: DraftPick[]): void {
+    // Every path that refreshes the board comes through here, so this is the
+    // one place the assistant needs to learn about new picks.
+    this.latestPicks = picks
+    this.refreshBoard()
+
     const pickMap = new Map<string, DraftPick>()
     picks.forEach(p => pickMap.set(`${p.round}.${p.draft_slot}`, p))
 

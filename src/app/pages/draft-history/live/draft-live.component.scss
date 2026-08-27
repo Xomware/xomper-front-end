@@ -402,3 +402,128 @@
     padding: $spacing-sm $spacing-md;
   }
 }
+
+// ---- Draft assistant ----
+// The board tells you what happened; this tells you what to do next.
+
+.chip--assistant {
+  margin-left: auto;
+}
+
+.assistant {
+  background: $bg-card;
+  border: 1px solid rgba($champion-gold, 0.25);
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+}
+
+.assistant-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+
+  h3 {
+    font-size: $text-lg;
+    margin: 0;
+  }
+}
+
+.strategy-group {
+  flex-wrap: wrap;
+}
+
+.chip--sm {
+  font-size: $text-xs;
+  padding: 4px $spacing-sm;
+}
+
+.board {
+  list-style: none;
+  margin: 0;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.board-row {
+  align-items: center;
+  border-radius: $radius-sm;
+  display: grid;
+  font-size: $text-sm;
+  gap: $spacing-sm;
+  grid-template-columns: 26px 34px minmax(0, 1fr) auto auto auto;
+  padding: $spacing-xs $spacing-sm;
+
+  &:hover {
+    background: $bg-card-hover;
+  }
+
+  &--liked {
+    background: rgba($champion-gold, 0.1);
+  }
+
+  &--buried {
+    opacity: 0.45;
+  }
+}
+
+.board-rank,
+.board-pos {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.board-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-reason {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.board-value {
+  color: $champion-gold;
+}
+
+.board-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.mark {
+  background: none;
+  border: 0;
+  border-radius: $radius-sm;
+  color: $text-secondary;
+  cursor: pointer;
+  font-size: $text-sm;
+  line-height: 1;
+  padding: 4px 6px;
+
+  &:hover {
+    background: $bg-card-hover;
+    color: $text-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: -2px;
+  }
+
+  &--on {
+    color: $champion-gold;
+  }
+}
+
+@media (max-width: 640px) {
+  .board-reason {
+    display: none;
+  }
+}
