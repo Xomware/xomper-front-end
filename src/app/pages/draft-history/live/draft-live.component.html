@@ -46,7 +46,65 @@
             (click)="setViewMode('board')"
           >Board</button>
         </div>
+
+        <!-- Assistant toggle -->
+        <button
+          class="chip chip--assistant"
+          [class.active]="showAssistant"
+          [attr.aria-expanded]="showAssistant"
+          (click)="toggleAssistant()"
+        >Who to take</button>
       </div>
+
+      <!-- ============ ASSISTANT ============ -->
+      <section class="assistant" *ngIf="showAssistant && board.length">
+        <div class="assistant-head">
+          <h3>Who to take</h3>
+          <div class="chip-group strategy-group">
+            <button
+              *ngFor="let s of strategies"
+              class="chip chip--sm"
+              [class.active]="prefs.preset === s"
+              (click)="setStrategy(s)"
+            >{{ strategyLabel(s) }}</button>
+          </div>
+        </div>
+
+        <ol class="board">
+          <li
+            class="board-row"
+            *ngFor="let c of board; let i = index"
+            [class.board-row--liked]="c.liked"
+            [class.board-row--buried]="isDisliked(c.playerId)"
+          >
+            <span class="board-rank">{{ i + 1 }}</span>
+            <span class="board-pos">{{ c.position }}</span>
+            <span class="board-name">{{ c.name }}</span>
+            <span class="board-reason">{{ c.reason }}</span>
+            <span class="board-value">{{ c.value | number: '1.0-0' }}</span>
+            <span class="board-actions">
+              <button
+                type="button"
+                class="mark"
+                [class.mark--on]="c.liked"
+                [attr.aria-pressed]="c.liked"
+                [attr.aria-label]="'Target ' + c.name"
+                title="Move to the top of your board"
+                (click)="toggleLike(c.playerId)"
+              >&#9733;</button>
+              <button
+                type="button"
+                class="mark"
+                [class.mark--on]="isDisliked(c.playerId)"
+                [attr.aria-pressed]="isDisliked(c.playerId)"
+                [attr.aria-label]="'Avoid ' + c.name"
+                title="Bury on your board"
+                (click)="toggleDislike(c.playerId)"
+              >&#8856;</button>
+            </span>
+          </li>
+        </ol>
+      </section>
 
       <!-- ============ ROUNDS LIST VIEW ============ -->
       <div class="rounds-list" *ngIf="viewMode === 'rounds'">
