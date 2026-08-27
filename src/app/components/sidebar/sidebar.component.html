@@ -41,6 +41,45 @@
     </a>
   </div>
 
+  <!-- League switcher: only meaningful once the user follows more than one -->
+  <div class="league-switcher" *ngIf="followedLeagues.length">
+    <button
+      type="button"
+      class="league-chip"
+      (click)="toggleLeagueMenu($event)"
+      [attr.aria-expanded]="leagueMenuOpen"
+      [disabled]="followedLeagues.length < 2"
+      aria-haspopup="menu"
+      aria-label="Switch league"
+    >
+      <span class="league-name">{{ selectedLeagueName }}</span>
+      <svg
+        *ngIf="followedLeagues.length > 1"
+        class="chevron"
+        [class.chevron--open]="leagueMenuOpen"
+        viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+      </svg>
+    </button>
+
+    <div *ngIf="leagueMenuOpen" class="league-dropdown" role="menu">
+      <button
+        type="button"
+        role="menuitemradio"
+        *ngFor="let league of followedLeagues"
+        class="league-option"
+        [class.league-option--active]="league.leagueId === selectedLeagueId"
+        [attr.aria-checked]="league.leagueId === selectedLeagueId"
+        (click)="selectLeague(league)"
+      >
+        <span class="league-option-name">{{ league.name }}</span>
+        <span class="league-option-meta">{{ league.isDynasty ? 'Dynasty' : 'Redraft' }} · {{ league.totalRosters }} teams</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Sections -->
   <div class="sections">
     <div *ngFor="let section of visibleSections" class="section">

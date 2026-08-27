@@ -15,6 +15,7 @@ import { NflStateModel } from '../models/nfl-state.model'
 import { NflState } from '../models/nfl-state.interface'
 import { PlayoffBracketMatch } from '../models/playoff-bracket.interface'
 import { environment } from 'src/environments/environment'
+import { LeagueFollowsService } from './league-follows.service'
 import { getCurrentSeason } from '../constants/season'
 
 /** How many league members to ask about the new season before giving up. */
@@ -56,8 +57,13 @@ export class LeagueService {
 
   private baseUrl = 'https://api.sleeper.app/v1'
 
-  // Whitelisted league from environment
-  /** Transitional default league. Removed in Phase 4 with followed leagues. */
+  /**
+   * Last-resort league id from the build.
+   *
+   * Only reached when the user has no followed league selected — a signed-out
+   * guest browsing, or a linked account whose leagues have not loaded yet.
+   * A signed-in user's selection wins over it.
+   */
   private defaultLeagueId: string | null = environment.myLeagueId || null
 
   /** anchor league id -> current-season league id. Stable within a session. */
@@ -68,6 +74,7 @@ export class LeagueService {
     private standingsService: StandingsService,
     private userService: UserService,
     private teamService: TeamService,
+    private follows: LeagueFollowsService,
   ) {}
 
   // =========================================
@@ -162,16 +169,20 @@ export class LeagueService {
    *
    * Replaces `getWhitelistedLeagueId()`, which returned a build-time constant
    * and made every surface single-league by construction. Resolution order:
-   * explicitly selected league, then the user's own league, then the
-   * configured default.
    *
-   * The `environment.myLeagueId` fallback is transitional. It disappears in
-   * Phase 4 when followed leagues land; until then it keeps a user with
-   * nothing selected from landing on an empty app.
+   *   1. a league explicitly opened this session (guest browsing, search)
+   *   2. the league the signed-in user has selected in the switcher
+   *   3. an already-loaded league
+   *   4. the build-time default
+   *
+   * The switcher sits above `getMyLeague()` deliberately: `myLeague` is
+   * whatever was loaded first, so without this a user who switched leagues
+   * would keep seeing the old one on any surface that asks for "the" league.
    */
   getActiveLeagueId(): string | null {
     return (
       this.getCurrentLeague()?.league_id ??
+      this.follows.selectedLeagueId ??
       this.getMyLeague()?.league_id ??
       this.defaultLeagueId ??
       null
@@ -354,6 +365,22 @@ export class LeagueService {
     this.currentLeague = null
     this.leagueState = null
     this.leagueChainCache = null
+  }
+
+  /**
+   * Drop everything scoped to one league.
+   *
+   * Called when the user switches leagues. Every one of these is keyed to the
+   * league that was loaded, so leaving any behind shows the previous league's
+   * rosters, chain or standings under the new league's name.
+   *
+   * `resolvedLeagueIds` goes too: it maps an anchor id to the current
+   * season's id, and the new league has its own anchor.
+   */
+  clearForLeagueSwitch(): void {
+    this.reset()
+    this.resolvedLeagueIds.clear()
+    this.teamService.reset()
   }
 
   // =========================================

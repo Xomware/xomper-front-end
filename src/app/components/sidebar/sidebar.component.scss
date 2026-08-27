@@ -85,6 +85,100 @@
   }
 }
 
+.league-switcher {
+  position: relative;
+  margin: 0 $spacing-sm $spacing-md;
+}
+
+.league-chip {
+  align-items: center;
+  background: rgba($champion-gold, 0.08);
+  border: 1px solid rgba($champion-gold, 0.2);
+  border-radius: $radius-md;
+  color: var(--xomper-text-primary, #{$text-primary});
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: $text-sm;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  text-align: left;
+  transition: background $transition-fast;
+  width: 100%;
+
+  &:hover:not(:disabled) {
+    background: rgba($champion-gold, 0.14);
+  }
+
+  // One league is not a choice; the chip stays as a label.
+  &:disabled {
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+.league-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.league-dropdown {
+  background: var(--xomper-bg-card, #{$bg-card});
+  border: 1px solid rgba($champion-gold, 0.2);
+  border-radius: $radius-md;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  padding: $spacing-xs;
+  position: absolute;
+  right: 0;
+  top: calc(100% + #{$spacing-xs});
+  z-index: 20;
+}
+
+.league-option {
+  background: none;
+  border: 0;
+  border-radius: $radius-sm;
+  color: var(--xomper-text-primary, #{$text-primary});
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font: inherit;
+  gap: 2px;
+  padding: $spacing-sm $spacing-md;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    background: var(--xomper-bg-card-hover, #{$bg-card-hover});
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: -2px;
+  }
+
+  &--active {
+    color: $champion-gold;
+  }
+}
+
+.league-option-name {
+  font-size: $text-sm;
+}
+
+.league-option-meta {
+  color: var(--xomper-text-secondary, #{$text-secondary});
+  font-size: $text-xs;
+}
+
 .profile-dropdown {
   position: absolute;
   top: calc(100% + #{$spacing-xs});

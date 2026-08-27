@@ -4,6 +4,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
 import { Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { CognitoService } from 'src/app/services/cognito.service'
 import { UserProfileService, UserProfile } from 'src/app/services/user-profile.service'
+import { LeagueFollowsService, FollowedLeague } from 'src/app/services/league-follows.service'
+import { LeagueService } from 'src/app/services/league.service'
 import { UserService } from 'src/app/services/user.service'
 import { SidebarSection, SidebarEntry } from './sidebar.entries'
 
@@ -23,10 +25,15 @@ export class SidebarComponent {
   /** Whether the account dropdown is showing. */
   profileMenuOpen = false
 
+  /** Whether the league switcher is showing. */
+  leagueMenuOpen = false
+
   constructor(
     public profiles: UserProfileService,
     public userService: UserService,
     private cognito: CognitoService,
+    private follows: LeagueFollowsService,
+    private leagueService: LeagueService,
     private router: Router,
     private sanitizer: DomSanitizer,
   ) {}
@@ -43,6 +50,42 @@ export class SidebarComponent {
     const avatar = this.profile?.sleeperAvatar
     if (!avatar) return null
     return this.userService.buildAvatar(avatar)
+  }
+
+  get followedLeagues(): FollowedLeague[] {
+    return this.follows.followed
+  }
+
+  get selectedLeagueId(): string | null {
+    return this.follows.selectedLeagueId
+  }
+
+  get selectedLeagueName(): string {
+    return this.follows.selectedLeague?.name ?? 'Select a league'
+  }
+
+  toggleLeagueMenu(event: Event): void {
+    event.stopPropagation()
+    this.leagueMenuOpen = !this.leagueMenuOpen
+  }
+
+  /**
+   * Switch the app to another league.
+   *
+   * Everything cached in LeagueService is scoped to one league — rosters, the
+   * season chain, resolved ids, the current team — so it all has to go, or
+   * the new league renders with the old one's data under its name. Navigating
+   * to /home rather than staying put avoids re-entering a page mid-load with
+   * its inputs pulled out from under it.
+   */
+  selectLeague(league: FollowedLeague): void {
+    this.leagueMenuOpen = false
+    if (league.leagueId === this.follows.selectedLeagueId) return
+
+    this.follows.select(league.leagueId)
+    this.leagueService.clearForLeagueSwitch()
+    this.router.navigate(['/home'])
+    this.onEntryClick()
   }
 
   get visibleSections(): SidebarSection[] {
@@ -73,11 +116,13 @@ export class SidebarComponent {
   @HostListener('document:click')
   onDocumentClick(): void {
     this.closeProfileMenu()
+    this.leagueMenuOpen = false
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.closeProfileMenu()
+    this.leagueMenuOpen = false
   }
 
   signOut(): void {
@@ -93,6 +138,7 @@ export class SidebarComponent {
 
   private afterSignOut(): void {
     this.profiles.clear()
+    this.follows.clear()
     this.userService.reset()
     this.router.navigate(['/login'])
   }
