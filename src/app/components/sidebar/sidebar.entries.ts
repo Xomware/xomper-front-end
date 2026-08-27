@@ -1,7 +1,7 @@
 /**
  * Sidebar entry data table — mirrors iOS TrayDestination order.
  * s3: all 9 league destinations now point at flat child routes under /league/...
- * Admin entries are filtered by ShellLayoutComponent based on SupabaseService.isAdmin.
+ * Admin entries are filtered by ShellLayoutComponent based on CognitoService.isAdmin (the cognito:groups claim).
  * s10: emoji icons replaced with inline SVG (Heroicons outline style, monochrome).
  */
 
