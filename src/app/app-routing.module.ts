@@ -162,6 +162,13 @@ export const routes: Routes = [
       },
       // PR 7b — Announcements
       {
+        path: 'sleeper-claims',
+        loadComponent: () =>
+          import('./pages/admin/sleeper-claims/admin-sleeper-claims.component').then(
+            (m) => m.AdminSleeperClaimsComponent,
+          ),
+      },
+      {
         path: 'announcements',
         loadComponent: () =>
           import('./pages/admin/announcements/list/admin-announcements-list.component').then(
