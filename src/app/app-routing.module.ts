@@ -305,6 +305,13 @@ export const routes: Routes = [
   // Root /draft-history has no children — DraftHistoryComponent.ngOnInit redirects to
   // /draft-history/:currentSeason/live (or picks for past seasons).
   { path: 'draft-history', component: DraftHistoryComponent, canActivate: [AuthGuard] },
+
+  // Top-level entry point for the live draft, which was previously reachable
+  // only by opening Draft History and finding the tab. DraftHistoryComponent
+  // resolves the current season and lands on its live sub-tab, so this
+  // redirect ends up at /draft-history/:season/live -- an honest URL, at the
+  // cost of routerLinkActive tracking the resolved path rather than this one.
+  { path: 'live-draft', redirectTo: 'draft-history', pathMatch: 'full' },
   {
     path: 'draft-history/:year',
     component: DraftHistoryComponent,
