@@ -1,0 +1,175 @@
+@import 'styles/variables';
+
+.claims-page {
+  padding: $spacing-lg;
+}
+
+.page-header {
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    font-size: $text-2xl;
+    margin: 0;
+  }
+
+  .subtitle {
+    color: $text-secondary;
+    font-size: $text-sm;
+    margin: $spacing-xs 0 0;
+    max-width: 62ch;
+  }
+}
+
+.state {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $spacing-xl 0;
+
+  p {
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  &--error p {
+    color: $error-red;
+  }
+}
+
+.spinner {
+  animation: spin 900ms linear infinite;
+  border: 3px solid rgba($surface-light, 0.3);
+  border-radius: 50%;
+  border-top-color: $champion-gold;
+  height: 32px;
+  width: 32px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn {
+  background: rgba($champion-gold, 0.12);
+  border: 1px solid rgba($champion-gold, 0.3);
+  border-radius: $radius-md;
+  color: $champion-gold;
+  cursor: pointer;
+  font: inherit;
+  padding: $spacing-sm $spacing-lg;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.stat {
+  background: $bg-card;
+  border: 1px solid rgba($surface-light, 0.2);
+  border-radius: $radius-md;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 96px;
+  padding: $spacing-md;
+
+  &--alert {
+    border-color: rgba($error-red, 0.5);
+
+    .stat-value {
+      color: $error-red;
+    }
+  }
+}
+
+.stat-value {
+  font-size: $text-xl;
+  font-weight: $font-weight-semibold;
+}
+
+.stat-label {
+  color: $text-secondary;
+  font-size: $text-xs;
+  letter-spacing: $tracking-wider;
+  text-transform: uppercase;
+}
+
+.empty {
+  color: $text-secondary;
+}
+
+.accounts {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account {
+  background: $bg-card;
+  border: 1px solid rgba($surface-light, 0.2);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+
+  &--contested {
+    border-color: rgba($error-red, 0.5);
+  }
+}
+
+.account-head {
+  align-items: center;
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.handle {
+  color: $champion-gold;
+  font-weight: $font-weight-semibold;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.badge {
+  background: rgba($error-red, 0.15);
+  border-radius: $radius-sm;
+  color: $error-red;
+  font-size: $text-xs;
+  padding: 2px $spacing-sm;
+}
+
+.claimants {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: $text-sm;
+    gap: $spacing-sm;
+    padding: 2px 0;
+  }
+}
+
+.claimant-when {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.claimant-first {
+  color: $success-green;
+  font-size: $text-xs;
+}

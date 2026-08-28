@@ -1,0 +1,70 @@
+<div class="claims-page">
+  <header class="page-header">
+    <h1>Sleeper Claims</h1>
+    <p class="subtitle">
+      Linking is unverified — Sleeper has no OAuth. Any account can claim any handle,
+      and more than one can claim the same one. Users are never told; this is the only
+      place it shows.
+    </p>
+  </header>
+
+  <div class="state" *ngIf="loading" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading claims…</p>
+  </div>
+
+  <div class="state state--error" *ngIf="error" role="alert">
+    <p>{{ error }}</p>
+    <button type="button" class="btn" (click)="load()">Try again</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error && data">
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value">{{ data.totalUsers }}</span>
+        <span class="stat-label">Users</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ data.linkedAccounts }}</span>
+        <span class="stat-label">Linked</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ data.unlinkedUsers }}</span>
+        <span class="stat-label">Unlinked</span>
+      </div>
+      <div class="stat" [class.stat--alert]="data.contestedAccounts > 0">
+        <span class="stat-value">{{ data.contestedAccounts }}</span>
+        <span class="stat-label">Contested</span>
+      </div>
+    </div>
+
+    <p class="empty" *ngIf="!data.accounts.length">No Sleeper accounts linked yet.</p>
+
+    <ul class="accounts" *ngIf="data.accounts.length">
+      <li
+        class="account"
+        *ngFor="let a of data.accounts"
+        [ngClass]="{ 'account--contested': a.isContested }"
+      >
+        <div class="account-head">
+          <a
+            class="handle"
+            [href]="sleeperUrl(a.sleeperUsername)"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{ a.sleeperUsername || a.sleeperUserId }}</a>
+          <span class="badge" *ngIf="a.isContested">{{ a.claimCount }} claims</span>
+        </div>
+
+        <ul class="claimants">
+          <li *ngFor="let c of a.claimants; let i = index">
+            <span class="claimant-email">{{ c.email || c.userId }}</span>
+            <span class="claimant-when">{{ c.linkedAt | date: 'medium' }}</span>
+            <!-- Earliest link is the only ordering an admin can act on. -->
+            <span class="claimant-first" *ngIf="a.isContested && i === 0">first</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </ng-container>
+</div>
