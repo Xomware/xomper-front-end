@@ -3,6 +3,7 @@ import { NgIf } from '@angular/common'
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router'
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs'
 import { filter } from 'rxjs/operators'
+import { TickerComponent } from '../ticker/ticker.component'
 import { SidebarComponent } from '../sidebar/sidebar.component'
 import { MobileDrawerComponent } from '../mobile-drawer/mobile-drawer.component'
 import { ToastComponent } from '../toast/toast.component'
@@ -22,6 +23,7 @@ const MOBILE_BREAKPOINT = 768
     SidebarComponent,
     MobileDrawerComponent,
     ToastComponent,
+    TickerComponent,
   ],
 })
 export class ShellLayoutComponent implements OnInit, OnDestroy {
