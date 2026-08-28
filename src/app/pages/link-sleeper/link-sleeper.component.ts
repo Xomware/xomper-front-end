@@ -112,9 +112,10 @@ export class LinkSleeperComponent implements OnInit, OnDestroy {
         next: (user) => {
           this.userService.setMyUser(user)
 
-          this.router.navigate(['/my-profile'], {
-            queryParams: { userId: sleeperUserId }
-          })
+          // Home, not the profile page. Landing on a single team's profile
+          // after linking gives no sense of what the app does -- the overview
+          // is the front door.
+          this.router.navigate(['/home'])
         },
         error: () => {
           this.toastService.showNegativeToast('Error loading user data')
