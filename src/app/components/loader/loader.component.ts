@@ -9,5 +9,8 @@ import { NgIf } from '@angular/common';
     imports: [NgIf]
 })
 export class LoaderComponent {
-  @Input() loading: boolean = false;
+  @Input() loading = false;
+
+  /** What is being waited on. Generic by default; pages can be specific. */
+  @Input() message = 'Loading';
 }

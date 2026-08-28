@@ -2,43 +2,95 @@
 @import 'styles/mixins';
 @import 'styles/theme';
 
+// Translucent rather than a solid fill: the starfield sits behind every page,
+// and an opaque overlay reads as the app blanking out rather than working.
 .loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, $deep-navy 0%, $dark-navy 50%, $deep-navy 100%);
+  align-items: center;
+  backdrop-filter: blur(3px);
+  background: rgba($bg-dark, 0.72);
   display: flex;
   flex-direction: column;
+  height: 100%;
   justify-content: center;
-  align-items: center;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
   z-index: $z-loader;
 }
 
-.spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid rgba($surface-light, 0.3);
-  border-top-color: $champion-gold;
-  border-right-color: $steel-blue;
-  border-radius: $radius-full;
-  animation: spin 1s linear infinite;
+.orbit {
+  height: 72px;
+  position: relative;
+  width: 72px;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+.orbit-ring {
+  border-radius: $radius-full;
+  border: 2px solid transparent;
+  inset: 0;
+  position: absolute;
+
+  &--outer {
+    animation: orbit-spin 1.6s linear infinite;
+    border-top-color: $champion-gold;
   }
-  100% {
+
+  &--inner {
+    animation: orbit-spin 1.1s linear infinite reverse;
+    border-bottom-color: $steel-blue;
+    inset: 12px;
+  }
+}
+
+.orbit-core {
+  animation: orbit-pulse 1.6s ease-in-out infinite;
+  background: $champion-gold;
+  border-radius: $radius-full;
+  height: 8px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+}
+
+@keyframes orbit-spin {
+  to {
     transform: rotate(360deg);
   }
 }
 
+@keyframes orbit-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+}
+
+// Anyone who has asked not to see motion gets a static mark rather than three
+// things spinning at them.
+@media (prefers-reduced-motion: reduce) {
+  .orbit-ring,
+  .orbit-core {
+    animation: none;
+  }
+
+  .orbit-core {
+    opacity: 1;
+  }
+}
+
 p {
-  margin-top: $spacing-md;
-  font-size: $text-base;
-  font-family: $font-body;
   color: $text-secondary;
+  font-family: $font-body;
+  font-size: $text-sm;
   letter-spacing: $tracking-wide;
+  margin-top: $spacing-lg;
 }
