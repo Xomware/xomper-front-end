@@ -240,6 +240,11 @@
   }
 }
 
+.roster li {
+  align-items: center;
+  display: flex;
+}
+
 .roster {
   list-style: none;
   margin: 0;
@@ -354,4 +359,26 @@
 
 .pick-value {
   color: $champion-gold;
+}
+
+// Opens the player's profile. Its own target because the row click is the
+// trade selection.
+.player-open {
+  align-items: center;
+  color: $text-secondary;
+  display: flex;
+  flex-shrink: 0;
+  font-size: $text-lg;
+  padding: 0 $spacing-xs;
+  text-decoration: none;
+
+  &:hover {
+    color: $champion-gold;
+  }
+
+  &:focus-visible {
+    border-radius: $radius-sm;
+    outline: 2px solid $champion-gold;
+    outline-offset: -2px;
+  }
 }

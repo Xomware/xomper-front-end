@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { NgIf, NgFor, NgClass, DecimalPipe } from '@angular/common'
+import { RouterLink } from '@angular/router'
 import { forkJoin } from 'rxjs'
 import { switchMap } from 'rxjs/operators'
 import { LeagueService } from 'src/app/services/league.service'
@@ -44,7 +45,7 @@ interface RosterPlayer {
 @Component({
   selector: 'app-trade-analyzer',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, DecimalPipe],
+  imports: [NgIf, NgFor, NgClass, DecimalPipe, RouterLink],
   templateUrl: './trade-analyzer.component.html',
   styleUrls: ['./trade-analyzer.component.scss'],
 })

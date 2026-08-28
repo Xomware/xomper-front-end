@@ -1,0 +1,154 @@
+@import 'styles/variables';
+
+.player-page {
+  margin: 0 auto;
+  max-width: 860px;
+  padding: $spacing-lg;
+}
+
+.state {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $spacing-xl 0;
+
+  &--error p {
+    color: $error-red;
+    margin: 0;
+  }
+}
+
+.btn {
+  background: rgba($champion-gold, 0.12);
+  border: 1px solid rgba($champion-gold, 0.3);
+  border-radius: $radius-md;
+  color: $champion-gold;
+  cursor: pointer;
+  font: inherit;
+  padding: $spacing-sm $spacing-lg;
+}
+
+.head {
+  align-items: center;
+  display: flex;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.portrait {
+  align-items: center;
+  background: rgba($bg-card, 0.8);
+  border: 2px solid rgba($champion-gold, 0.5);
+  border-radius: $radius-full;
+  display: flex;
+  flex-shrink: 0;
+  height: 104px;
+  justify-content: center;
+  overflow: hidden;
+  width: 104px;
+
+  img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+}
+
+.portrait-initials {
+  color: $champion-gold;
+  font-size: $text-2xl;
+}
+
+.identity h1 {
+  font-size: $text-2xl;
+  margin: 0;
+}
+
+.meta {
+  align-items: center;
+  color: $text-secondary;
+  display: flex;
+  font-size: $text-sm;
+  gap: $spacing-sm;
+  margin: $spacing-xs 0 0;
+}
+
+.pos {
+  color: $champion-gold;
+}
+
+.injury {
+  background: rgba($error-red, 0.15);
+  border-radius: $radius-sm;
+  color: $error-red;
+  font-size: $text-xs;
+  padding: 1px 6px;
+}
+
+.cards {
+  display: grid;
+  gap: $spacing-md;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-bottom: $spacing-lg;
+}
+
+.card {
+  background: rgba($bg-card, 0.72);
+  border: 1px solid rgba($surface-light, 0.35);
+  border-radius: $radius-md;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: $spacing-md;
+}
+
+.card-label {
+  color: $text-secondary;
+  font-size: $text-xs;
+  letter-spacing: $tracking-wider;
+  text-transform: uppercase;
+}
+
+.card-value {
+  color: $champion-gold;
+  font-size: $text-xl;
+
+  &--muted {
+    color: $text-secondary;
+    font-size: $text-base;
+  }
+}
+
+.card-hint {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.section-title {
+  font-size: $text-lg;
+  margin: 0 0 $spacing-sm;
+}
+
+.fact-grid {
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  margin: 0;
+}
+
+.fact {
+  background: rgba($bg-card, 0.6);
+  border-radius: $radius-sm;
+  padding: $spacing-sm $spacing-md;
+
+  dt {
+    color: $text-secondary;
+    font-size: $text-xs;
+  }
+
+  dd {
+    font-size: $text-sm;
+    margin: 2px 0 0;
+  }
+}

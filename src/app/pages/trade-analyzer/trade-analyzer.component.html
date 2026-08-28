@@ -112,6 +112,15 @@
               <span class="player-value" *ngIf="p.known">{{ p.value | number: '1.0-0' }}</span>
               <span class="player-value player-value--unknown" *ngIf="!p.known" title="Not covered by this league's value source">—</span>
             </button>
+            <!-- Separate control: the row itself toggles trade selection, so
+                 opening a profile needs its own target rather than stealing
+                 the click. -->
+            <a
+              class="player-open"
+              [routerLink]="['/player', p.playerId]"
+              [attr.aria-label]="'Open ' + p.name"
+              title="Open player"
+            >&rsaquo;</a>
           </li>
         </ul>
       </section>

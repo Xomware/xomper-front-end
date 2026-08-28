@@ -1,0 +1,63 @@
+<div class="player-page">
+  <app-loader [loading]="loading" message="Looking up the player"></app-loader>
+
+  <div class="state state--error" *ngIf="error" role="alert">
+    <p>{{ error }}</p>
+    <button type="button" class="btn" (click)="back()">Back to league</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+    <header class="head">
+      <div class="portrait" [class.portrait--placeholder]="imageFailed">
+        <img
+          *ngIf="!imageFailed"
+          [src]="imageUrl"
+          [alt]="name"
+          (error)="imageFailed = true"
+        />
+        <span *ngIf="imageFailed" class="portrait-initials">{{ initials }}</span>
+      </div>
+
+      <div class="identity">
+        <h1>{{ name }}</h1>
+        <p class="meta">
+          <span class="pos">{{ position }}</span>
+          <span>{{ team }}</span>
+          <span class="injury" *ngIf="injuryStatus">{{ injuryStatus }}</span>
+        </p>
+      </div>
+    </header>
+
+    <section class="cards">
+      <div class="card">
+        <span class="card-label">Value{{ leagueName ? ' in ' + leagueName : '' }}</span>
+        <span class="card-value" *ngIf="value !== null">{{ value | number: '1.0-0' }}</span>
+        <!-- Unknown is not zero: this league's source does not price them. -->
+        <span class="card-value card-value--muted" *ngIf="value === null">Not priced</span>
+        <span class="card-hint" *ngIf="positionRank">
+          {{ position }} {{ positionRank }} of {{ positionCount }}
+        </span>
+        <span class="card-hint" *ngIf="value === null">
+          This league's value source does not cover {{ position || 'this position' }}.
+        </span>
+      </div>
+
+      <div class="card">
+        <span class="card-label">Rostered by</span>
+        <span class="card-value" *ngIf="ownerTeam">{{ ownerTeam }}</span>
+        <span class="card-value card-value--muted" *ngIf="!ownerTeam">Free agent</span>
+        <span class="card-hint" *ngIf="leagueName">in {{ leagueName }}</span>
+      </div>
+    </section>
+
+    <section class="facts" *ngIf="facts.length">
+      <h2 class="section-title">Details</h2>
+      <dl class="fact-grid">
+        <div class="fact" *ngFor="let fact of facts">
+          <dt>{{ fact.label }}</dt>
+          <dd>{{ fact.value }}</dd>
+        </div>
+      </dl>
+    </section>
+  </ng-container>
+</div>
