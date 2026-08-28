@@ -300,3 +300,58 @@
     color: $text-secondary;
   }
 }
+
+// ---- draft picks ----
+
+.picks {
+  margin-bottom: $spacing-sm;
+}
+
+.picks-label {
+  color: $text-secondary;
+  display: block;
+  font-size: $text-xs;
+  letter-spacing: $tracking-wider;
+  margin-bottom: $spacing-xs;
+  text-transform: uppercase;
+}
+
+.pick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.pick-chip {
+  align-items: baseline;
+  background: none;
+  border: 1px solid rgba($surface-light, 0.3);
+  border-radius: $radius-sm;
+  color: $text-primary;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: $text-xs;
+  gap: $spacing-xs;
+  padding: 4px $spacing-sm;
+
+  &:hover {
+    background: $bg-card-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+
+  &--selected {
+    background: rgba($champion-gold, 0.12);
+    border-color: rgba($champion-gold, 0.4);
+  }
+}
+
+.pick-value {
+  color: $champion-gold;
+}

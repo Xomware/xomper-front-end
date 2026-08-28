@@ -62,6 +62,17 @@ export class TradeAnalyzerComponent implements OnInit {
 
   private selectedA = new Set<string>()
   private selectedB = new Set<string>()
+  private picksA = new Set<string>()
+  private picksB = new Set<string>()
+
+  /**
+   * Draft picks this league's value source prices.
+   *
+   * Empty for a redraft league: projections carry no picks, and there is
+   * nothing to trade anyway once the draft is done. The picker hides itself
+   * rather than showing an empty control.
+   */
+  availablePicks: string[] = []
 
   evaluation: TradeEvaluation | null = null
   suggestions: SuggestedAddOn[] = []
@@ -111,6 +122,7 @@ export class TradeAnalyzerComponent implements OnInit {
           this.book = book
           this.playerMap = playerMap as never
           this.analyses = this.teamAnalysisService.build(rosters, users, playerMap, book)
+          this.availablePicks = book.allPickNames
           this.pickDefaultTeams()
           this.loading = false
         },
@@ -138,6 +150,8 @@ export class TradeAnalyzerComponent implements OnInit {
     // The previous team's players are not on this roster; keeping them would
     // grade a trade nobody could make.
     this.selectedA.clear()
+    // Picks are not tied to a roster the way players are -- a team can trade
+    // a pick it acquired from anyone -- so they survive a team change.
     this.recalculate()
   }
 
@@ -178,6 +192,27 @@ export class TradeAnalyzerComponent implements OnInit {
     return this.set(side).has(playerId)
   }
 
+  // ---- picks ----
+
+  isPickSelected(side: 'A' | 'B', name: string): boolean {
+    return this.pickSet(side).has(name)
+  }
+
+  togglePick(side: 'A' | 'B', name: string): void {
+    const set = this.pickSet(side)
+    if (set.has(name)) set.delete(name)
+    else set.add(name)
+    this.recalculate()
+  }
+
+  pickValue(name: string): number {
+    return this.book?.pickValue(name).value ?? 0
+  }
+
+  private pickSet(side: 'A' | 'B'): Set<string> {
+    return side === 'A' ? this.picksA : this.picksB
+  }
+
   toggle(side: 'A' | 'B', playerId: string): void {
     const set = this.set(side)
     if (set.has(playerId)) set.delete(playerId)
@@ -188,6 +223,8 @@ export class TradeAnalyzerComponent implements OnInit {
   clear(): void {
     this.selectedA.clear()
     this.selectedB.clear()
+    this.picksA.clear()
+    this.picksB.clear()
     this.recalculate()
   }
 
@@ -201,10 +238,12 @@ export class TradeAnalyzerComponent implements OnInit {
     const sideA: TradeSide = {
       ...emptyTradeSide(this.sideARosterId ?? -1, this.teamName(this.sideARosterId)),
       playerIds: [...this.selectedA],
+      pickNames: [...this.picksA],
     }
     const sideB: TradeSide = {
       ...emptyTradeSide(this.sideBRosterId ?? -1, this.teamName(this.sideBRosterId)),
       playerIds: [...this.selectedB],
+      pickNames: [...this.picksB],
     }
     return { sideA, sideB }
   }

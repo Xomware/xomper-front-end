@@ -47,8 +47,14 @@ function book() {
       ['p2', 'WR'],
       ['p3', 'QB'],
     ]),
-    new Map(),
-    new Map(),
+    new Map([
+      ['2027 1st', 6000],
+      ['2027 2nd', 2500],
+    ]),
+    new Map([
+      ['2027 1st', 2027],
+      ['2027 2nd', 2027],
+    ]),
     Date.now(),
   )
 }
@@ -217,5 +223,82 @@ describe('TradeAnalyzerComponent', () => {
 
     expect(component.verdict).toContain('Team One')
     expect(component.verdict).not.toContain('Side A')
+  })
+})
+
+
+describe('TradeAnalyzerComponent draft picks', () => {
+  it('offers the picks this league prices', () => {
+    const { component } = build()
+    component.ngOnInit()
+
+    expect(component.availablePicks).toEqual(['2027 1st', '2027 2nd'])
+  })
+
+  it('counts a pick toward the side that holds it', () => {
+    const { component } = build()
+    component.ngOnInit()
+
+    component.togglePick('A', '2027 1st') // 6000
+    component.toggle('B', 'p2') // 5000
+
+    expect(component.evaluation!.sideAValue).toBe(6000)
+    expect(component.evaluation!.sideBValue).toBe(5000)
+  })
+
+  it('adds picks on top of players on the same side', () => {
+    const { component } = build()
+    component.ngOnInit()
+
+    component.toggle('A', 'p3') // 4200
+    component.togglePick('A', '2027 2nd') // 2500
+
+    expect(component.evaluation!.sideAValue).toBe(6700)
+  })
+
+  it('toggles a pick off again', () => {
+    const { component } = build()
+    component.ngOnInit()
+
+    component.togglePick('A', '2027 1st')
+    component.togglePick('A', '2027 1st')
+
+    expect(component.isPickSelected('A', '2027 1st')).toBe(false)
+  })
+
+  it('keeps picks when the team on that side changes', () => {
+    const { component } = build()
+    component.ngOnInit()
+    component.togglePick('B', '2027 1st')
+
+    component.onSideBChange(1)
+
+    // Unlike players, a pick is not tied to a roster — a team can trade one
+    // it acquired from anyone.
+    expect(component.isPickSelected('B', '2027 1st')).toBe(true)
+  })
+
+  it('clears picks along with players', () => {
+    const { component } = build()
+    component.ngOnInit()
+    component.togglePick('A', '2027 1st')
+    component.toggle('B', 'p2')
+
+    component.clear()
+
+    expect(component.isPickSelected('A', '2027 1st')).toBe(false)
+    expect(component.evaluation).toBeNull()
+  })
+
+  it('grades a picks-only trade', () => {
+    const { component } = build()
+    component.ngOnInit()
+
+    component.togglePick('A', '2027 1st') // 6000
+    component.togglePick('B', '2027 2nd') // 2500
+
+    // Dynasty trades are frequently picks on both sides and nothing else.
+    expect(component.verdictTone).toBe('a')
+    expect(component.isGradable).toBe(true)
   })
 })

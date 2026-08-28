@@ -73,6 +73,24 @@
           <option *ngFor="let a of analyses" [value]="a.rosterId">{{ a.teamName }}</option>
         </select>
 
+        <!-- Picks. Hidden for redraft leagues, whose value source carries none. -->
+        <div class="picks" *ngIf="availablePicks.length">
+          <span class="picks-label">Picks</span>
+          <div class="pick-chips">
+            <button
+              type="button"
+              class="pick-chip"
+              *ngFor="let name of availablePicks"
+              [class.pick-chip--selected]="isPickSelected($any(side), name)"
+              [attr.aria-pressed]="isPickSelected($any(side), name)"
+              (click)="togglePick($any(side), name)"
+            >
+              <span class="pick-name">{{ name }}</span>
+              <span class="pick-value">{{ pickValue(name) | number: '1.0-0' }}</span>
+            </button>
+          </div>
+        </div>
+
         <ul class="roster">
           <li *ngFor="let p of playersFor(side === 'A' ? sideARosterId : sideBRosterId)">
             <button
