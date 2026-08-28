@@ -69,9 +69,18 @@
 .league-name {
   font-size: $text-sm;
   font-weight: $font-weight-semibold;
+  // Wraps to two lines rather than truncating: league names are how you tell
+  // them apart, and "Chris Berman Memorial ..." is not a name.
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+// Equal heights so a two-line name does not leave a ragged grid.
+.league {
+  min-height: 104px;
 }
 
 .league-meta,

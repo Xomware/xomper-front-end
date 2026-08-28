@@ -1,0 +1,27 @@
+<!-- Nothing to say means no bar at all, rather than an empty strip. -->
+<div
+  class="ticker"
+  *ngIf="current as item"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  <span class="ticker-label" [ngClass]="'ticker-label--' + item.tone">
+    {{ item.label }}
+  </span>
+
+  <!-- Keyed on the index so the animation restarts each rotation. -->
+  <span class="ticker-text" [attr.data-index]="index">{{ item.text }}</span>
+
+  <button
+    type="button"
+    class="ticker-next"
+    *ngIf="items.length > 1"
+    (click)="next()"
+    aria-label="Next ticker item"
+  >
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+</div>
