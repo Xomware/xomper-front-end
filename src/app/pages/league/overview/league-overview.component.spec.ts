@@ -47,7 +47,6 @@ function build(options: { fails?: boolean; analyses?: unknown[]; myUserId?: stri
     { bookFor: () => of({}) } as never,
     { build: () => analyses } as never,
     { getMyUser: () => ({ getUserId: () => myUserId }) } as never,
-    { selectedLeague: { isDynasty: true, totalRosters: 12 } } as never,
     { navigate: jasmine.createSpy('navigate') } as never,
   )
   return component
