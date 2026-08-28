@@ -45,6 +45,15 @@ export const routes: Routes = [
   // Landing hub — auth-gated. AuthGuard redirects unauthed → /login.
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
 
+  {
+    path: 'player/:playerId',
+    loadComponent: () =>
+      import('./pages/player/player-profile.component').then(
+        (m) => m.PlayerProfileComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+
   { path: 'search', component: SearchComponent },
 
   // Guest accessible (view others)
