@@ -64,7 +64,16 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { mode: 'my' },
     children: [
-      { path: '', redirectTo: 'standings', pathMatch: 'full' },
+      // Overview, not standings. In the preseason standings is twelve teams
+      // at 0-0, which says nothing about the league you just opened.
+      { path: '', redirectTo: 'overview', pathMatch: 'full' },
+      {
+        path: 'overview',
+        loadComponent: () =>
+          import('./pages/league/overview/league-overview.component').then(
+            (m) => m.LeagueOverviewComponent,
+          ),
+      },
       {
         path: 'standings',
         loadComponent: () =>

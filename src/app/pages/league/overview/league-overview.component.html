@@ -1,0 +1,58 @@
+<div class="overview-page">
+  <app-loader [loading]="loading" message="Reading the league"></app-loader>
+
+  <div class="state state--error" *ngIf="error" role="alert">
+    <p>{{ error }}</p>
+    <button type="button" class="btn" (click)="load()">Try again</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+    <header class="league-head">
+      <h1>{{ leagueName }}</h1>
+      <p class="league-meta" *ngIf="leagueMeta">{{ leagueMeta }}</p>
+    </header>
+
+    <section class="power" *ngIf="rows.length">
+      <h2 class="section-title">Power rankings</h2>
+      <!-- Records are 0-0 all preseason; roster value is the only honest
+           ranking available before a game is played. -->
+      <p class="section-hint">By total roster value, priced by this league's settings.</p>
+
+      <ol class="rows">
+        <li class="row" *ngFor="let row of rows" [class.row--mine]="row.isMine">
+          <span class="row-rank">{{ row.rank }}</span>
+
+          <span class="row-body">
+            <span class="row-name">
+              {{ row.teamName }}
+              <span class="row-you" *ngIf="row.isMine">you</span>
+            </span>
+            <span class="row-bar" aria-hidden="true">
+              <span class="row-bar-fill" [style.width.%]="row.share * 100"></span>
+            </span>
+            <span class="row-groups">
+              Strongest {{ row.strength }} · Thinnest {{ row.weakness }}
+            </span>
+          </span>
+
+          <span class="row-total">{{ row.total | number: '1.0-0' }}</span>
+        </li>
+      </ol>
+    </section>
+
+    <section class="deeper">
+      <h2 class="section-title">Go deeper</h2>
+      <div class="deeper-grid">
+        <button
+          type="button"
+          class="deeper-link"
+          *ngFor="let link of deeper"
+          (click)="go(link.route)"
+        >
+          <span class="deeper-label">{{ link.label }}</span>
+          <span class="deeper-hint">{{ link.hint }}</span>
+        </button>
+      </div>
+    </section>
+  </ng-container>
+</div>

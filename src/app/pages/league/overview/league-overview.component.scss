@@ -1,0 +1,179 @@
+@import 'styles/variables';
+
+.overview-page {
+  margin: 0 auto;
+  max-width: 1000px;
+  padding: $spacing-lg;
+}
+
+.league-head {
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    font-size: $text-2xl;
+    margin: 0;
+  }
+}
+
+.league-meta {
+  color: $text-secondary;
+  font-size: $text-sm;
+  margin: $spacing-xs 0 0;
+}
+
+.state {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $spacing-xl 0;
+
+  &--error p {
+    color: $error-red;
+    margin: 0;
+  }
+}
+
+.btn {
+  background: rgba($champion-gold, 0.12);
+  border: 1px solid rgba($champion-gold, 0.3);
+  border-radius: $radius-md;
+  color: $champion-gold;
+  cursor: pointer;
+  font: inherit;
+  padding: $spacing-sm $spacing-lg;
+}
+
+.section-title {
+  font-size: $text-lg;
+  margin: 0;
+}
+
+.section-hint {
+  color: $text-secondary;
+  font-size: $text-sm;
+  margin: $spacing-xs 0 $spacing-md;
+}
+
+.power {
+  margin-bottom: $spacing-xl;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  align-items: center;
+  background: rgba($bg-card, 0.72);
+  border: 1px solid rgba($surface-light, 0.3);
+  border-radius: $radius-md;
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+
+  &--mine {
+    border-color: rgba($champion-gold, 0.5);
+  }
+}
+
+.row-rank {
+  color: $text-secondary;
+  flex-shrink: 0;
+  font-size: $text-sm;
+  text-align: right;
+  width: 22px;
+}
+
+.row-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.row-name {
+  align-items: center;
+  display: flex;
+  font-size: $text-sm;
+  gap: $spacing-xs;
+}
+
+.row-you {
+  background: rgba($champion-gold, 0.15);
+  border-radius: $radius-sm;
+  color: $champion-gold;
+  font-size: $text-xs;
+  padding: 1px 6px;
+}
+
+.row-bar {
+  background: rgba($surface-light, 0.4);
+  border-radius: $radius-full;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+}
+
+.row-bar-fill {
+  background: $champion-gold;
+  display: block;
+  height: 100%;
+}
+
+.row-groups {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.row-total {
+  color: $champion-gold;
+  flex-shrink: 0;
+  font-size: $text-sm;
+}
+
+.deeper-grid {
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+.deeper-link {
+  background: rgba($bg-card, 0.72);
+  border: 1px solid rgba($surface-light, 0.35);
+  border-radius: $radius-md;
+  color: $text-primary;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font: inherit;
+  gap: 2px;
+  padding: $spacing-md;
+  text-align: left;
+  transition: border-color $transition-fast;
+
+  &:hover {
+    border-color: rgba($champion-gold, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+.deeper-label {
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.deeper-hint {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
