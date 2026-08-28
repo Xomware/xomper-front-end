@@ -7,11 +7,6 @@
   </div>
 
   <ng-container *ngIf="!loading && !error">
-    <header class="league-head">
-      <h1>{{ leagueName }}</h1>
-      <p class="league-meta" *ngIf="leagueMeta">{{ leagueMeta }}</p>
-    </header>
-
     <section class="power" *ngIf="rows.length">
       <h2 class="section-title">Power rankings</h2>
       <!-- Records are 0-0 all preseason; roster value is the only honest

@@ -8,7 +8,6 @@ import { PlayerService } from 'src/app/services/player.service'
 import { PlayerValuesService } from 'src/app/services/player-values.service'
 import { TeamAnalysisService } from 'src/app/services/team-analysis.service'
 import { UserService } from 'src/app/services/user.service'
-import { LeagueFollowsService } from 'src/app/services/league-follows.service'
 import { LoaderComponent } from 'src/app/components/loader/loader.component'
 import { TeamAnalysis, totalValue } from 'src/app/models/team-analysis.model'
 
@@ -56,8 +55,6 @@ export class LeagueOverviewComponent implements OnInit {
   loading = true
   error: string | null = null
 
-  leagueName = ''
-  leagueMeta = ''
   rows: PowerRow[] = []
 
   readonly deeper: DeeperLink[] = [
@@ -75,7 +72,6 @@ export class LeagueOverviewComponent implements OnInit {
     private playerValuesService: PlayerValuesService,
     private teamAnalysisService: TeamAnalysisService,
     private userService: UserService,
-    private follows: LeagueFollowsService,
     private router: Router,
   ) {}
 
@@ -94,23 +90,17 @@ export class LeagueOverviewComponent implements OnInit {
       return
     }
 
-    const selected = this.follows.selectedLeague
-    this.leagueMeta = selected
-      ? `${selected.isDynasty ? 'Dynasty' : 'Redraft'} · ${selected.totalRosters} teams`
-      : ''
-
     this.leagueService
       .searchLeague(leagueId)
       .pipe(
-        switchMap((league) => {
-          this.leagueName = league.getDisplayName()
-          return forkJoin([
+        switchMap((league) =>
+          forkJoin([
             this.leagueService.findLeagueRosters(leagueId),
             this.leagueService.findLeagueUsers(leagueId),
             this.playerValuesService.bookFor(league),
             this.playerService.getPlayerMap(),
-          ])
-        }),
+          ]),
+        ),
       )
       .subscribe({
         next: ([rosters, users, book, playerMap]) => {
