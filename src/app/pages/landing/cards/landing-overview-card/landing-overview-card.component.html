@@ -1,0 +1,41 @@
+<section class="overview">
+  <!-- Your leagues — the part of this page that is not about one league -->
+  <div class="block" *ngIf="leagues.length">
+    <h2 class="block-title">Your leagues</h2>
+    <div class="league-grid">
+      <button
+        type="button"
+        class="league"
+        *ngFor="let league of leagues"
+        [class.league--active]="league.leagueId === selectedLeagueId"
+        (click)="open(league)"
+      >
+        <span class="league-name">{{ league.name }}</span>
+        <span class="league-meta">
+          {{ league.isDynasty ? 'Dynasty' : 'Redraft' }} · {{ league.totalRosters }} teams
+        </span>
+        <span class="league-status" [attr.data-status]="league.status">
+          {{ statusLabel(league) }}
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="block">
+    <h2 class="block-title">Jump to</h2>
+    <div class="action-grid">
+      <button
+        type="button"
+        class="action"
+        *ngFor="let action of actions"
+        (click)="go(action)"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="action.svg" />
+        </svg>
+        <span class="action-label">{{ action.label }}</span>
+        <span class="action-hint">{{ action.hint }}</span>
+      </button>
+    </div>
+  </div>
+</section>

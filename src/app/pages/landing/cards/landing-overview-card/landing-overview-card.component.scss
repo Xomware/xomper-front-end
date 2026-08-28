@@ -1,0 +1,107 @@
+@import 'styles/variables';
+
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.block-title {
+  color: $text-secondary;
+  font-size: $text-xs;
+  letter-spacing: $tracking-wider;
+  margin: 0 0 $spacing-sm;
+  text-transform: uppercase;
+}
+
+.league-grid,
+.action-grid {
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+
+.league,
+.action {
+  background: rgba($bg-card, 0.72);
+  border: 1px solid rgba($surface-light, 0.35);
+  border-radius: $radius-md;
+  color: $text-primary;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font: inherit;
+  gap: 4px;
+  padding: $spacing-md;
+  text-align: left;
+  transition:
+    border-color $transition-fast,
+    transform $transition-fast;
+
+  &:hover {
+    border-color: rgba($champion-gold, 0.5);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+// Motion is decoration here; anyone who asked for less should not get lift.
+@media (prefers-reduced-motion: reduce) {
+  .league,
+  .action {
+    transition: border-color $transition-fast;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.league--active {
+  border-color: rgba($champion-gold, 0.6);
+}
+
+.league-name {
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.league-meta,
+.action-hint {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.league-status {
+  color: $text-secondary;
+  font-size: $text-xs;
+  letter-spacing: $tracking-wide;
+  text-transform: uppercase;
+
+  &[data-status='in_season'] {
+    color: $success-green;
+  }
+
+  &[data-status='drafting'] {
+    color: $champion-gold;
+  }
+}
+
+.action {
+  svg {
+    color: $champion-gold;
+  }
+}
+
+.action-label {
+  font-size: $text-sm;
+  font-weight: $font-weight-semibold;
+}

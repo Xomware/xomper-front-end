@@ -1,4 +1,5 @@
 import { Component } from '@angular/core'
+import { LandingOverviewCardComponent } from './cards/landing-overview-card/landing-overview-card.component'
 import { LandingHeadlineCardComponent } from './cards/landing-headline-card/landing-headline-card.component'
 import { LandingDraftCountdownCardComponent } from './cards/landing-draft-countdown-card/landing-draft-countdown-card.component'
 import { LandingAnnouncementsCardComponent } from './cards/landing-announcements-card/landing-announcements-card.component'
@@ -7,14 +8,17 @@ import { LandingThisWeekCardComponent } from './cards/landing-this-week-card/lan
 
 /**
  * Landing hub host — composition only, no fetch logic.
- * Mirrors iOS LandingView: composes 5 cards in a vertical stack.
- * Order: Headline AI Report → Upcoming Draft countdown → Announcements
- *        → Standings scroll bar → This-week matchups.
+ *
+ * The overview card comes first and is the only league-agnostic one: your
+ * leagues and the jump-off points into the app. Everything below it is scoped
+ * to whichever league is selected, which is why this page previously read as
+ * a view of one league rather than of the app.
  */
 @Component({
   selector: 'app-landing',
   standalone: true,
   imports: [
+    LandingOverviewCardComponent,
     LandingHeadlineCardComponent,
     LandingDraftCountdownCardComponent,
     LandingAnnouncementsCardComponent,
