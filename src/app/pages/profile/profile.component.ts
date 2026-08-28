@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { take } from 'rxjs'
 import { UserService } from 'src/app/services/user.service'
+import { getCurrentSeason } from 'src/app/constants/season'
 import { ToastService } from 'src/app/services/toast.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { UserModel } from 'src/app/models/user.model'
@@ -24,6 +25,9 @@ export class ProfileComponent implements OnInit {
   userLeagues: LeagueModel[] = []
   loading = false
 
+  /** Sleeper rolls the season over in spring, so this is not the calendar year. */
+  readonly season = getCurrentSeason()
+
   constructor(
     private userService: UserService,
     private leagueService: LeagueService,
@@ -38,9 +42,27 @@ export class ProfileComponent implements OnInit {
     } else {
       this.user = this.userService.getCurrentUser()
     }
+    // Already resolved -- 'my' mode reads the signed-in user straight from
+    // UserService, which AuthGuard populates on every protected navigation.
+    // Falling through to the query-param lookup anyway is what rendered
+    // "UNDEFINED": /profile carries no ?userId=, so this fetched
+    // /user/undefined and named the page from the result.
+    if (this.user) {
+      this.setupUser()
+      this.loading = false
+      return
+    }
+
     this.loading = true
     this.route.queryParams.pipe(take(1)).subscribe((params) => {
       const queryUserId = params['userId']
+
+      if (!queryUserId) {
+        this.toastService.showNegativeToast('No profile to show.')
+        this.loading = false
+        return
+      }
+
       this.userService.searchUser(queryUserId)
         .pipe(take(1))
         .subscribe({

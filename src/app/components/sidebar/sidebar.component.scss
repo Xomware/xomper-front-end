@@ -8,10 +8,15 @@
   width: 260px;
   min-width: 260px;
   height: 100%;
-  background: var(--xomper-bg-card, #{$bg-card});
+  background: $bg-card;
   border-right: 1px solid $surface-light;
   overflow-y: auto;
   padding: $spacing-md 0;
+  // The starfield is position: fixed at z-index 0. Without its own stacking
+  // position the sidebar does not paint over it and stars show through the
+  // navigation.
+  position: relative;
+  z-index: 1;
 }
 
 // ---- Sidebar header (profile chip + search icon) ----
@@ -346,4 +351,36 @@ ul {
   border-top: 1px solid $surface-light;
   padding: $spacing-sm;
   margin-top: auto;
+}
+
+// ---- Sidebar footer ----
+// `margin-top: auto` pins these to the bottom of the flex column, so they sit
+// below the nav however short the entry list gets.
+.sidebar-footer {
+  border-top: 1px solid rgba($surface-light, 0.6);
+  display: flex;
+  gap: $spacing-md;
+  margin: $spacing-md $spacing-sm 0;
+  margin-top: auto;
+  padding: $spacing-sm $spacing-md 0;
+}
+
+.footer-link {
+  align-items: center;
+  color: $text-secondary;
+  display: flex;
+  font-size: $text-xs;
+  gap: $spacing-xs;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $champion-gold;
+  }
+
+  &:focus-visible {
+    border-radius: $radius-sm;
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
 }

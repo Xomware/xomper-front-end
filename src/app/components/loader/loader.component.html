@@ -1,5 +1,8 @@
-<div class="loader" *ngIf="loading">
-    <div class="spinner"></div>
-    <p>Loading...</p>
+<div class="loader" *ngIf="loading" role="status" aria-live="polite">
+  <div class="orbit" aria-hidden="true">
+    <span class="orbit-ring orbit-ring--outer"></span>
+    <span class="orbit-ring orbit-ring--inner"></span>
+    <span class="orbit-core"></span>
+  </div>
+  <p>{{ message }}</p>
 </div>
-

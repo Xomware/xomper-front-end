@@ -6,7 +6,9 @@
 
 // Page shell
 .analyzer-page {
-  background: $bg-dark;
+  // Deliberately transparent, like every other page. Painting $bg-dark here
+  // covered the starfield with a flat black rectangle that ended in a hard
+  // edge against the sidebar.
   min-height: 100%;
   padding-bottom: $spacing-xl;
   position: relative;
@@ -50,7 +52,8 @@
 // ────────────────────────────────────────────────────────
 .tab-bar {
   display: flex;
-  background: $bg-dark;
+  background: rgba($bg-card, 0.72);
+  backdrop-filter: blur(6px);
   border-bottom: 1px solid rgba($surface-light, 0.3);
   padding-top: $spacing-xs;
 }
