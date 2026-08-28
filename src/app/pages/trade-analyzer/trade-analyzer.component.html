@@ -62,15 +62,22 @@
         <label class="side-label" [attr.for]="'team-' + side">
           {{ side === 'A' ? 'Gives' : 'Receives' }}
         </label>
+        <!-- `selected` on the option, not `[value]` on the select: binding the
+             select's value does not move the rendered selection, so both
+             dropdowns displayed the first team while operating on different
+             rosters. -->
         <select
           class="team-select"
           [id]="'team-' + side"
-          [value]="side === 'A' ? sideARosterId : sideBRosterId"
           (change)="side === 'A'
             ? onSideAChange($any($event.target).value)
             : onSideBChange($any($event.target).value)"
         >
-          <option *ngFor="let a of analyses" [value]="a.rosterId">{{ a.teamName }}</option>
+          <option
+            *ngFor="let a of analyses"
+            [value]="a.rosterId"
+            [selected]="a.rosterId === (side === 'A' ? sideARosterId : sideBRosterId)"
+          >{{ a.teamName }}</option>
         </select>
 
         <!-- Picks. Hidden for redraft leagues, whose value source carries none. -->
