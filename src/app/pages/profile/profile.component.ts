@@ -96,10 +96,13 @@ export class ProfileComponent implements OnInit {
   }
 
   getUserLeagues(): void {
-    const currentUser = this.userService.getCurrentUser()
-    if (!currentUser) return
+    // `this.user`, not getCurrentUser(): in 'my' mode the user comes from
+    // getMyUser() and getCurrentUser() is null, so this returned early and
+    // the leagues list stayed empty under a correct heading.
+    const user = this.user
+    if (!user) return
 
-    this.userService.findUserLeagues(currentUser.getUserId())
+    this.userService.findUserLeagues(user.getUserId())
       .pipe(take(1))
       .subscribe({
         next: (leagues) => {
