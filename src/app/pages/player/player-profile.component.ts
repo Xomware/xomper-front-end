@@ -7,6 +7,7 @@ import { LeagueService } from 'src/app/services/league.service'
 import { PlayerService } from 'src/app/services/player.service'
 import { PlayerValuesService } from 'src/app/services/player-values.service'
 import { LoaderComponent } from 'src/app/components/loader/loader.component'
+import { CommentThreadComponent } from 'src/app/components/comment-thread/comment-thread.component'
 import { Player } from 'src/app/models/player.interface'
 import { Roster } from 'src/app/models/roster.interface'
 import { User } from 'src/app/models/user.interface'
@@ -29,7 +30,7 @@ interface Fact {
 @Component({
   selector: 'app-player-profile',
   standalone: true,
-  imports: [NgIf, NgFor, DecimalPipe, LoaderComponent],
+  imports: [NgIf, NgFor, DecimalPipe, LoaderComponent, CommentThreadComponent],
   templateUrl: './player-profile.component.html',
   styleUrls: ['./player-profile.component.scss'],
 })

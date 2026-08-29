@@ -50,6 +50,12 @@
       </div>
     </section>
 
+    <app-comment-thread
+      targetType="player"
+      [targetId]="playerId"
+      [heading]="'Talk about ' + name"
+    ></app-comment-thread>
+
     <section class="facts" *ngIf="facts.length">
       <h2 class="section-title">Details</h2>
       <dl class="fact-grid">
