@@ -1,12 +1,27 @@
 import { Component, OnInit, DestroyRef, inject } from '@angular/core'
-import { NgIf, NgFor } from '@angular/common'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { NgIf, NgFor, DecimalPipe } from '@angular/common'
 import { FormsModule } from '@angular/forms'
+import { forkJoin, switchMap } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { PlayerService } from 'src/app/services/player.service'
+import { LeagueService } from 'src/app/services/league.service'
+import { PlayerValuesService } from 'src/app/services/player-values.service'
+import { ValueBook } from 'src/app/models/value-book.model'
+import {
+  DraftAssistantService,
+  DraftCandidate,
+  StrategyPreset,
+  STRATEGY_LABELS,
+  BoardPrefs,
+  emptyPrefs,
+} from 'src/app/services/draft-assistant.service'
+import { pressureFrom } from 'src/app/services/draft-context.service'
 import {
   ManualDraft,
   PlayerLookup,
   emptyManualDraft,
+  ownerForSlot,
   isMyTurn,
   onTheClock,
   recordPick,
@@ -26,17 +41,16 @@ const STORAGE_KEY = 'xomper.manualDraft'
  * user taps players off as they go, and `manual-draft.service` turns that into
  * the same `DraftPick[]` the live board already consumes.
  *
- * Deliberately not here: the suggestion board. It needs a value book, which is
- * derived from a Sleeper league — a manual draft may have no Sleeper league at
- * all. Wiring a value source for a non-Sleeper league is its own problem, so
- * this ships as accurate pick tracking rather than a half-wired assistant.
+ * Values come from the league already selected in Draft History, the same book
+ * the live board uses. Marking players off is only half the job — the point is
+ * being told who to take next.
  */
 @Component({
   selector: 'app-manual-draft',
   templateUrl: './manual-draft.component.html',
   styleUrls: ['./manual-draft.component.scss'],
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule],
+  imports: [NgIf, NgFor, FormsModule, DecimalPipe],
 })
 export class ManualDraftComponent implements OnInit {
   private destroyRef = inject(DestroyRef)
@@ -48,24 +62,101 @@ export class ManualDraftComponent implements OnInit {
   query = ''
   results: string[] = []
 
-  constructor(private playerService: PlayerService) {}
+  // Suggestions, from the same value book the live board uses.
+  board: DraftCandidate[] = []
+  prefs: BoardPrefs = emptyPrefs()
+  strategies: StrategyPreset[] = ['bpa', 'needs', 'rb-heavy', 'wr-heavy', 'qb-early']
+  private book: ValueBook | null = null
+  private leagueId = ''
+
+  constructor(
+    private playerService: PlayerService,
+    private leagueService: LeagueService,
+    private playerValuesService: PlayerValuesService,
+    private assistant: DraftAssistantService,
+  ) {}
 
   ngOnInit(): void {
     this.draft = this.restore() ?? emptyManualDraft()
 
-    this.playerService
-      .getPlayerMap()
-      .pipe(take(1))
-      .subscribe({
-        next: (map) => {
-          this.players = map as unknown as PlayerLookup
+    this.leagueId = this.leagueService.getMyLeague()?.getId() ?? ''
+
+    forkJoin({
+      league: this.leagueService.searchLeague(this.leagueId),
+      playerMap: this.playerService.getPlayerMap(),
+    })
+      .pipe(
+        switchMap(({ league, playerMap }) => {
+          this.players = playerMap as unknown as PlayerLookup
           this.loading = false
           this.search()
+          return this.playerValuesService.bookFor(league)
+        }),
+        take(1),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (book) => {
+          this.book = book
+          this.refreshBoard()
         },
+        // Failure leaves the panel off. Mark-off still works without
+        // suggestions, and an error banner over a usable board is worse.
         error: () => {
+          this.book = null
           this.loading = false
         },
       })
+  }
+
+  /**
+   * Re-rank against the picks marked off so far.
+   *
+   * `toDraftPicks` is what makes this possible: the assistant is handed the
+   * same shape it gets from a live Sleeper draft, so nothing here is a second
+   * ranking path.
+   */
+  private refreshBoard(): void {
+    if (!this.book) return
+    this.board = this.assistant.suggest(
+      toDraftPicks(this.draft, this.players),
+      this.players as never,
+      this.book,
+      this.prefs,
+      ownerForSlot(this.draft.mySlot),
+    )
+  }
+
+  setStrategy(preset: StrategyPreset): void {
+    this.prefs = { ...this.prefs, preset }
+    this.refreshBoard()
+  }
+
+  strategyLabel(preset: StrategyPreset): string {
+    return STRATEGY_LABELS[preset]
+  }
+
+  /** What the teams picking before you still need. Counts, never a prediction. */
+  get pressureLines(): string[] {
+    const owners: string[] = []
+    for (let pick = this.draft.picks.length + 1; pick <= totalPicks(this.draft); pick++) {
+      const slot = onTheClock({ ...this.draft, picks: this.draft.picks.slice(0, pick - 1) })
+      if (slot === this.draft.mySlot) break
+      if (slot) owners.push(ownerForSlot(slot))
+    }
+    if (!owners.length) return []
+
+    const pressure = pressureFrom(
+      owners,
+      toDraftPicks(this.draft, this.players),
+      this.players,
+      { teams: this.draft.teams, rounds: this.draft.rounds } as never,
+    )
+    return Object.entries(pressure.teamsNeeding)
+      .filter(([position]) => ['QB', 'RB', 'WR', 'TE'].includes(position))
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([position, teams]) => `${teams} need ${position}`)
   }
 
   // -------- board state --------
@@ -108,6 +199,7 @@ export class ManualDraftComponent implements OnInit {
   take(playerId: string): void {
     this.draft = recordPick(this.draft, playerId)
     this.persist()
+    this.refreshBoard()
     // Clearing the box is the whole ergonomic point: the next pick is seconds
     // away and nobody should have to select-all first.
     this.query = ''
@@ -118,12 +210,14 @@ export class ManualDraftComponent implements OnInit {
     this.draft = undoLastPick(this.draft)
     this.persist()
     this.search()
+    this.refreshBoard()
   }
 
   reset(): void {
     this.draft = emptyManualDraft(this.draft.teams, this.draft.rounds, this.draft.mySlot)
     this.persist()
     this.search()
+    this.refreshBoard()
   }
 
   applySetup(): void {
@@ -136,6 +230,7 @@ export class ManualDraftComponent implements OnInit {
       mySlot: Number(this.draft.mySlot) || 1,
     }
     this.persist()
+    this.refreshBoard()
   }
 
   nameFor(playerId: string): string {
