@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core'
-import { NgFor, NgIf } from '@angular/common'
+import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common'
 import { RouterLink } from '@angular/router'
 import { take } from 'rxjs/operators'
 import { FriendsService, FriendGraph, Person } from 'src/app/services/friends.service'
@@ -18,7 +18,7 @@ import { LoaderComponent } from 'src/app/components/loader/loader.component'
 @Component({
   selector: 'app-friends',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink, LoaderComponent],
+  imports: [NgIf, NgFor, NgTemplateOutlet, RouterLink, LoaderComponent],
   templateUrl: './friends.component.html',
   styleUrls: ['./friends.component.scss'],
 })
@@ -73,6 +73,17 @@ export class FriendsComponent implements OnInit {
 
   initials(person: Person): string {
     return (person.displayName || '?').slice(0, 1).toUpperCase()
+  }
+
+  /**
+   * Query params for someone else's profile.
+   *
+   * /selected-profile resolves through Sleeper's /user/{id_or_username},
+   * which takes either form -- so the handle works and no Sleeper numeric id
+   * has to be carried on Person just for this link.
+   */
+  profileParams(person: Person): { userId: string } {
+    return { userId: person.sleeperUsername }
   }
 
   get isEmpty(): boolean {

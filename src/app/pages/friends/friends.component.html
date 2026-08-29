@@ -15,19 +15,38 @@
       Nobody yet. Search a Sleeper username to find someone.
     </p>
 
+    <!--
+      One identity cell for all three groups. Linking only the incoming rows
+      was the bug: you could not look up the person asking to be your friend
+      before answering, which is the one place the link matters most.
+    -->
+    <ng-template #personCell let-p="person" let-meta="meta">
+      <span class="avatar">
+        <img *ngIf="avatarUrl(p)" [src]="avatarUrl(p)" alt="" />
+        <span *ngIf="!avatarUrl(p)">{{ initials(p) }}</span>
+      </span>
+      <span class="person-info">
+        <a
+          class="person-name"
+          *ngIf="p.sleeperUsername; else plainName"
+          [routerLink]="['/selected-profile']"
+          [queryParams]="profileParams(p)"
+        >{{ p.displayName }}</a>
+        <ng-template #plainName>
+          <span class="person-name">{{ p.displayName }}</span>
+        </ng-template>
+        <span class="person-meta" *ngIf="meta">{{ meta }}</span>
+      </span>
+    </ng-template>
+
     <!-- Requests first: they are the only rows that need an answer. -->
     <section class="group" *ngIf="graph.incoming.length">
       <h2 class="group-title">Wants to be friends</h2>
       <ul class="people">
         <li class="person" *ngFor="let p of graph.incoming">
-          <span class="avatar">
-            <img *ngIf="avatarUrl(p)" [src]="avatarUrl(p)" alt="" />
-            <span *ngIf="!avatarUrl(p)">{{ initials(p) }}</span>
-          </span>
-          <span class="person-info">
-            <a class="person-name" [routerLink]="['/profile']">{{ p.displayName }}</a>
-            <span class="person-meta" *ngIf="p.sleeperUsername">{{ p.sleeperUsername }}</span>
-          </span>
+          <ng-container
+            *ngTemplateOutlet="personCell; context: { person: p, meta: p.sleeperUsername }"
+          ></ng-container>
           <span class="actions">
             <button type="button" class="btn" [disabled]="busyWith === p.userId" (click)="accept(p)">
               Accept
@@ -44,14 +63,9 @@
       <h2 class="group-title">Friends</h2>
       <ul class="people">
         <li class="person" *ngFor="let p of graph.friends">
-          <span class="avatar">
-            <img *ngIf="avatarUrl(p)" [src]="avatarUrl(p)" alt="" />
-            <span *ngIf="!avatarUrl(p)">{{ initials(p) }}</span>
-          </span>
-          <span class="person-info">
-            <span class="person-name">{{ p.displayName }}</span>
-            <span class="person-meta" *ngIf="p.sleeperUsername">{{ p.sleeperUsername }}</span>
-          </span>
+          <ng-container
+            *ngTemplateOutlet="personCell; context: { person: p, meta: p.sleeperUsername }"
+          ></ng-container>
           <span class="actions">
             <button type="button" class="btn btn--ghost" [disabled]="busyWith === p.userId" (click)="remove(p)">
               Remove
@@ -65,14 +79,9 @@
       <h2 class="group-title">Asked</h2>
       <ul class="people">
         <li class="person" *ngFor="let p of graph.outgoing">
-          <span class="avatar">
-            <img *ngIf="avatarUrl(p)" [src]="avatarUrl(p)" alt="" />
-            <span *ngIf="!avatarUrl(p)">{{ initials(p) }}</span>
-          </span>
-          <span class="person-info">
-            <span class="person-name">{{ p.displayName }}</span>
-            <span class="person-meta">Waiting for an answer</span>
-          </span>
+          <ng-container
+            *ngTemplateOutlet="personCell; context: { person: p, meta: 'Waiting for an answer' }"
+          ></ng-container>
           <span class="actions">
             <button type="button" class="btn btn--ghost" [disabled]="busyWith === p.userId" (click)="remove(p)">
               Cancel
