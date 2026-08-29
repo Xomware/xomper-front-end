@@ -14,6 +14,7 @@ import {
   adpKey,
 } from 'src/app/services/adp.service'
 import { nextPickFor } from 'src/app/services/draft-order'
+import { pressureFrom, PositionPressure } from 'src/app/services/draft-context.service'
 import { DraftService } from 'src/app/services/draft.service'
 import { DraftModel } from 'src/app/models/draft.model'
 import { DraftPick } from 'src/app/models/draft.interface'
@@ -66,6 +67,9 @@ interface LiveRound {
  * delay is re-derived on every tick rather than fixed at subscribe time, so a
  * board opened before the draft speeds up on its own when picks start.
  */
+/** Positions worth reporting pressure on. K and DEF go late and nobody races. */
+const DRAFTABLE_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
+
 @Component({
   selector: 'app-draft-live',
   templateUrl: './draft-live.component.html',
@@ -95,6 +99,13 @@ export class DraftLiveComponent implements OnInit {
   adpSampleEnd = ''
   private adp = new Map<string, AdpPlayer>()
   private myNextPickNo: number | null = null
+
+  /**
+   * What the teams picking before you still need. Counts of unfilled starter
+   * slots - not a claim about who gets taken. See #155 for why the predictive
+   * form is gated rather than shipped.
+   */
+  pressure: PositionPressure | null = null
 
   // Kept for the next-pick walk, which needs ownership after trades.
   private tradedPicks: TradedPick[] = []
@@ -284,6 +295,9 @@ export class DraftLiveComponent implements OnInit {
       reversalRound: draft.settings?.reversal_round ?? 0,
     })
     this.myNextPickNo = next?.pickNo ?? null
+    this.pressure = next
+      ? pressureFrom(next.interveningOwners, picks, this.playerMap, draft.settings)
+      : null
   }
 
   /**
@@ -303,6 +317,21 @@ export class DraftLiveComponent implements OnInit {
     const gap = this.myNextPickNo - adp
     const sign = gap > 0 ? `+${gap}` : `${gap}`
     return `ADP ${adp} · next ${this.myNextPickNo} · ${sign}`
+  }
+
+  /**
+   * The positions worth mentioning before your next pick, most contested
+   * first. Capped at three: a list of every position is not a signal.
+   */
+  get pressureLines(): string[] {
+    const pressure = this.pressure
+    if (!pressure || !pressure.teams) return []
+
+    return Object.entries(pressure.teamsNeeding)
+      .filter(([position]) => DRAFTABLE_POSITIONS.has(position))
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([position, teams]) => `${teams} need ${position}`)
   }
 
   /** Re-rank against the picks seen so far. Cheap enough to run per poll. */
