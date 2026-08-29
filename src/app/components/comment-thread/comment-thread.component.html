@@ -1,0 +1,56 @@
+<section class="thread">
+  <h2 class="thread-title">{{ heading }}</h2>
+
+  <div class="composer">
+    <textarea
+      class="composer-input"
+      [(ngModel)]="draft"
+      [maxlength]="maxLength"
+      rows="2"
+      placeholder="Say something"
+      aria-label="Write a comment"
+    ></textarea>
+    <button type="button" class="composer-post" (click)="post()" [disabled]="posting || !draft.trim()">
+      {{ posting ? 'Posting…' : 'Post' }}
+    </button>
+  </div>
+
+  <p class="thread-error" *ngIf="error" role="alert">{{ error }}</p>
+
+  <p class="thread-empty" *ngIf="!loading && !comments.length">
+    Nothing here yet.
+  </p>
+
+  <ul class="comments" *ngIf="comments.length">
+    <li class="comment" *ngFor="let c of comments">
+      <span class="comment-avatar">
+        <img *ngIf="avatarUrl(c)" [src]="avatarUrl(c)" alt="" />
+        <span *ngIf="!avatarUrl(c)">{{ initials(c) }}</span>
+      </span>
+
+      <span class="comment-main">
+        <span class="comment-head">
+          <span class="comment-author">{{ c.author.displayName }}</span>
+          <span class="comment-when">{{ c.createdAt | date: 'short' }}</span>
+        </span>
+        <span class="comment-body">{{ c.body }}</span>
+
+        <span class="comment-actions">
+          <button
+            type="button"
+            class="comment-like"
+            [class.comment-like--on]="c.likedByMe"
+            [attr.aria-pressed]="c.likedByMe"
+            (click)="toggleLike(c)"
+          >
+            &#9829; <span *ngIf="c.likeCount">{{ c.likeCount }}</span>
+          </button>
+          <!-- Server-computed: only the author gets the control at all. -->
+          <button type="button" class="comment-delete" *ngIf="c.mine" (click)="remove(c)">
+            Delete
+          </button>
+        </span>
+      </span>
+    </li>
+  </ul>
+</section>

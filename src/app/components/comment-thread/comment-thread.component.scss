@@ -1,0 +1,161 @@
+@import 'styles/variables';
+
+.thread {
+  margin-top: $spacing-xl;
+}
+
+.thread-title {
+  font-size: $text-lg;
+  margin: 0 0 $spacing-sm;
+}
+
+.composer {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.composer-input {
+  background: rgba($bg-card, 0.8);
+  border: 1px solid rgba($surface-light, 0.4);
+  border-radius: $radius-md;
+  color: $text-primary;
+  flex: 1;
+  font: inherit;
+  font-size: $text-sm;
+  padding: $spacing-sm $spacing-md;
+  resize: vertical;
+
+  &:focus-visible {
+    border-color: rgba($champion-gold, 0.6);
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+.composer-post {
+  align-self: flex-start;
+  background: rgba($champion-gold, 0.12);
+  border: 1px solid rgba($champion-gold, 0.35);
+  border-radius: $radius-md;
+  color: $champion-gold;
+  cursor: pointer;
+  font: inherit;
+  font-size: $text-sm;
+  padding: $spacing-sm $spacing-lg;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+.thread-error {
+  color: $error-red;
+  font-size: $text-sm;
+}
+
+.thread-empty {
+  color: $text-secondary;
+  font-size: $text-sm;
+}
+
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.comment {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.comment-avatar {
+  align-items: center;
+  background: rgba($surface-light, 0.4);
+  border-radius: $radius-full;
+  color: $champion-gold;
+  display: flex;
+  flex-shrink: 0;
+  font-size: $text-xs;
+  height: 30px;
+  justify-content: center;
+  overflow: hidden;
+  width: 30px;
+
+  img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+}
+
+.comment-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.comment-head {
+  align-items: baseline;
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.comment-author {
+  font-size: $text-sm;
+}
+
+.comment-when {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.comment-body {
+  font-size: $text-sm;
+  // Comments are free text; a long unbroken string must not widen the page.
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.comment-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: 2px;
+}
+
+.comment-like,
+.comment-delete {
+  background: none;
+  border: 0;
+  color: $text-secondary;
+  cursor: pointer;
+  font: inherit;
+  font-size: $text-xs;
+  padding: 0;
+
+  &:hover {
+    color: $champion-gold;
+  }
+
+  &:focus-visible {
+    border-radius: $radius-sm;
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+.comment-like--on {
+  color: $champion-gold;
+}

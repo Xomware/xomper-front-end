@@ -9,6 +9,7 @@ import { PlayerValuesService } from 'src/app/services/player-values.service'
 import { TeamAnalysisService } from 'src/app/services/team-analysis.service'
 import { UserService } from 'src/app/services/user.service'
 import { LoaderComponent } from 'src/app/components/loader/loader.component'
+import { CommentThreadComponent } from 'src/app/components/comment-thread/comment-thread.component'
 import { TeamAnalysis, totalValue } from 'src/app/models/team-analysis.model'
 
 /** One row of the power ranking. */
@@ -47,13 +48,16 @@ interface DeeperLink {
 @Component({
   selector: 'app-league-overview',
   standalone: true,
-  imports: [NgIf, NgFor, DecimalPipe, LoaderComponent],
+  imports: [NgIf, NgFor, DecimalPipe, LoaderComponent, CommentThreadComponent],
   templateUrl: './league-overview.component.html',
   styleUrls: ['./league-overview.component.scss'],
 })
 export class LeagueOverviewComponent implements OnInit {
   loading = true
   error: string | null = null
+
+  /** Held for the comment thread, which keys on the league. */
+  leagueId = ''
 
   rows: PowerRow[] = []
 
@@ -84,6 +88,7 @@ export class LeagueOverviewComponent implements OnInit {
     this.error = null
 
     const leagueId = this.leagueService.getActiveLeagueId()
+    this.leagueId = leagueId ?? ''
     if (!leagueId) {
       this.error = 'No league selected.'
       this.loading = false
