@@ -2,14 +2,27 @@
   <h2 class="thread-title">{{ heading }}</h2>
 
   <div class="composer">
-    <textarea
-      class="composer-input"
-      [(ngModel)]="draft"
-      [maxlength]="maxLength"
-      rows="2"
-      placeholder="Say something"
-      aria-label="Write a comment"
-    ></textarea>
+    <div class="composer-field">
+      <textarea
+        class="composer-input"
+        [(ngModel)]="draft"
+        (ngModelChange)="onDraftChange()"
+        [maxlength]="maxLength"
+        rows="2"
+        placeholder="Say something. Type @ to mention a friend."
+        aria-label="Write a comment"
+      ></textarea>
+
+      <!-- Friends only: mentions resolve to Cognito subs, and display names
+           are not unique enough to match against everyone. -->
+      <ul class="mentions" *ngIf="suggestions.length" role="listbox">
+        <li *ngFor="let person of suggestions">
+          <button type="button" role="option" (click)="choose(person)">
+            {{ person.displayName }}
+          </button>
+        </li>
+      </ul>
+    </div>
     <button type="button" class="composer-post" (click)="post()" [disabled]="posting || !draft.trim()">
       {{ posting ? 'Posting…' : 'Post' }}
     </button>

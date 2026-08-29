@@ -37,7 +37,15 @@ function build(options: { thread?: Comment[]; addFails?: boolean; addError?: str
     react: jasmine.createSpy('react').and.returnValue(of([comment({ likedByMe: true, likeCount: 1 })])),
     remove: jasmine.createSpy('remove').and.returnValue(of([])),
   }
-  const component = new CommentThreadComponent(service as never)
+  const friends = {
+    graph: {
+      friends: [
+        { userId: 'u-bee', displayName: 'Bee', sleeperUsername: '', sleeperAvatar: '', since: '' },
+        { userId: 'u-cee', displayName: 'Cee', sleeperUsername: '', sleeperAvatar: '', since: '' },
+      ],
+    },
+  }
+  const component = new CommentThreadComponent(service as never, friends as never)
   component.targetType = 'league'
   component.targetId = 'l1'
   return { component, service }
@@ -71,9 +79,8 @@ describe('CommentThreadComponent', () => {
 
     component.post()
 
-    // Three args: mentions default to none in the service. @mentions have
-    // backend support but no UI to raise them yet.
-    expect(service.add).toHaveBeenCalledWith('league', 'l1', 'something')
+    // Mentions are always passed now the picker exists; none were chosen.
+    expect(service.add).toHaveBeenCalledWith('league', 'l1', 'something', [])
     expect(component.draft).toBe('')
   })
 
@@ -135,5 +142,82 @@ describe('CommentThreadComponent', () => {
     const { component } = build()
 
     expect(component.initials(comment({ author: { userId: '', displayName: '', sleeperAvatar: '' } }))).toBe('?')
+  })
+})
+
+
+describe('CommentThreadComponent mentions', () => {
+  it('offers nobody until an @ is typed', () => {
+    const { component } = build()
+    component.draft = 'just talking'
+
+    component.onDraftChange()
+
+    expect(component.suggestions).toEqual([])
+  })
+
+  it('offers friends after an @', () => {
+    const { component } = build()
+    component.draft = 'hey @'
+
+    component.onDraftChange()
+
+    expect(component.suggestions.length).toBe(2)
+  })
+
+  it('narrows as you type', () => {
+    const { component } = build()
+    component.draft = 'hey @be'
+
+    component.onDraftChange()
+
+    expect(component.suggestions.map((p) => p.displayName)).toEqual(['Bee'])
+  })
+
+  it('only matches a trailing token', () => {
+    const { component } = build()
+    component.draft = 'hey @Bee how are you'
+
+    component.onDraftChange()
+
+    // Mid-sentence matching would need caret tracking for very little.
+    expect(component.suggestions).toEqual([])
+  })
+
+  it('replaces the partial token, not the draft', () => {
+    const { component } = build()
+    component.draft = 'hey @be'
+
+    component.choose(component.suggestions[0] ?? { userId: 'u-bee', displayName: 'Bee' } as never)
+
+    expect(component.draft).toBe('hey @Bee ')
+    expect(component.suggestions).toEqual([])
+  })
+
+  it('sends the sub for a name still in the text', () => {
+    const { component, service } = build()
+    component.ngOnInit()
+    component.draft = '@'
+    component.onDraftChange()
+    component.choose(component.suggestions[0])
+    component.draft += 'nice pick'
+
+    component.post()
+
+    expect(service.add).toHaveBeenCalledWith('league', 'l1', '@Bee nice pick', ['u-bee'])
+  })
+
+  it('drops a mention the user deleted before posting', () => {
+    const { component, service } = build()
+    component.ngOnInit()
+    component.draft = '@'
+    component.onDraftChange()
+    component.choose(component.suggestions[0])
+    component.draft = 'changed my mind'
+
+    component.post()
+
+    // Tagging someone the comment no longer names is worse than missing one.
+    expect(service.add).toHaveBeenCalledWith('league', 'l1', 'changed my mind', [])
   })
 })

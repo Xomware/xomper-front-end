@@ -7,6 +7,7 @@ import {
   CommentsService,
   CommentTarget,
 } from 'src/app/services/comments.service'
+import { FriendsService, Person } from 'src/app/services/friends.service'
 
 /** Matches the API's cap, so the failure happens before a round trip. */
 const BODY_MAX = 1000
@@ -35,11 +36,28 @@ export class CommentThreadComponent implements OnInit {
 
   comments: Comment[] = []
   draft = ''
+
+  /**
+   * People offered after an `@`.
+   *
+   * Friends only. Mentions are resolved to Cognito subs here rather than
+   * parsed from the text server-side, because display names are not unique --
+   * matching on them would eventually tag the wrong person. Offering only
+   * people you already have a relationship with is also what keeps this from
+   * being a directory of everyone.
+   */
+  suggestions: Person[] = []
+
+  /** Subs picked from the menu, sent alongside the body. */
+  private mentioned = new Map<string, string>()
   loading = true
   posting = false
   error = ''
 
-  constructor(private comments$: CommentsService) {}
+  constructor(
+    private comments$: CommentsService,
+    private friends: FriendsService,
+  ) {}
 
   ngOnInit(): void {
     if (!this.targetId) {
@@ -55,6 +73,45 @@ export class CommentThreadComponent implements OnInit {
       })
   }
 
+  /**
+   * Offer people when the caret sits in an `@word` at the end of the draft.
+   *
+   * Deliberately only the trailing token: matching mid-sentence would need
+   * caret tracking for very little, and people type a mention as they reach
+   * for it.
+   */
+  onDraftChange(): void {
+    const match = /@([\w-]*)$/.exec(this.draft)
+    if (!match) {
+      this.suggestions = []
+      return
+    }
+    const term = match[1].toLowerCase()
+    this.suggestions = this.friends.graph.friends
+      .filter((f) => f.displayName.toLowerCase().includes(term))
+      .slice(0, 5)
+  }
+
+  choose(person: Person): void {
+    // Replace the partial token, not the whole draft.
+    this.draft = this.draft.replace(/@[\w-]*$/, `@${person.displayName} `)
+    this.mentioned.set(person.displayName, person.userId)
+    this.suggestions = []
+  }
+
+  /**
+   * Subs for the names still present in the final text.
+   *
+   * Re-derived at post time rather than trusted from the picker: someone can
+   * pick a name and then delete it, and tagging a person the comment no
+   * longer names would be worse than missing one.
+   */
+  private mentionsInDraft(body: string): string[] {
+    return [...this.mentioned.entries()]
+      .filter(([name]) => body.includes(`@${name}`))
+      .map(([, userId]) => userId)
+  }
+
   post(): void {
     const body = this.draft.trim()
     this.error = ''
@@ -66,12 +123,14 @@ export class CommentThreadComponent implements OnInit {
 
     this.posting = true
     this.comments$
-      .add(this.targetType, this.targetId, body)
+      .add(this.targetType, this.targetId, body, this.mentionsInDraft(body))
       .pipe(take(1))
       .subscribe({
         next: (comments) => {
           this.comments = comments
           this.draft = ''
+          this.mentioned.clear()
+          this.suggestions = []
           this.posting = false
         },
         error: (err) => {
