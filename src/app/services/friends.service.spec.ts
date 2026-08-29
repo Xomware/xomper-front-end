@@ -15,7 +15,14 @@ function person(userId: string, displayName = 'Bee') {
 }
 
 function graph(overrides: Partial<FriendGraph> = {}): FriendGraph {
-  return { friends: [], incoming: [], outgoing: [], pendingCount: 0, ...overrides }
+  return {
+    friends: [],
+    incoming: [],
+    outgoing: [],
+    pendingCount: 0,
+    suggestions: [],
+    ...overrides,
+  }
 }
 
 function serviceWith(http: Partial<HttpClient>): FriendsService {
@@ -121,5 +128,34 @@ describe('FriendsService', () => {
       expect(service.graph.friends).toEqual([])
       done()
     })
+  })
+})
+
+describe('FriendsService suggestions', () => {
+  it('only asks for suggestions when told to', () => {
+    const urls: string[] = []
+    const http = { get: (url: string) => (urls.push(url), of(graph())) }
+    const service = serviceWith(http as unknown as HttpClient)
+
+    service.load().subscribe()
+    service.load(true).subscribe()
+
+    // The auth guard loads this on every protected navigation, and building
+    // suggestions costs the server a scan plus a fan-out over Sleeper.
+    expect(urls[0]).not.toContain('suggest')
+    expect(urls[1]).toContain('suggest=1')
+  })
+
+  it('fills in suggestions the server left off', () => {
+    const legacy = { friends: [], incoming: [], outgoing: [], pendingCount: 0 }
+    const http = { get: () => of(legacy) }
+    const service = serviceWith(http as unknown as HttpClient)
+
+    let seen: FriendGraph | undefined
+    service.load().subscribe((g) => (seen = g))
+
+    // A response predating this field must not leave `suggestions` undefined
+    // for a template that iterates it.
+    expect(seen?.suggestions).toEqual([])
   })
 })
