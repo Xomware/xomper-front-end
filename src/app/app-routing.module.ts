@@ -343,6 +343,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
+        path: 'manual',
+        loadComponent: () =>
+          import('./pages/draft-history/manual/manual-draft.component').then(
+            (m) => m.ManualDraftComponent,
+          ),
+      },
+      {
         path: 'live',
         loadComponent: () =>
           import('./pages/draft-history/live/draft-live.component').then(
