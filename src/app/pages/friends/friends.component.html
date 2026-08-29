@@ -5,14 +5,14 @@
     <header class="page-header">
       <h1>Friends</h1>
       <p class="subtitle">
-        Find people through <a routerLink="/search">search</a>, then open their profile to add them.
+        People you share a league with show up below. Add them to compare teams and talk trades.
       </p>
     </header>
 
     <p class="error" *ngIf="error" role="alert">{{ error }}</p>
 
     <p class="empty" *ngIf="isEmpty">
-      Nobody yet. Search a Sleeper username to find someone.
+      Nobody yet. When someone in one of your leagues signs up, they will show up here.
     </p>
 
     <!--
@@ -85,6 +85,21 @@
           <span class="actions">
             <button type="button" class="btn btn--ghost" [disabled]="busyWith === p.userId" (click)="remove(p)">
               Cancel
+            </button>
+          </span>
+        </li>
+      </ul>
+    </section>
+    <section class="group" *ngIf="suggestions.length">
+      <h2 class="group-title">In your leagues</h2>
+      <ul class="people">
+        <li class="person" *ngFor="let p of suggestions">
+          <ng-container
+            *ngTemplateOutlet="personCell; context: { person: p, meta: p.sleeperUsername }"
+          ></ng-container>
+          <span class="actions">
+            <button type="button" class="btn" [disabled]="busyWith === p.userId" (click)="add(p)">
+              Add friend
             </button>
           </span>
         </li>

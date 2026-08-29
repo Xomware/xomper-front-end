@@ -7,13 +7,12 @@ import { UserService } from 'src/app/services/user.service'
 import { LoaderComponent } from 'src/app/components/loader/loader.component'
 
 /**
- * Friends: who you have, who asked, who you asked.
+ * Friends: who you have, who asked, who you asked, and who you could add.
  *
- * People are found through the existing search — a username resolves to a
- * Sleeper account, and a Sleeper account resolves to a Xomper user only if
- * they have one. Rather than build a second people-search, this page hangs
- * off the graph the API already returns and points elsewhere for finding
- * someone new.
+ * Leaguemates are the only directory Xomper exposes. A search by Sleeper
+ * handle would have to answer "does this handle have a Xomper account" for
+ * any handle, and every Sleeper handle is public — sharing a league is the
+ * consent that makes listing someone reasonable.
  */
 @Component({
   selector: 'app-friends',
@@ -27,7 +26,21 @@ export class FriendsComponent implements OnInit {
   error = ''
   busyWith = ''
 
-  graph: FriendGraph = { friends: [], incoming: [], outgoing: [], pendingCount: 0 }
+  graph: FriendGraph = {
+    friends: [],
+    incoming: [],
+    outgoing: [],
+    pendingCount: 0,
+    suggestions: [],
+  }
+
+  /**
+   * Held apart from `graph`, which is replaced wholesale by every mutation
+   * response — and those responses carry no suggestions, since the server
+   * only builds them when asked. Without this, adding one person emptied the
+   * list of everyone else.
+   */
+  suggestions: Person[] = []
 
   constructor(
     private friends: FriendsService,
@@ -35,8 +48,9 @@ export class FriendsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.friends.load().pipe(take(1)).subscribe((graph) => {
+    this.friends.load(true).pipe(take(1)).subscribe((graph) => {
       this.graph = graph
+      this.suggestions = graph.suggestions
       this.loading = false
     })
   }
@@ -45,18 +59,31 @@ export class FriendsComponent implements OnInit {
     this.act(person, this.friends.accept(person.userId))
   }
 
+  add(person: Person): void {
+    // Drop them from the list on success only: a failed request that removed
+    // the row would leave no way to try again.
+    this.act(person, this.friends.request(person.userId), () => {
+      this.suggestions = this.suggestions.filter((p) => p.userId !== person.userId)
+    })
+  }
+
   /** Decline, cancel and unfriend are the same call; only the label differs. */
   remove(person: Person): void {
     this.act(person, this.friends.remove(person.userId))
   }
 
-  private act(person: Person, request: ReturnType<FriendsService['accept']>): void {
+  private act(
+    person: Person,
+    request: ReturnType<FriendsService['accept']>,
+    onSuccess?: () => void,
+  ): void {
     this.error = ''
     this.busyWith = person.userId
     request.pipe(take(1)).subscribe({
       next: (graph) => {
         this.graph = graph
         this.busyWith = ''
+        onSuccess?.()
       },
       error: (err) => {
         this.busyWith = ''
@@ -90,7 +117,8 @@ export class FriendsComponent implements OnInit {
     return (
       !this.graph.friends.length &&
       !this.graph.incoming.length &&
-      !this.graph.outgoing.length
+      !this.graph.outgoing.length &&
+      !this.suggestions.length
     )
   }
 }

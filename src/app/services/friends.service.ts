@@ -20,9 +20,22 @@ export interface FriendGraph {
   outgoing: Person[]
   /** Incoming requests awaiting an answer. What the bell shows. */
   pendingCount: number
+  /**
+   * Leaguemates with a Xomper account you are not already tied to.
+   *
+   * Only populated when asked for, because the server pays a scan and a
+   * fan-out over Sleeper to build it.
+   */
+  suggestions: Person[]
 }
 
-const EMPTY: FriendGraph = { friends: [], incoming: [], outgoing: [], pendingCount: 0 }
+const EMPTY: FriendGraph = {
+  friends: [],
+  incoming: [],
+  outgoing: [],
+  pendingCount: 0,
+  suggestions: [],
+}
 
 /**
  * The caller's social graph.
@@ -56,8 +69,12 @@ export class FriendsService {
    * Swallows failures: the bell and the friends list are secondary, and a
    * social outage must not block navigation into the rest of the app.
    */
-  load(): Observable<FriendGraph> {
-    return this.http.get<FriendGraph>(`${this.baseUrl}/friends`).pipe(
+  load(withSuggestions = false): Observable<FriendGraph> {
+    const url = withSuggestions
+      ? `${this.baseUrl}/friends?suggest=1`
+      : `${this.baseUrl}/friends`
+    return this.http.get<FriendGraph>(url).pipe(
+      map((graph) => ({ ...EMPTY, ...graph })),
       tap((graph) => this.graphSubject.next(graph)),
       catchError(() => of(EMPTY)),
     )
@@ -90,7 +107,7 @@ export class FriendsService {
     return this.http
       .request<FriendGraph>(method, `${this.baseUrl}/${path}`, { body: { userId } })
       .pipe(
-        map((graph) => graph ?? EMPTY),
+        map((graph) => ({ ...EMPTY, ...(graph ?? {}) })),
         tap((graph) => this.graphSubject.next(graph)),
       )
   }
