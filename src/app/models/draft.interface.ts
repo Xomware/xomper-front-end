@@ -11,6 +11,8 @@ export interface DraftSettings {
   slots_bn: number
   rounds: number
   pick_timer: number
+  /** Sleeper's third-round-reversal knob. 0 or absent means a plain snake. */
+  reversal_round?: number
 }
 
 export interface DraftMetadata {

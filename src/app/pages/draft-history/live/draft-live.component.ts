@@ -5,6 +5,15 @@ import { AsyncPipe, DecimalPipe, NgIf, NgFor, NgClass, LowerCasePipe } from '@an
 import { interval, timer, switchMap, of, forkJoin, BehaviorSubject, Observable } from 'rxjs'
 import { map, take } from 'rxjs/operators'
 import { LeagueService, TradedPick } from 'src/app/services/league.service'
+import {
+  AdpService,
+  AdpFormat,
+  AdpPlayer,
+  adpByName,
+  adpFormatFor,
+  adpKey,
+} from 'src/app/services/adp.service'
+import { nextPickFor } from 'src/app/services/draft-order'
 import { DraftService } from 'src/app/services/draft.service'
 import { DraftModel } from 'src/app/models/draft.model'
 import { DraftPick } from 'src/app/models/draft.interface'
@@ -80,6 +89,17 @@ export class DraftLiveComponent implements OnInit {
   lastPollAt = 0
   pollError: string | null = null
 
+  // ADP context. Null format means no ADP set fits this league, which is a
+  // real answer for TE-premium rather than a load failure.
+  adpFormat: AdpFormat | null = null
+  adpSampleEnd = ''
+  private adp = new Map<string, AdpPlayer>()
+  private myNextPickNo: number | null = null
+
+  // Kept for the next-pick walk, which needs ownership after trades.
+  private tradedPicks: TradedPick[] = []
+  private rosters: Roster[] = []
+
   // Derived display data
   rounds: LiveRound[] = []
   slots: number[] = []
@@ -118,6 +138,7 @@ export class DraftLiveComponent implements OnInit {
     private playerService: PlayerService,
     private playerValuesService: PlayerValuesService,
     private assistant: DraftAssistantService,
+    private adpService: AdpService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
@@ -148,6 +169,9 @@ export class DraftLiveComponent implements OnInit {
       tradedPicks: this.leagueService.getTradedPicks(this.leagueId),
     }).pipe(take(1)).subscribe({
       next: ({ users, rosters, drafts, tradedPicks }) => {
+        this.tradedPicks = tradedPicks
+        this.rosters = rosters
+
         // Find the draft for the current year
         const draft = drafts.find(d => d.season === this.year) ?? drafts[0] ?? null
         this.draft = draft
@@ -204,6 +228,7 @@ export class DraftLiveComponent implements OnInit {
       .pipe(
         switchMap(({ league, playerMap }) => {
           this.playerMap = playerMap as never
+          this.loadAdp(league)
           return this.playerValuesService.bookFor(league)
         }),
         take(1),
@@ -218,6 +243,66 @@ export class DraftLiveComponent implements OnInit {
           this.book = null
         },
       })
+  }
+
+  /**
+   * ADP for this league's format, if one fits.
+   *
+   * Failure and "no format fits" both leave the column off. The board is
+   * useful without it, so neither is worth an error banner.
+   */
+  private loadAdp(league: unknown): void {
+    const scoring = (league as { scoring_settings?: Record<string, number> })
+      ?.scoring_settings
+    this.adpFormat = adpFormatFor(this.draft?.settings ?? null, scoring)
+    if (!this.adpFormat) return
+
+    this.adpService
+      .forFormat(this.adpFormat)
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((snapshot) => {
+        this.adp = adpByName(snapshot)
+        this.adpSampleEnd = snapshot?.sampleEnd ?? ''
+        if (!snapshot) this.adpFormat = null
+      })
+  }
+
+  /** Where the user picks next, used only to show the gap beside ADP. */
+  private refreshNextPick(picks: DraftPick[]): void {
+    const draft = this.draft
+    if (!draft || !this.mySleeperUserId) {
+      this.myNextPickNo = null
+      return
+    }
+    const lastPick = picks.reduce((max, p) => Math.max(max, p.pick_no ?? 0), 0)
+    const next = nextPickFor(this.mySleeperUserId, lastPick, {
+      draftOrder: draft.draft_order,
+      tradedPicks: this.tradedPicks,
+      rosters: this.rosters,
+      teams: draft.settings?.teams ?? 12,
+      rounds: draft.settings?.rounds ?? 15,
+      reversalRound: draft.settings?.reversal_round ?? 0,
+    })
+    this.myNextPickNo = next?.pickNo ?? null
+  }
+
+  /**
+   * ADP context for one candidate: where he usually goes, where you pick next,
+   * and the gap between. Deliberately three numbers and no probability - the
+   * calibration spike found none worth stating.
+   */
+  adpContext(playerId: string, position: string): string | null {
+    if (!this.adpFormat) return null
+    const meta = this.playerMap[playerId] as { first_name?: string; last_name?: string }
+    const name = `${meta?.first_name ?? ''} ${meta?.last_name ?? ''}`.trim()
+    const entry = this.adp.get(adpKey(name, position))
+    if (!entry) return null
+
+    const adp = Math.round(entry.adp)
+    if (this.myNextPickNo === null) return `ADP ${adp}`
+    const gap = this.myNextPickNo - adp
+    const sign = gap > 0 ? `+${gap}` : `${gap}`
+    return `ADP ${adp} · next ${this.myNextPickNo} · ${sign}`
   }
 
   /** Re-rank against the picks seen so far. Cheap enough to run per poll. */
@@ -476,6 +561,7 @@ export class DraftLiveComponent implements OnInit {
     // Every path that refreshes the board comes through here, so this is the
     // one place the assistant needs to learn about new picks.
     this.latestPicks = picks
+    this.refreshNextPick(picks)
     this.refreshBoard()
 
     const pickMap = new Map<string, DraftPick>()

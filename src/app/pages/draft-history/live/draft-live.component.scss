@@ -549,3 +549,14 @@
   color: #7a5d00;
   font-size: $text-sm;
 }
+
+.adp-source {
+  font-size: $text-xs;
+  opacity: 0.6;
+}
+
+.board-adp {
+  font-size: $text-xs;
+  opacity: 0.75;
+  white-space: nowrap;
+}
