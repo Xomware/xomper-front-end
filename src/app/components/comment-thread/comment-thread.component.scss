@@ -159,3 +159,52 @@
 .comment-like--on {
   color: $champion-gold;
 }
+
+// ---- Mention picker ----
+
+.composer-field {
+  flex: 1;
+  position: relative;
+}
+
+.composer-field .composer-input {
+  width: 100%;
+}
+
+.mentions {
+  background: var(--xomper-bg-card, #{$bg-card});
+  border: 1px solid rgba($champion-gold, 0.3);
+  border-radius: $radius-md;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  left: 0;
+  list-style: none;
+  margin: 0;
+  padding: $spacing-xs;
+  position: absolute;
+  right: 0;
+  top: calc(100% + #{$spacing-xs});
+  z-index: 20;
+
+  button {
+    background: none;
+    border: 0;
+    border-radius: $radius-sm;
+    color: $text-primary;
+    cursor: pointer;
+    display: block;
+    font: inherit;
+    font-size: $text-sm;
+    padding: $spacing-xs $spacing-sm;
+    text-align: left;
+    width: 100%;
+
+    &:hover {
+      background: var(--xomper-bg-card-hover, #{$bg-card-hover});
+    }
+
+    &:focus-visible {
+      outline: 2px solid $champion-gold;
+      outline-offset: -2px;
+    }
+  }
+}
