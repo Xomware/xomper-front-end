@@ -6,6 +6,7 @@ import { CognitoService } from 'src/app/services/cognito.service'
 import { UserProfileService, UserProfile } from 'src/app/services/user-profile.service'
 import { LeagueFollowsService, FollowedLeague } from 'src/app/services/league-follows.service'
 import { LeagueService } from 'src/app/services/league.service'
+import { FriendsService } from 'src/app/services/friends.service'
 import { UserService } from 'src/app/services/user.service'
 import { SidebarSection, SidebarEntry } from './sidebar.entries'
 
@@ -33,6 +34,7 @@ export class SidebarComponent {
     public userService: UserService,
     private cognito: CognitoService,
     private follows: LeagueFollowsService,
+    private friends: FriendsService,
     private leagueService: LeagueService,
     private router: Router,
     private sanitizer: DomSanitizer,
@@ -58,6 +60,11 @@ export class SidebarComponent {
     const avatar = this.profile?.sleeperAvatar
     if (!avatar) return null
     return this.userService.buildAvatar(avatar)
+  }
+
+  /** Incoming friend requests. Zero hides the badge entirely. */
+  get pendingCount(): number {
+    return this.friends.pendingCount
   }
 
   get followedLeagues(): FollowedLeague[] {
@@ -147,6 +154,7 @@ export class SidebarComponent {
   private afterSignOut(): void {
     this.profiles.clear()
     this.follows.clear()
+    this.friends.clear()
     this.userService.reset()
     this.router.navigate(['/login'])
   }

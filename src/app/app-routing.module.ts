@@ -54,6 +54,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
+  {
+    path: 'friends',
+    loadComponent: () =>
+      import('./pages/friends/friends.component').then((m) => m.FriendsComponent),
+    canActivate: [AuthGuard],
+  },
+
   { path: 'search', component: SearchComponent },
 
   // Guest accessible (view others)

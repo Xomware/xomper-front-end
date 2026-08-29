@@ -52,6 +52,7 @@ function build(options: { signOutFails?: boolean; profile?: UserProfile | null }
     userService as never,
     cognito as never,
     follows as never,
+    { pendingCount: 0, clear: jasmine.createSpy('clearFriends') } as never,
     leagueService as never,
     router as never,
     { bypassSecurityTrustHtml: (v: string) => v } as never,

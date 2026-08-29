@@ -1,0 +1,140 @@
+@import 'styles/variables';
+
+.friends-page {
+  margin: 0 auto;
+  max-width: 720px;
+  padding: $spacing-lg;
+}
+
+.page-header {
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    font-size: $text-2xl;
+    margin: 0;
+  }
+}
+
+.subtitle {
+  color: $text-secondary;
+  font-size: $text-sm;
+  margin: $spacing-xs 0 0;
+
+  a {
+    color: $champion-gold;
+  }
+}
+
+.error {
+  color: $error-red;
+  font-size: $text-sm;
+}
+
+.empty {
+  color: $text-secondary;
+}
+
+.group {
+  margin-bottom: $spacing-lg;
+}
+
+.group-title {
+  color: $text-secondary;
+  font-size: $text-xs;
+  letter-spacing: $tracking-wider;
+  margin: 0 0 $spacing-sm;
+  text-transform: uppercase;
+}
+
+.people {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.person {
+  align-items: center;
+  background: rgba($bg-card, 0.72);
+  border: 1px solid rgba($surface-light, 0.3);
+  border-radius: $radius-md;
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+}
+
+.avatar {
+  align-items: center;
+  background: rgba($surface-light, 0.4);
+  border-radius: $radius-full;
+  color: $champion-gold;
+  display: flex;
+  flex-shrink: 0;
+  height: 36px;
+  justify-content: center;
+  overflow: hidden;
+  width: 36px;
+
+  img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+}
+
+.person-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.person-name {
+  color: $text-primary;
+  font-size: $text-sm;
+  overflow: hidden;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.person-meta {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: $spacing-xs;
+}
+
+.btn {
+  background: rgba($champion-gold, 0.12);
+  border: 1px solid rgba($champion-gold, 0.3);
+  border-radius: $radius-sm;
+  color: $champion-gold;
+  cursor: pointer;
+  font: inherit;
+  font-size: $text-xs;
+  padding: 4px $spacing-md;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+
+  &--ghost {
+    background: none;
+    border-color: rgba($surface-light, 0.4);
+    color: $text-secondary;
+  }
+}
