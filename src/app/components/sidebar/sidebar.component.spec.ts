@@ -15,6 +15,7 @@ function profile(overrides: Partial<UserProfile> = {}): UserProfile {
     email: 'd@x.com',
     sleeperUserId: '594625531702460416',
     sleeperUsername: 'domgiordano',
+    displayName: 'domgiordano',
     sleeperAvatar: '',
     hasLinkedSleeper: true,
     createdAt: '',
@@ -136,10 +137,24 @@ describe('SidebarComponent account menu', () => {
     expect(component.profileMenuOpen).toBe(false)
   })
 
-  it('falls back through username, email, then a generic label', () => {
-    expect(build().component.displayName).toBe('domgiordano')
+  it('shows the Xomper display name ahead of the Sleeper handle', () => {
+    // The handle is unverified -- leading with it makes the app assert an
+    // identity nobody confirmed.
+    const component = build({
+      profile: profile({ displayName: 'Dom', sleeperUsername: 'domgiordano' }),
+    }).component
+
+    expect(component.displayName).toBe('Dom')
+  })
+
+  it('falls back through handle, email, then a generic label', () => {
+    // Records predating displayName still need a name.
     expect(
-      build({ profile: profile({ sleeperUsername: '' }) }).component.displayName,
+      build({ profile: profile({ displayName: '' }) }).component.displayName,
+    ).toBe('domgiordano')
+    expect(
+      build({ profile: profile({ displayName: '', sleeperUsername: '' }) }).component
+        .displayName,
     ).toBe('d@x.com')
     expect(build({ profile: null }).component.displayName).toBe('My Profile')
   })

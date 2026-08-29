@@ -43,7 +43,15 @@ export class SidebarComponent {
   }
 
   get displayName(): string {
-    return this.profile?.sleeperUsername || this.profile?.email || 'My Profile'
+    // displayName first: the Sleeper handle is unverified, so leading with it
+    // makes the app assert an identity nobody confirmed. The handle remains
+    // the fallback for records predating the field.
+    return (
+      this.profile?.displayName ||
+      this.profile?.sleeperUsername ||
+      this.profile?.email ||
+      'My Profile'
+    )
   }
 
   get avatarUrl(): string | null {
