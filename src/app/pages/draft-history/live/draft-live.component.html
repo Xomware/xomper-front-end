@@ -81,6 +81,10 @@
           </div>
         </div>
 
+        <p class="pressure-line" *ngIf="pressureLines.length">
+          Before your next pick, {{ pressureLines.join(', ') }}
+        </p>
+
         <ol class="board">
           <li
             class="board-row"
