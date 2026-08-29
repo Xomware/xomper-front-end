@@ -532,7 +532,7 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  font-size: 0.75rem;
+  font-size: $text-xs;
   opacity: 0.7;
 }
 
@@ -547,5 +547,5 @@
   border-radius: 4px;
   background: #fdf3d8;
   color: #7a5d00;
-  font-size: 0.8rem;
+  font-size: $text-sm;
 }
