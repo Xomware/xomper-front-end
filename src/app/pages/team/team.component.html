@@ -94,35 +94,19 @@
         <!-- league rank -->
         <p
           class="clickable team-place"
+          *ngIf="ordinal(team?.leagueRank)"
           (click)="goToStandings(teamLeague.league_id, 'league')"
         >
-          {{ teamLeague.name }} Standings: {{ team?.leagueRank
-          }}{{
-            team?.leagueRank === 1
-              ? 'st'
-              : team?.leagueRank === 2
-              ? 'nd'
-              : team?.leagueRank === 3
-              ? 'rd'
-              : 'th'
-          }}
+          {{ teamLeague.name }} Standings: {{ ordinal(team?.leagueRank) }}
         </p>
 
         <!-- division rank -->
         <p
           class="clickable team-place"
+          *ngIf="ordinal(team?.divisionRank)"
           (click)="goToStandings(teamLeague.league_id, 'division')"
         >
-          {{ team?.divisionName }} Standings: {{ team?.divisionRank
-          }}{{
-            team?.divisionRank === 1
-              ? 'st'
-              : team?.divisionRank === 2
-              ? 'nd'
-              : team?.divisionRank === 3
-              ? 'rd'
-              : 'th'
-          }}
+          {{ team?.divisionName }} Standings: {{ ordinal(team?.divisionRank) }}
         </p>
       </div>
     </div>
