@@ -109,3 +109,61 @@
 .recent-slot {
   opacity: 0.6;
 }
+
+.markoff-board {
+  margin: 1rem 0;
+}
+
+.board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pressure-line {
+  margin: 0 0 0.5rem;
+  font-size: $text-xs;
+  opacity: 0.75;
+}
+
+.board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.board-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+  font-size: $text-sm;
+}
+
+.board-rank,
+.board-pos,
+.board-reason {
+  font-size: $text-xs;
+  opacity: 0.7;
+}
+
+.board-rank {
+  min-width: 1.5rem;
+}
+
+.board-pos {
+  min-width: 2.5rem;
+}
+
+.board-name {
+  flex: 1;
+}
+
+.btn-take {
+  padding: 0.2rem 0.5rem;
+  font-size: $text-xs;
+  cursor: pointer;
+}
