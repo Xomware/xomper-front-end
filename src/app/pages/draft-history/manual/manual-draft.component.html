@@ -1,0 +1,71 @@
+<div class="manual-draft">
+  <p class="manual-intro">
+    For drafts we can't read — ESPN, Yahoo, CBS, or a room with a whiteboard.
+    Tap each player as they go.
+  </p>
+
+  <!-- Setup -->
+  <div class="setup-bar">
+    <label>
+      Teams
+      <input type="number" min="2" max="20" [(ngModel)]="draft.teams" (change)="applySetup()" />
+    </label>
+    <label>
+      Rounds
+      <input type="number" min="1" max="30" [(ngModel)]="draft.rounds" (change)="applySetup()" />
+    </label>
+    <label>
+      My slot
+      <input type="number" min="1" [max]="draft.teams" [(ngModel)]="draft.mySlot" (change)="applySetup()" />
+    </label>
+  </div>
+
+  <!-- Clock -->
+  <div class="clock" [class.clock--mine]="myTurn" *ngIf="!complete">
+    <span class="clock-pick">Pick {{ pickNumber }}</span>
+    <span class="clock-slot">Slot {{ onTheClockSlot }}</span>
+    <span class="clock-you" *ngIf="myTurn">You're up</span>
+  </div>
+  <div class="clock clock--done" *ngIf="complete">Draft complete</div>
+
+  <!-- Search -->
+  <div class="search-row" *ngIf="!complete">
+    <input
+      class="search-input"
+      type="search"
+      placeholder="Search a player, then tap to mark them gone"
+      [(ngModel)]="query"
+      (ngModelChange)="search()"
+      [disabled]="loading"
+    />
+    <button class="btn-undo" (click)="undo()" [disabled]="!draft.picks.length">Undo</button>
+  </div>
+
+  <p class="loading-note" *ngIf="loading">Loading players…</p>
+
+  <ul class="results" *ngIf="results.length">
+    <li *ngFor="let id of results">
+      <button class="result-row" (click)="take(id)">
+        <span class="result-pos">{{ positionFor(id) }}</span>
+        <span class="result-name">{{ nameFor(id) }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <p class="no-results" *ngIf="query && !results.length && !loading">
+    Nobody left matching "{{ query }}"
+  </p>
+
+  <!-- Recent picks -->
+  <div class="recent" *ngIf="draft.picks.length">
+    <h3>Just gone</h3>
+    <ol class="recent-list">
+      <li *ngFor="let pick of recentPicks">
+        <span class="recent-no">{{ pick.pickNo }}</span>
+        <span class="recent-slot">slot {{ pick.slot }}</span>
+        <span class="recent-name">{{ pick.name }}</span>
+      </li>
+    </ol>
+    <button class="btn-reset" (click)="reset()">Start over</button>
+  </div>
+</div>

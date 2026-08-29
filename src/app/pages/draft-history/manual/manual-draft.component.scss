@@ -1,0 +1,111 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
+.manual-draft {
+  min-height: 200px;
+}
+
+.manual-intro {
+  font-size: $text-sm;
+  opacity: 0.75;
+}
+
+.setup-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: $text-xs;
+  }
+
+  input {
+    width: 4rem;
+    padding: 0.25rem 0.4rem;
+  }
+}
+
+.clock {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  font-size: $text-sm;
+}
+
+.clock--mine {
+  font-weight: $font-weight-bold;
+}
+
+.clock--done {
+  opacity: 0.7;
+}
+
+.search-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.5rem 0.65rem;
+  font-size: $text-sm;
+}
+
+.results {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.5rem;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  cursor: pointer;
+  font-size: $text-sm;
+}
+
+.result-pos {
+  min-width: 2.5rem;
+  font-size: $text-xs;
+  opacity: 0.7;
+}
+
+.no-results,
+.loading-note {
+  font-size: $text-sm;
+  opacity: 0.7;
+}
+
+.recent-list {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+
+  li {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.25rem 0;
+    font-size: $text-xs;
+  }
+}
+
+.recent-no,
+.recent-slot {
+  opacity: 0.6;
+}
