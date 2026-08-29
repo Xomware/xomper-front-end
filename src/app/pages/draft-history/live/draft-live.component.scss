@@ -566,3 +566,22 @@
   font-size: $text-xs;
   opacity: 0.75;
 }
+
+// Player names open their profile. Inherit so the board still reads as a
+// board rather than a wall of links.
+a.player-name,
+a.board-name {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: $champion-gold;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    border-radius: $radius-sm;
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}

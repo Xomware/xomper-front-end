@@ -1,6 +1,6 @@
 import { Component, OnInit, DestroyRef, inject } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
-import { ActivatedRoute, Router } from '@angular/router'
+import { ActivatedRoute, Router, RouterLink } from '@angular/router'
 import { AsyncPipe, DecimalPipe, NgIf, NgFor, NgClass, LowerCasePipe } from '@angular/common'
 import { interval, timer, switchMap, of, forkJoin, BehaviorSubject, Observable } from 'rxjs'
 import { map, take } from 'rxjs/operators'
@@ -75,7 +75,7 @@ const DRAFTABLE_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
   templateUrl: './draft-live.component.html',
   styleUrls: ['./draft-live.component.scss'],
   standalone: true,
-  imports: [LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, DecimalPipe, LowerCasePipe],
+  imports: [LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, DecimalPipe, LowerCasePipe, RouterLink],
 })
 export class DraftLiveComponent implements OnInit {
   private destroyRef = inject(DestroyRef)

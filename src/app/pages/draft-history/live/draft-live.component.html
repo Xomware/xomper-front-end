@@ -94,7 +94,7 @@
           >
             <span class="board-rank">{{ i + 1 }}</span>
             <span class="board-pos">{{ c.position }}</span>
-            <span class="board-name">{{ c.name }}</span>
+            <a class="board-name" [routerLink]="['/player', c.playerId]">{{ c.name }}</a>
             <span class="board-reason">{{ c.reason }}</span>
             <span class="board-adp" *ngIf="adpContext(c.playerId, c.position) as adp">{{ adp }}</span>
             <span class="board-value">{{ c.value | number: '1.0-0' }}</span>
@@ -145,9 +145,9 @@
                   alt="{{ cell.pick.metadata?.first_name }} {{ cell.pick.metadata?.last_name }}"
                 />
                 <div class="pick-info">
-                  <span class="player-name">
+                  <a class="player-name" [routerLink]="['/player', cell.pick.player_id]">
                     {{ cell.pick.metadata?.first_name }} {{ cell.pick.metadata?.last_name }}
-                  </span>
+                  </a>
                   <span class="player-pos-team">
                     <span class="pos-badge" [class]="'pos-' + (cell.pick.metadata?.position | lowercase)">
                       {{ cell.pick.metadata?.position }}

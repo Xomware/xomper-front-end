@@ -8,7 +8,7 @@ import { PlayerModel } from 'src/app/models/player.model'
 import { Player } from 'src/app/models/player.interface'
 import { StandingsTeamModel } from 'src/app/models/standings.model'
 import { TEAM_COLORS } from 'src/app/constants/team-colors'
-import { Router } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { UserService } from 'src/app/services/user.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { PlayerService } from 'src/app/services/player.service'
@@ -29,6 +29,7 @@ import { PlayerModalComponent } from '../../components/player-modal/player-modal
         NgFor,
         NgTemplateOutlet,
         PlayerModalComponent,
+        RouterLink,
     ],
 })
 export class TeamComponent implements OnInit {

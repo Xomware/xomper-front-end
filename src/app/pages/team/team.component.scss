@@ -278,3 +278,19 @@
     text-align: center;
   }
 }
+
+// The name links to the player's page; keep it reading as a heading.
+.player-name a {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: $champion-gold;
+  }
+
+  &:focus-visible {
+    border-radius: $radius-sm;
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
