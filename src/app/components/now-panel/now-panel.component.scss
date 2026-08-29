@@ -1,0 +1,70 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
+// Sized for a glance on a phone after switching apps, not for reading.
+.now-panel {
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  margin-bottom: 0.75rem;
+  // Everything wraps. A second screen that scrolls sideways is unusable with
+  // one thumb and ten seconds.
+  overflow-wrap: anywhere;
+}
+
+.now-panel--mine {
+  border-color: rgba(46, 160, 67, 0.6);
+}
+
+.now-timing {
+  font-size: $text-xs;
+  opacity: 0.75;
+  margin-bottom: 0.2rem;
+}
+
+.now-top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.now-pos {
+  font-size: $text-xs;
+  opacity: 0.7;
+}
+
+.now-name {
+  font-size: $text-lg;
+  font-weight: $font-weight-bold;
+}
+
+.now-reason {
+  font-size: $text-xs;
+  opacity: 0.7;
+}
+
+.now-alts {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    gap: 0.45rem;
+    font-size: $text-sm;
+    opacity: 0.85;
+  }
+}
+
+.now-alt-pos {
+  min-width: 2.2rem;
+  font-size: $text-xs;
+  opacity: 0.7;
+}
+
+.now-pressure {
+  margin: 0.45rem 0 0;
+  font-size: $text-xs;
+  opacity: 0.7;
+}

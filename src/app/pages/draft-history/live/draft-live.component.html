@@ -65,6 +65,14 @@
       </div>
 
       <!-- ============ ASSISTANT ============ -->
+      <app-now-panel
+        [board]="board"
+        [nextPickNo]="nextPickNo"
+        [picksAway]="picksAway"
+        [myTurn]="myTurn"
+        [pressureLines]="pressureLines"
+      ></app-now-panel>
+
       <section class="assistant" *ngIf="showAssistant && board.length">
         <div class="assistant-head">
           <h3>Who to take</h3>

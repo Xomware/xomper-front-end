@@ -56,6 +56,14 @@
     Nobody left matching "{{ query }}"
   </p>
 
+  <app-now-panel
+    [board]="board"
+    [nextPickNo]="nextPickNo"
+    [picksAway]="picksAway"
+    [myTurn]="myTurn"
+    [pressureLines]="pressureLines"
+  ></app-now-panel>
+
   <!-- Who to take -->
   <section class="markoff-board" *ngIf="board.length && !complete">
     <div class="board-head">

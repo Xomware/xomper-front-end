@@ -1,0 +1,61 @@
+import { Component, Input } from '@angular/core'
+import { NgIf, NgFor } from '@angular/common'
+import { DraftCandidate } from 'src/app/services/draft-assistant.service'
+
+/**
+ * The second-screen panel.
+ *
+ * People draft on a phone with the draft app in the foreground, so this is what
+ * they see in the seconds after switching apps. That budget is the whole design
+ * constraint: one clear answer, two alternates, and how long they have — not a
+ * board they would have to read.
+ *
+ * Presentational only. Everything is an input, so it renders identically over a
+ * live Sleeper draft and over manual mark-off, and it can be tested without a
+ * league, a value book or a pick feed.
+ */
+@Component({
+  selector: 'app-now-panel',
+  templateUrl: './now-panel.component.html',
+  styleUrls: ['./now-panel.component.scss'],
+  standalone: true,
+  imports: [NgIf, NgFor],
+})
+export class NowPanelComponent {
+  /** Ranked candidates. Only the first three are shown. */
+  @Input() board: DraftCandidate[] = []
+
+  /** Overall pick number the user picks next, if known. */
+  @Input() nextPickNo: number | null = null
+
+  /** Picks between now and then. Null when it cannot be worked out. */
+  @Input() picksAway: number | null = null
+
+  /** True when the user is the one on the clock. */
+  @Input() myTurn = false
+
+  /** Factual opponent need, e.g. "4 need RB". Never a prediction. */
+  @Input() pressureLines: string[] = []
+
+  get top(): DraftCandidate | null {
+    return this.board[0] ?? null
+  }
+
+  /** Two alternates. Three names is already more than a glance affords. */
+  get alternates(): DraftCandidate[] {
+    return this.board.slice(1, 3)
+  }
+
+  /**
+   * The urgency line.
+   *
+   * "On the clock" beats a pick number when it is your turn — that is the only
+   * moment the number stops being what you need to know.
+   */
+  get timing(): string {
+    if (this.myTurn) return 'On the clock'
+    if (this.picksAway === null || this.nextPickNo === null) return ''
+    if (this.picksAway === 1) return 'You pick next'
+    return `${this.picksAway} picks away · #${this.nextPickNo}`
+  }
+}
