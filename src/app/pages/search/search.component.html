@@ -62,6 +62,48 @@
       <p class="search-state__sub">Try a different {{ config.emptyNoun }}.</p>
     </div>
 
+    <!-- User search results: who they are, plus the leagues they are in.
+         This is how you reach a league you are not in -- league search wants
+         an id, and nobody knows those. -->
+    <div class="user-results" *ngIf="searchMode === 'user' && searched && !errorMessage && foundUser">
+      <button type="button" class="found-user" (click)="openProfile()">
+        <img
+          class="found-user__pic"
+          *ngIf="foundUser.avatar"
+          [src]="'https://sleepercdn.com/avatars/' + foundUser.avatar"
+          alt=""
+        />
+        <span class="found-user__info">
+          <span class="found-user__name">{{ foundUser.display_name || foundUser.username }}</span>
+          <span class="found-user__meta">View profile</span>
+        </span>
+      </button>
+
+      <div class="search-state search-state--empty" *ngIf="leagueResults.length === 0">
+        <p>No leagues this season.</p>
+        <p class="search-state__sub">They may not have joined one yet.</p>
+      </div>
+
+      <ul class="league-list" *ngIf="leagueResults.length > 0">
+        <li
+          *ngFor="let league of leagueResults"
+          class="league-row"
+          role="button"
+          tabindex="0"
+          (click)="openLeague(league)"
+          (keyup.enter)="openLeague(league)"
+        >
+          <span class="league-row__info">
+            <span class="league-row__name">{{ league.name }}</span>
+            <span class="league-row__meta">
+              {{ league.season }} &bull; {{ league.total_rosters }} teams &bull; {{ league.status }}
+            </span>
+          </span>
+          <span class="league-row__go" aria-hidden="true">&rsaquo;</span>
+        </li>
+      </ul>
+    </div>
+
     <!-- Player results -->
     <div class="player-results" *ngIf="searchMode === 'player' && searched && !errorMessage">
       <!-- Empty state -->
@@ -75,10 +117,9 @@
         <li
           *ngFor="let player of playerResults"
           class="player-row"
-          (click)="openPlayerModal(player)"
-          role="button"
+          [routerLink]="['/player', player.player_id]"
+          role="link"
           tabindex="0"
-          (keyup.enter)="openPlayerModal(player)"
         >
           <img
             class="player-row__pic"
