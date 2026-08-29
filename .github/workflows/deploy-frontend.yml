@@ -11,6 +11,17 @@ on:
         required: false
         default: 'false'
 
+# Two pushes landing close together each build their own bundle and both sync
+# the same S3 prefix. Whichever finishes last wins, so an older commit can
+# overwrite a newer one -- which is what happened when #174 and #175 merged
+# six seconds apart and #175's UI never reached the live site.
+#
+# cancel-in-progress: a queued run is building a newer commit, so an in-flight
+# older one has nothing worth finishing.
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     permissions:
