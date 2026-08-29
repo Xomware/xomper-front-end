@@ -15,6 +15,14 @@
           <h2 class="draft-name">{{ draft.metadata?.name || year + ' Draft' }}</h2>
         </div>
         <div class="countdown" *ngIf="countdown">{{ countdown }}</div>
+        <div class="poll-status" *ngIf="draft.status !== 'complete' && lastUpdatedLabel">
+          <span class="updated">Updated {{ lastUpdatedLabel }}</span>
+          <span class="poll-error" *ngIf="pollError">{{ pollError }}</span>
+        </div>
+      </div>
+
+      <div class="stale-banner" *ngIf="boardIsStale">
+        Board may be out of date — last update {{ lastUpdatedLabel }}.
       </div>
 
       <!-- Controls bar -->

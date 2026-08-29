@@ -2,7 +2,7 @@ import { Component, OnInit, DestroyRef, inject } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
 import { AsyncPipe, DecimalPipe, NgIf, NgFor, NgClass, LowerCasePipe } from '@angular/common'
-import { interval, switchMap, of, forkJoin, BehaviorSubject, Observable } from 'rxjs'
+import { interval, timer, switchMap, of, forkJoin, BehaviorSubject, Observable } from 'rxjs'
 import { map, take } from 'rxjs/operators'
 import { LeagueService, TradedPick } from 'src/app/services/league.service'
 import { DraftService } from 'src/app/services/draft.service'
@@ -53,8 +53,9 @@ interface LiveRound {
  * Traded picks: fetches /league/:id/traded_picks, builds per-round ownership
  * override map. Port of iOS liveTeamsBySlotByRound.
  *
- * Polling: 5s while drafting, 30s while pre_draft, stops on complete.
- * Uses interval + switchMap + takeUntilDestroyed.
+ * Polling: 5s while drafting, 30s while pre_draft, stops on complete. The
+ * delay is re-derived on every tick rather than fixed at subscribe time, so a
+ * board opened before the draft speeds up on its own when picks start.
  */
 @Component({
   selector: 'app-draft-live',
@@ -74,6 +75,10 @@ export class DraftLiveComponent implements OnInit {
   // View state
   viewMode: ViewMode = 'rounds'
   pickFilter: PickFilter = 'all'
+
+  // Poll health
+  lastPollAt = 0
+  pollError: string | null = null
 
   // Derived display data
   rounds: LiveRound[] = []
@@ -402,28 +407,69 @@ export class DraftLiveComponent implements OnInit {
   }
 
   private startPolling(draft: DraftModel): void {
-    if (draft.status === 'complete') return
-
-    const pollInterval = draft.status === 'drafting' ? 5000 : 30000
-
-    interval(pollInterval).pipe(
-      switchMap(() => this.draftService.getDraftPicks(draft)),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (picks) => {
-        draft.addPicks(picks)
-        this.buildRounds(draft, picks)
-        // Stop polling once complete
-        if (draft.status === 'complete') {
-          this.countdown = 'Draft complete'
-        }
-      },
-    })
-
     // Build initial rounds immediately from cached picks
     this.draftService.getDraftPicks(draft).pipe(take(1)).subscribe(picks => {
+      this.lastPollAt = Date.now()
       this.buildRounds(draft, picks)
     })
+
+    if (draft.status === 'complete') return
+    this.scheduleNextPoll(draft)
+  }
+
+  /**
+   * One poll, then reschedule. Recursive rather than interval() because the
+   * delay depends on draft.status, which changes underneath us mid-session.
+   */
+  private scheduleNextPoll(draft: DraftModel): void {
+    timer(this.pollDelayMs(draft))
+      .pipe(
+        switchMap(() => this.draftService.getDraftPicks(draft)),
+        take(1),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (picks) => {
+          this.lastPollAt = Date.now()
+          this.pollError = null
+          draft.addPicks(picks)
+          this.buildRounds(draft, picks)
+          if (draft.status === 'complete') {
+            this.countdown = 'Draft complete'
+            return
+          }
+          this.scheduleNextPoll(draft)
+        },
+        error: () => {
+          // A failed poll must not end the loop. The board keeps the last good
+          // picks and the banner says how old they are; the old code let one
+          // error terminate the stream and freeze the board until a reload.
+          this.pollError = 'Pick feed unreachable — retrying'
+          this.scheduleNextPoll(draft)
+        },
+      })
+  }
+
+  /**
+   * Re-derived per tick. Proximity to the user's next pick belongs here too,
+   * but that needs nextPickFor (#150) and is not worth duplicating.
+   */
+  private pollDelayMs(draft: DraftModel): number {
+    return draft.status === 'drafting' ? 5000 : 30000
+  }
+
+  /** Stale once roughly three polls have gone by without a fresh board. */
+  get boardIsStale(): boolean {
+    if (!this.draft || this.draft.status === 'complete' || !this.lastPollAt) return false
+    return Date.now() - this.lastPollAt > this.pollDelayMs(this.draft) * 3
+  }
+
+  get lastUpdatedLabel(): string {
+    if (!this.lastPollAt) return ''
+    const secs = Math.floor((Date.now() - this.lastPollAt) / 1000)
+    if (secs < 5) return 'just now'
+    if (secs < 60) return `${secs}s ago`
+    return `${Math.floor(secs / 60)}m ago`
   }
 
   private buildRounds(draft: DraftModel, picks: DraftPick[]): void {
