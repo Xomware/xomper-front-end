@@ -16,6 +16,14 @@ export interface UserProfile {
   email: string
   sleeperUserId: string
   sleeperUsername: string
+  /**
+   * The name this user goes by in Xomper.
+   *
+   * Owned by us, not borrowed from Sleeper. The Sleeper handle is
+   * unverified -- any account can claim any handle -- so showing it as
+   * identity means asserting something nobody checked.
+   */
+  displayName: string
   sleeperAvatar: string
   /** Computed server-side so the guard checks a boolean, not field presence. */
   hasLinkedSleeper: boolean
@@ -87,6 +95,15 @@ export class UserProfileService {
   linkSleeper(sleeperUsername: string): Observable<UserProfile> {
     return this.http
       .put<ProfileResponse>(`${this.baseUrl}/sleeper-link`, { sleeperUsername })
+      .pipe(
+        map((response) => response.user),
+        tap((profile) => this.profileSubject.next(profile)),
+      )
+  }
+
+  setDisplayName(displayName: string): Observable<UserProfile> {
+    return this.http
+      .put<ProfileResponse>(`${this.baseUrl}/display-name`, { displayName })
       .pipe(
         map((response) => response.user),
         tap((profile) => this.profileSubject.next(profile)),

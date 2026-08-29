@@ -20,6 +20,7 @@ function profile(overrides: Partial<UserProfile> = {}): UserProfile {
     email: 'd@x.com',
     sleeperUserId: '594625531702460416',
     sleeperUsername: 'domgiordano',
+    displayName: 'domgiordano',
     sleeperAvatar: '',
     hasLinkedSleeper: true,
     createdAt: '',

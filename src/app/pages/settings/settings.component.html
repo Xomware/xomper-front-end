@@ -1,7 +1,38 @@
 <div class="settings-page">
   <div class="settings-card">
     <h1 class="settings-card__title">Settings</h1>
-    <p class="settings-card__body">Settings coming soon.</p>
+
+    <section class="field">
+      <label class="field__label" for="display-name">Display name</label>
+      <p class="field__hint">
+        What other people see. Yours, not borrowed from Sleeper.
+      </p>
+
+      <div class="field__row">
+        <input
+          id="display-name"
+          class="field__input"
+          type="text"
+          [(ngModel)]="displayName"
+          [maxlength]="maxLength"
+          (keydown.enter)="save()"
+          autocomplete="nickname"
+        />
+        <button type="button" class="field__save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+
+      <p class="field__error" *ngIf="error" role="alert">{{ error }}</p>
+      <p class="field__saved" *ngIf="saved" role="status">Saved.</p>
+    </section>
+
+    <!-- The handle is a linked account, not who you are. -->
+    <section class="field" *ngIf="sleeperUsername">
+      <span class="field__label">Linked Sleeper account</span>
+      <p class="field__hint">{{ sleeperUsername }}</p>
+    </section>
+
     <a class="settings-card__back" routerLink="/home">Back to Home</a>
   </div>
 </div>
