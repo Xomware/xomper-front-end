@@ -233,3 +233,113 @@
     padding: 8px 20px;
   }
 }
+
+// ---- User search: the person, then the leagues they are in ----
+
+.user-results {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.found-user {
+  align-items: center;
+  background: rgba($bg-card, 0.72);
+  border: 1px solid rgba($surface-light, 0.35);
+  border-radius: $radius-md;
+  color: $text-primary;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    border-color: rgba($champion-gold, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+.found-user__pic {
+  border-radius: $radius-full;
+  height: 42px;
+  width: 42px;
+}
+
+.found-user__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.found-user__name {
+  font-size: $text-base;
+  font-weight: $font-weight-semibold;
+}
+
+.found-user__meta {
+  color: $text-secondary;
+  font-size: $text-xs;
+}
+
+.league-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.league-row {
+  align-items: center;
+  background: rgba($bg-card, 0.6);
+  border: 1px solid rgba($surface-light, 0.3);
+  border-radius: $radius-md;
+  cursor: pointer;
+  display: flex;
+  gap: $spacing-md;
+  justify-content: space-between;
+  padding: $spacing-md;
+
+  &:hover {
+    border-color: rgba($champion-gold, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $champion-gold;
+    outline-offset: 2px;
+  }
+}
+
+.league-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.league-row__name {
+  font-size: $text-sm;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.league-row__meta {
+  color: $text-secondary;
+  font-size: $text-xs;
+  text-transform: capitalize;
+}
+
+.league-row__go {
+  color: $text-secondary;
+  flex-shrink: 0;
+  font-size: $text-lg;
+}

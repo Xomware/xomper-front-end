@@ -1,15 +1,19 @@
 import { Component } from '@angular/core'
 import { Router } from '@angular/router'
-import { take } from 'rxjs'
+import { of, take } from 'rxjs'
+import { catchError, switchMap } from 'rxjs/operators'
 import { ToastService } from 'src/app/services/toast.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { UserService } from 'src/app/services/user.service'
 import { PlayerService } from 'src/app/services/player.service'
 import { PlayerModel } from 'src/app/models/player.model'
+import { User } from 'src/app/models/user.interface'
+import { League } from 'src/app/models/league.interface'
 import { LoaderComponent } from '../../components/loader/loader.component'
 import { PlayerModalComponent } from '../../components/player-modal/player-modal.component'
 import { FormsModule } from '@angular/forms'
 import { NgIf, NgFor } from '@angular/common'
+import { RouterLink } from '@angular/router'
 
 type SearchMode = 'user' | 'league' | 'player'
 
@@ -22,7 +26,7 @@ interface ModeConfig {
 
 const MODE_CONFIG: Record<SearchMode, ModeConfig> = {
   user: {
-    placeholder: 'Enter a Sleeper username...',
+    placeholder: 'Sleeper username — see their leagues',
     hint: 'Search by Sleeper username or user ID',
     emptyNoun: 'username',
     promptCopy: 'Search for Sleeper users',
@@ -51,12 +55,15 @@ const MODE_CONFIG: Record<SearchMode, ModeConfig> = {
     PlayerModalComponent,
     FormsModule,
     NgIf,
-    NgFor,
-  ],
+    NgFor, RouterLink],
 })
 export class SearchComponent {
   loading = false
   searchMode: SearchMode = 'user'
+
+  /** The user behind a username search, and the leagues they are in. */
+  foundUser: User | null = null
+  leagueResults: League[] = []
   searchTerm = ''
 
   searched = false
@@ -85,6 +92,8 @@ export class SearchComponent {
     this.searched = false
     this.errorMessage = ''
     this.playerResults = []
+    this.leagueResults = []
+    this.foundUser = null
     this.selectedPlayer = null
   }
 
@@ -101,21 +110,31 @@ export class SearchComponent {
     this.searched = false
     this.errorMessage = ''
     this.playerResults = []
+    this.leagueResults = []
+    this.foundUser = null
 
     if (this.searchMode === 'user') {
+      // Show the user AND the leagues they are in. League search needs a
+      // league id, which nobody knows -- finding a league you are not in
+      // realistically means going through someone who is in it.
       this.userService.searchUser(term)
-        .pipe(take(1))
+        .pipe(
+          take(1),
+          switchMap((user) => {
+            if (!user || !user.user_id) throw new Error('No user found.')
+            this.foundUser = user
+            return this.userService.findUserLeagues(user.user_id).pipe(
+              // A user with no leagues this season is a real answer, not a
+              // failure -- still show who they are.
+              catchError(() => of([])),
+            )
+          }),
+        )
         .subscribe({
-          next: (user) => {
+          next: (leagues) => {
+            this.leagueResults = leagues
             this.loading = false
-            if (!user || !user.user_id) {
-              this.errorMessage = 'No user found.'
-              this.searched = true
-              return
-            }
-            this.router.navigate(['/selected-profile'], {
-              queryParams: { userId: user.user_id },
-            })
+            this.searched = true
           },
           error: () => {
             this.loading = false
@@ -161,6 +180,20 @@ export class SearchComponent {
           },
         })
     }
+  }
+
+  /** Open a league this user is in, even though the viewer is not. */
+  openLeague(league: League): void {
+    this.router.navigate(['/selected-league'], {
+      queryParams: { leagueId: league.league_id, view: 'league' },
+    })
+  }
+
+  openProfile(): void {
+    if (!this.foundUser?.user_id) return
+    this.router.navigate(['/selected-profile'], {
+      queryParams: { userId: this.foundUser.user_id },
+    })
   }
 
   openPlayerModal(player: PlayerModel): void {
