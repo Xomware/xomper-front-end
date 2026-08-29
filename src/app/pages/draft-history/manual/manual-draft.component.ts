@@ -4,6 +4,7 @@ import { NgIf, NgFor, DecimalPipe } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { forkJoin, switchMap } from 'rxjs'
 import { take } from 'rxjs/operators'
+import { NowPanelComponent } from 'src/app/components/now-panel/now-panel.component'
 import { PlayerService } from 'src/app/services/player.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { PlayerValuesService } from 'src/app/services/player-values.service'
@@ -50,7 +51,7 @@ const STORAGE_KEY = 'xomper.manualDraft'
   templateUrl: './manual-draft.component.html',
   styleUrls: ['./manual-draft.component.scss'],
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule, DecimalPipe],
+  imports: [NgIf, NgFor, FormsModule, DecimalPipe, NowPanelComponent],
 })
 export class ManualDraftComponent implements OnInit {
   private destroyRef = inject(DestroyRef)
@@ -134,6 +135,21 @@ export class ManualDraftComponent implements OnInit {
 
   strategyLabel(preset: StrategyPreset): string {
     return STRATEGY_LABELS[preset]
+  }
+
+  /** How many picks until the user's turn, for the second-screen panel. */
+  get picksAway(): number | null {
+    const total = totalPicks(this.draft)
+    for (let pick = this.draft.picks.length + 1; pick <= total; pick++) {
+      const slot = onTheClock({ ...this.draft, picks: this.draft.picks.slice(0, pick - 1) })
+      if (slot === this.draft.mySlot) return pick - this.draft.picks.length
+    }
+    return null
+  }
+
+  get nextPickNo(): number | null {
+    const away = this.picksAway
+    return away === null ? null : this.draft.picks.length + away
   }
 
   /** What the teams picking before you still need. Counts, never a prediction. */

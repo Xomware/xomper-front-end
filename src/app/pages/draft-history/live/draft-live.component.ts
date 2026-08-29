@@ -20,6 +20,7 @@ import { DraftModel } from 'src/app/models/draft.model'
 import { DraftPick } from 'src/app/models/draft.interface'
 import { User } from 'src/app/models/user.interface'
 import { Roster } from 'src/app/models/roster.interface'
+import { NowPanelComponent } from 'src/app/components/now-panel/now-panel.component'
 import { LoaderComponent } from '../../../components/loader/loader.component'
 import { UserProfileService } from 'src/app/services/user-profile.service'
 import { PlayerService } from 'src/app/services/player.service'
@@ -75,7 +76,7 @@ const DRAFTABLE_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
   templateUrl: './draft-live.component.html',
   styleUrls: ['./draft-live.component.scss'],
   standalone: true,
-  imports: [LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, DecimalPipe, LowerCasePipe, RouterLink],
+  imports: [NowPanelComponent, LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, DecimalPipe, LowerCasePipe, RouterLink],
 })
 export class DraftLiveComponent implements OnInit {
   private destroyRef = inject(DestroyRef)
@@ -570,6 +571,22 @@ export class DraftLiveComponent implements OnInit {
    */
   private pollDelayMs(draft: DraftModel): number {
     return draft.status === 'drafting' ? 5000 : 30000
+  }
+
+  /** Overall pick number the user picks next, for the second-screen panel. */
+  get nextPickNo(): number | null {
+    return this.myNextPickNo
+  }
+
+  /** How many picks until then, or null when it cannot be worked out. */
+  get picksAway(): number | null {
+    if (this.myNextPickNo === null) return null
+    const lastPick = this.latestPicks.reduce((max, p) => Math.max(max, p.pick_no ?? 0), 0)
+    return this.myNextPickNo - lastPick
+  }
+
+  get myTurn(): boolean {
+    return this.picksAway === 1
   }
 
   /** Stale once roughly three polls have gone by without a fresh board. */

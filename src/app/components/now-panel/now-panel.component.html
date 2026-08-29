@@ -1,0 +1,20 @@
+<aside class="now-panel" [class.now-panel--mine]="myTurn" *ngIf="top">
+  <div class="now-timing" *ngIf="timing">{{ timing }}</div>
+
+  <div class="now-top">
+    <span class="now-pos">{{ top.position }}</span>
+    <span class="now-name">{{ top.name }}</span>
+  </div>
+  <div class="now-reason" *ngIf="top.reason">{{ top.reason }}</div>
+
+  <ul class="now-alts" *ngIf="alternates.length">
+    <li *ngFor="let alt of alternates">
+      <span class="now-alt-pos">{{ alt.position }}</span>
+      <span class="now-alt-name">{{ alt.name }}</span>
+    </li>
+  </ul>
+
+  <p class="now-pressure" *ngIf="pressureLines.length">
+    {{ pressureLines.join(' · ') }}
+  </p>
+</aside>
