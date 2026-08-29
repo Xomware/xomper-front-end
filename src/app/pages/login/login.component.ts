@@ -9,6 +9,22 @@ import { ToastService } from 'src/app/services/toast.service'
 import { environment } from 'src/environments/environment'
 
 type AuthMode = 'options' | 'email' | 'verify' | 'forgot'
+
+/**
+ * Where a half-finished signup is remembered.
+ *
+ * The pool aliases on email, and an email alias does not resolve until the
+ * account is confirmed -- so an unconfirmed user cannot be looked up by email
+ * at all. Confirmation needs the opaque username minted at signup, and if
+ * that only ever lived in a component field, closing the tab made the account
+ * permanently unconfirmable.
+ */
+const PENDING_SIGNUP_KEY = 'xomper.pendingSignup'
+
+interface PendingSignup {
+  email: string
+  username: string
+}
 type EmailMode = 'signin' | 'signup'
 
 /**
@@ -61,6 +77,9 @@ export class LoginComponent implements OnInit, OnDestroy {
    * returned, not the address the user typed.
    */
   private pendingUsername = ''
+
+  /** True when the verify screen was reached from a remembered signup. */
+  resumedVerification = false
 
   private destroy$ = new Subject<void>()
 
@@ -168,6 +187,20 @@ export class LoginComponent implements OnInit, OnDestroy {
           return
         }
 
+        // Cognito cannot find an unconfirmed account by email, because the
+        // alias does not exist until confirmation. It reports that as
+        // "user not found", indistinguishable from a wrong address. If we
+        // remembered a signup for this address, that is what happened.
+        const pending = this.readPending()
+        if (pending && pending.email === this.email.trim()) {
+          this.pendingUsername = pending.username
+          this.resumedVerification = true
+          this.authMode = 'verify'
+          this.authNotice =
+            'You still need to confirm this email. Enter the code we sent, or request a new one.'
+          return
+        }
+
         this.authError = this.readableError(err)
       },
     })
@@ -192,6 +225,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: ({ userConfirmed, username }) => {
         this.loading = false
         this.pendingUsername = username
+        this.rememberPending({ email: this.email.trim(), username })
 
         if (userConfirmed) {
           this.authMode = 'email'
@@ -226,6 +260,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.loading = false
+          this.clearPending()
+          this.resumedVerification = false
           this.authMode = 'email'
           this.emailMode = 'signin'
           this.code = ''
@@ -304,6 +340,36 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.authError = this.readableError(err)
         },
       })
+  }
+
+  // ---- pending signup ----
+
+  private rememberPending(pending: PendingSignup): void {
+    try {
+      localStorage.setItem(PENDING_SIGNUP_KEY, JSON.stringify(pending))
+    } catch {
+      // Private browsing and blocked site data both throw. Verification still
+      // works in this tab; only resuming later is lost.
+    }
+  }
+
+  private readPending(): PendingSignup | null {
+    try {
+      const raw = localStorage.getItem(PENDING_SIGNUP_KEY)
+      if (!raw) return null
+      const parsed = JSON.parse(raw) as PendingSignup
+      return parsed?.email && parsed?.username ? parsed : null
+    } catch {
+      return null
+    }
+  }
+
+  private clearPending(): void {
+    try {
+      localStorage.removeItem(PENDING_SIGNUP_KEY)
+    } catch {
+      // Nothing to do; a stale entry only ever offers verification again.
+    }
   }
 
   // ---- helpers ----
