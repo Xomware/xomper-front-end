@@ -72,6 +72,7 @@ function harness(options: {
         profileErrors ? throwError(() => new Error('boom')) : of(prof),
     } as never,
     { leagues: [], load: () => of([]) } as never,
+    { load: () => of(null) } as never,
     userService as never,
     { loadMyLeague: () => of({}) } as never,
     router as never,

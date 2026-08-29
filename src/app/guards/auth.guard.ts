@@ -5,6 +5,7 @@ import { catchError, filter, map, of } from 'rxjs'
 import { CognitoService } from '../services/cognito.service'
 import { UserProfileService } from '../services/user-profile.service'
 import { LeagueFollowsService } from '../services/league-follows.service'
+import { FriendsService } from '../services/friends.service'
 import { UserService } from '../services/user.service'
 import { LeagueService } from '../services/league.service'
 
@@ -42,6 +43,7 @@ export class AuthGuard implements CanActivate {
     private cognito: CognitoService,
     private profiles: UserProfileService,
     private follows: LeagueFollowsService,
+    private friends: FriendsService,
     private userService: UserService,
     private leagueService: LeagueService,
     private router: Router,
@@ -86,6 +88,12 @@ export class AuthGuard implements CanActivate {
     // so a switcher that cannot populate never blocks navigation.
     if (profile?.sleeperUserId && !this.follows.leagues.length) {
       await firstValueFrom(this.follows.load().pipe(catchError(() => of([]))))
+    }
+
+    // The bell reads this. load() swallows failures, so a social outage
+    // shows an empty bell rather than blocking navigation.
+    if (profile) {
+      await firstValueFrom(this.friends.load().pipe(catchError(() => of(null))))
     }
 
     // A league that fails to load should not lock an authenticated user out.

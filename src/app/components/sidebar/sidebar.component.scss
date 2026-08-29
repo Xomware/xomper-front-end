@@ -384,3 +384,24 @@ ul {
     outline-offset: 2px;
   }
 }
+
+// ---- Friend-request bell ----
+
+.sidebar-bell {
+  position: relative;
+}
+
+.bell-count {
+  background: $champion-gold;
+  border-radius: $radius-full;
+  color: $bg-dark;
+  font-size: $text-xs;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+  min-width: 15px;
+  padding: 2px 4px;
+  position: absolute;
+  right: -2px;
+  text-align: center;
+  top: -2px;
+}
