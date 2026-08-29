@@ -225,4 +225,24 @@ export class TeamComponent implements OnInit {
       cursor: 'pointer',
     }
   }
+
+  /**
+   * "4th", "21st", "" for a rank that never resolved.
+   *
+   * The inline ternary this replaces special-cased exactly 1, 2 and 3, so 21
+   * rendered "21th" and 11 would have rendered "11st". It also had no case
+   * for the -1 the standings model defaults to when a division's standings
+   * were never computed -- which is how the team page showed
+   * "BIG10 Standings: -1th" in production.
+   */
+  ordinal(rank: number | undefined): string {
+    if (!rank || rank < 1) return ''
+
+    // 11th, 12th and 13th break the last-digit rule.
+    const teens = rank % 100
+    if (teens >= 11 && teens <= 13) return `${rank}th`
+
+    const suffix = { 1: 'st', 2: 'nd', 3: 'rd' }[rank % 10] ?? 'th'
+    return `${rank}${suffix}`
+  }
 }
