@@ -46,23 +46,29 @@ describe('top and alternates', () => {
 })
 
 describe('timing line', () => {
-  it('says on the clock when it is your turn', () => {
-    // The only moment the pick number stops being what you need to know.
-    const p = panel({ myTurn: true, nextPickNo: 52, picksAway: 5 })
-    expect(p.timing).toBe('On the clock')
+  it('keeps the pick number while on the clock', () => {
+    // Both, always. "On the clock" alone leaves you counting rounds by hand.
+    const p = panel({ myTurn: true, nextPickNo: 48, picksAway: 0 })
+    expect(p.timing).toBe('On the clock · #48')
   })
 
   it('calls out the very next pick', () => {
-    expect(panel({ nextPickNo: 40, picksAway: 1 }).timing).toBe('You pick next')
+    expect(panel({ nextPickNo: 40, picksAway: 1 }).timing).toBe('You pick next · #40')
   })
 
   it('counts picks away otherwise', () => {
     expect(panel({ nextPickNo: 52, picksAway: 5 }).timing).toBe('5 picks away · #52')
   })
 
-  it('says nothing when the next pick is unknown', () => {
-    // Better silent than a confident wrong number.
+  it('still shows the number when the gap is unknown', () => {
+    expect(panel({ nextPickNo: 52, picksAway: null }).timing).toBe('Your pick #52')
+  })
+
+  it('falls back to on the clock with no number at all', () => {
+    expect(panel({ myTurn: true, nextPickNo: null }).timing).toBe('On the clock')
+  })
+
+  it('says nothing when there is neither', () => {
     expect(panel({ nextPickNo: null, picksAway: null }).timing).toBe('')
-    expect(panel({ nextPickNo: 52, picksAway: null }).timing).toBe('')
   })
 })

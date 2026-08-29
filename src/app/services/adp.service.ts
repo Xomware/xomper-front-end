@@ -117,3 +117,40 @@ export function adpKey(name: string, position: string | undefined): string {
     .join(' ')
   return `${cleaned}|${(position || '').toUpperCase()}`
 }
+
+
+export interface LaterCandidate {
+  name: string
+  position: string
+  adp: number
+}
+
+/**
+ * Board entries whose ADP sits comfortably past the user's next pick.
+ *
+ * Deliberately ADP and a margin, not a probability. Replaying three real drafts
+ * found no held-out skill in predicting whether a player survives to a given
+ * pick (docs/features/fantasy-draft-helper/SPIKE-adp-calibration.md), so this
+ * reports where players usually go and leaves the inference to the reader.
+ *
+ * The margin exists because ADP equal to your next pick is a coin flip dressed
+ * as information — only a clear gap is worth showing.
+ */
+export function laterThanNextPick(
+  board: Array<{ playerId: string; name: string; position: string }>,
+  adpFor: (playerId: string, position: string) => number | null,
+  nextPickNo: number | null,
+  margin = 6,
+  limit = 3,
+): LaterCandidate[] {
+  if (nextPickNo === null) return []
+
+  const out: LaterCandidate[] = []
+  for (const candidate of board) {
+    const adp = adpFor(candidate.playerId, candidate.position)
+    if (adp === null || adp < nextPickNo + margin) continue
+    out.push({ name: candidate.name, position: candidate.position, adp: Math.round(adp) })
+    if (out.length >= limit) break
+  }
+  return out
+}

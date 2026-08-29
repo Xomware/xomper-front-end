@@ -19,6 +19,16 @@ import {
 } from 'src/app/services/draft-assistant.service'
 import { pressureFrom } from 'src/app/services/draft-context.service'
 import {
+  AdpService,
+  AdpFormat,
+  AdpPlayer,
+  adpByName,
+  adpFormatFor,
+  adpKey,
+  laterThanNextPick,
+  LaterCandidate,
+} from 'src/app/services/adp.service'
+import {
   ManualDraft,
   PlayerLookup,
   emptyManualDraft,
@@ -69,12 +79,15 @@ export class ManualDraftComponent implements OnInit {
   strategies: StrategyPreset[] = ['bpa', 'needs', 'rb-heavy', 'wr-heavy', 'qb-early']
   private book: ValueBook | null = null
   private leagueId = ''
+  private adpFormat: AdpFormat | null = null
+  private adp = new Map<string, AdpPlayer>()
 
   constructor(
     private playerService: PlayerService,
     private leagueService: LeagueService,
     private playerValuesService: PlayerValuesService,
     private assistant: DraftAssistantService,
+    private adpService: AdpService,
   ) {}
 
   ngOnInit(): void {
@@ -91,6 +104,7 @@ export class ManualDraftComponent implements OnInit {
           this.players = playerMap as unknown as PlayerLookup
           this.loading = false
           this.search()
+          this.loadAdp(league)
           return this.playerValuesService.bookFor(league)
         }),
         take(1),
@@ -135,6 +149,41 @@ export class ManualDraftComponent implements OnInit {
 
   strategyLabel(preset: StrategyPreset): string {
     return STRATEGY_LABELS[preset]
+  }
+
+  /**
+   * ADP for this league's format, if one fits. Same rules as the live board:
+   * a format with no ADP set upstream simply gets no ADP rather than a
+   * substitute.
+   */
+  private loadAdp(league: unknown): void {
+    const scoring = (league as { scoring_settings?: Record<string, number> })
+      ?.scoring_settings
+    this.adpFormat = adpFormatFor(
+      { slots_qb: 1, slots_flex: 1 } as never,
+      scoring,
+    )
+    if (!this.adpFormat) return
+
+    this.adpService
+      .forFormat(this.adpFormat)
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((snapshot) => {
+        this.adp = adpByName(snapshot)
+        if (!snapshot) this.adpFormat = null
+      })
+  }
+
+  private adpFor(playerId: string, position: string): number | null {
+    if (!this.adpFormat) return null
+    const player = this.players[playerId]
+    const name = `${player?.first_name ?? ''} ${player?.last_name ?? ''}`.trim()
+    return this.adp.get(adpKey(name, position))?.adp ?? null
+  }
+
+  /** Board entries who usually go after the user's next pick. */
+  get laterCandidates(): LaterCandidate[] {
+    return laterThanNextPick(this.board, (id, pos) => this.adpFor(id, pos), this.nextPickNo)
   }
 
   /** How many picks until the user's turn, for the second-screen panel. */

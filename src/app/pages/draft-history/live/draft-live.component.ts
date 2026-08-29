@@ -12,6 +12,8 @@ import {
   adpByName,
   adpFormatFor,
   adpKey,
+  laterThanNextPick,
+  LaterCandidate,
 } from 'src/app/services/adp.service'
 import { nextPickFor } from 'src/app/services/draft-order'
 import { pressureFrom, PositionPressure } from 'src/app/services/draft-context.service'
@@ -306,6 +308,23 @@ export class DraftLiveComponent implements OnInit {
    * and the gap between. Deliberately three numbers and no probability - the
    * calibration spike found none worth stating.
    */
+  /** Raw ADP for a player, or null when this league has no ADP set. */
+  adpFor(playerId: string, position: string): number | null {
+    if (!this.adpFormat) return null
+    const meta = this.playerMap[playerId] as { first_name?: string; last_name?: string }
+    const name = `${meta?.first_name ?? ''} ${meta?.last_name ?? ''}`.trim()
+    return this.adp.get(adpKey(name, position))?.adp ?? null
+  }
+
+  /** Board entries who usually go after the user's next pick. */
+  get laterCandidates(): LaterCandidate[] {
+    return laterThanNextPick(
+      this.board,
+      (id, pos) => this.adpFor(id, pos),
+      this.myNextPickNo,
+    )
+  }
+
   adpContext(playerId: string, position: string): string | null {
     if (!this.adpFormat) return null
     const meta = this.playerMap[playerId] as { first_name?: string; last_name?: string }

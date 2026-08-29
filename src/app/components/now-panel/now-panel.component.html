@@ -14,6 +14,17 @@
     </li>
   </ul>
 
+  <div class="now-later" *ngIf="laterCandidates.length && nextPickNo">
+    <span class="now-later-head">Usually goes after #{{ nextPickNo }}</span>
+    <ul>
+      <li *ngFor="let c of laterCandidates">
+        <span class="now-alt-pos">{{ c.position }}</span>
+        <span class="now-alt-name">{{ c.name }}</span>
+        <span class="now-later-adp">ADP {{ c.adp }}</span>
+      </li>
+    </ul>
+  </div>
+
   <p class="now-pressure" *ngIf="pressureLines.length">
     {{ pressureLines.join(' · ') }}
   </p>
