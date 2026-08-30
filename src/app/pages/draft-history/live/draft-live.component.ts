@@ -11,6 +11,7 @@ import {
   AdpPlayer,
   adpByName,
   adpFormatFor,
+  isDynastyLeague,
   adpKey,
   laterThanNextPick,
   LaterCandidate,
@@ -268,7 +269,12 @@ export class DraftLiveComponent implements OnInit {
   private loadAdp(league: unknown): void {
     const scoring = (league as { scoring_settings?: Record<string, number> })
       ?.scoring_settings
-    this.adpFormat = adpFormatFor(this.draft?.settings ?? null, scoring)
+    const leagueSettings = (league as { settings?: Record<string, unknown> })?.settings
+    this.adpFormat = adpFormatFor(
+      this.draft?.settings ?? null,
+      scoring,
+      isDynastyLeague(leagueSettings),
+    )
     if (!this.adpFormat) return
 
     this.adpService

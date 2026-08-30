@@ -45,13 +45,39 @@ export interface AdpSnapshot {
  * showing PPR numbers under a TE-premium board would be a quiet lie about a
  * format where tight ends move dozens of picks.
  */
+/**
+ * Whether a league is dynasty or keeper rather than redraft.
+ *
+ * Mirrors `league-settings-fingerprint.service.ts` exactly, **including its
+ * default to dynasty when `type` is absent**. If the two disagree a league gets
+ * dynasty values under redraft ADP, which is the original bug wearing a
+ * disguise. Sleeper's `settings.type`: 0 redraft, 1 keeper, 2 dynasty.
+ */
+export function isDynastyLeague(settings: Record<string, unknown> | null | undefined): boolean {
+  const raw = settings?.['type']
+  const leagueType = typeof raw === 'number' ? raw : 2
+  return leagueType !== 0
+}
+
 export function adpFormatFor(
   settings: DraftSettings | null | undefined,
   scoring: Record<string, number> | null | undefined,
+  isDynasty = false,
 ): AdpFormat | null {
   if (!settings) return null
 
   if ((scoring?.['bonus_rec_te'] ?? 0) > 0) return null
+
+  // Dynasty first, because it changes the board more than scoring does. A
+  // rookie in a dynasty league goes rounds earlier than his redraft ADP, so
+  // serving redraft numbers on a dynasty board is not an approximation — it is
+  // the wrong answer for exactly the players the format exists to value.
+  //
+  // FFC publishes one dynasty set, not a dynasty-by-scoring cross product, so a
+  // dynasty league gets it regardless of PPR or superflex. That is a real loss
+  // of precision and it beats the alternative of a confidently wrong redraft
+  // list. There is no dynasty-superflex set upstream to reach for.
+  if (isDynasty) return 'dynasty'
 
   // Superflex is a second startable QB, whether the slot is named that or not.
   const qbSlots = Number(settings.slots_qb ?? 0)
