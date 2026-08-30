@@ -57,15 +57,6 @@ export class LeagueService {
 
   private baseUrl = 'https://api.sleeper.app/v1'
 
-  /**
-   * Last-resort league id from the build.
-   *
-   * Only reached when the user has no followed league selected — a signed-out
-   * guest browsing, or a linked account whose leagues have not loaded yet.
-   * A signed-in user's selection wins over it.
-   */
-  private defaultLeagueId: string | null = environment.myLeagueId || null
-
   /** anchor league id -> current-season league id. Stable within a session. */
   private resolvedLeagueIds = new Map<string, string>()
 
@@ -173,18 +164,21 @@ export class LeagueService {
    *   1. a league explicitly opened this session (guest browsing, search)
    *   2. the league the signed-in user has selected in the switcher
    *   3. an already-loaded league
-   *   4. the build-time default
    *
    * The switcher sits above `getMyLeague()` deliberately: `myLeague` is
    * whatever was loaded first, so without this a user who switched leagues
    * would keep seeing the old one on any surface that asks for "the" league.
+   *
+   * Null when the user is in no leagues. There is deliberately no build-time
+   * default: it could only ever fire for a user with nothing of their own,
+   * and it handed them the Charlotte Dynasty League -- a stranger's league
+   * presented as theirs. Every caller already handles null.
    */
   getActiveLeagueId(): string | null {
     return (
       this.getCurrentLeague()?.league_id ??
       this.follows.selectedLeagueId ??
       this.getMyLeague()?.league_id ??
-      this.defaultLeagueId ??
       null
     )
   }
