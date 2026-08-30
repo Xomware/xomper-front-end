@@ -37,6 +37,17 @@ export class NowPanelComponent {
   /** Factual opponent need, e.g. "4 need RB". Never a prediction. */
   @Input() pressureLines: string[] = []
 
+  /**
+   * Players whose ADP sits past the user's next pick.
+   *
+   * Shown so the board can be read two picks deep — take the one who will not
+   * come back, leave the one who probably will. This is ADP, not a probability:
+   * replaying real drafts found no held-out skill in predicting survival
+   * (SPIKE-adp-calibration.md), so the wording says "usually goes after" and
+   * never states odds.
+   */
+  @Input() laterCandidates: Array<{ name: string; position: string; adp: number }> = []
+
   get top(): DraftCandidate | null {
     return this.board[0] ?? null
   }
@@ -47,15 +58,14 @@ export class NowPanelComponent {
   }
 
   /**
-   * The urgency line.
-   *
-   * "On the clock" beats a pick number when it is your turn — that is the only
-   * moment the number stops being what you need to know.
+   * The urgency line. Always carries the pick number when one is known —
+   * "on the clock" alone leaves you counting rounds in your head.
    */
   get timing(): string {
-    if (this.myTurn) return 'On the clock'
-    if (this.picksAway === null || this.nextPickNo === null) return ''
-    if (this.picksAway === 1) return 'You pick next'
+    if (this.nextPickNo === null) return this.myTurn ? 'On the clock' : ''
+    if (this.myTurn) return `On the clock · #${this.nextPickNo}`
+    if (this.picksAway === null) return `Your pick #${this.nextPickNo}`
+    if (this.picksAway === 1) return `You pick next · #${this.nextPickNo}`
     return `${this.picksAway} picks away · #${this.nextPickNo}`
   }
 }
