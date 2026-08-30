@@ -123,6 +123,6 @@
 
   strong {
     color: var(--text, #e8f0ee);
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
   }
 }
