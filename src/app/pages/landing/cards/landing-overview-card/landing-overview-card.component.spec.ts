@@ -1,116 +1,112 @@
 /**
- * Tests for the overview card.
- *
- * This is the only league-agnostic thing on the home page. The behaviour that
- * matters is that opening a league actually switches the app to it — leaving
- * the old league selected would render the new one's name over the old one's
- * data.
+ * A user with no leagues used to be shown four "Jump to" actions that are all
+ * league-scoped, so every one dead-ended on "No league selected". Before
+ * that, the build-time default handed them the Charlotte Dynasty League
+ * instead. This covers the state in between: nothing of their own, and a
+ * real next step.
  */
-import { of } from 'rxjs'
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { By } from '@angular/platform-browser'
+import { Router } from '@angular/router'
+import { of, throwError } from 'rxjs'
 import { LandingOverviewCardComponent } from './landing-overview-card.component'
-import { FollowedLeague } from 'src/app/services/league-follows.service'
+import { LeagueFollowsService } from 'src/app/services/league-follows.service'
+import { LeagueService } from 'src/app/services/league.service'
+import { UserProfileService } from 'src/app/services/user-profile.service'
 
-function league(overrides: Partial<FollowedLeague> = {}): FollowedLeague {
-  return {
-    leagueId: 'a',
-    name: 'Charlotte Dynasty League',
-    season: '2026',
-    status: 'in_season',
-    totalRosters: 12,
-    avatar: '',
-    isDynasty: true,
-    isFollowed: true,
-    ...overrides,
+const league = (id: string) => ({
+  leagueId: id,
+  name: `League ${id}`,
+  isFollowed: true,
+  isDynasty: true,
+  totalRosters: 12,
+  status: 'in_season',
+})
+
+describe('LandingOverviewCardComponent with no leagues', () => {
+  let fixture: ComponentFixture<LandingOverviewCardComponent>
+  let navigated: unknown[][]
+
+  const render = async (options: {
+    followed?: unknown[]
+    loaded?: unknown[]
+    loadFails?: boolean
+    handle?: string
+  } = {}) => {
+    const { followed = [], loaded = [], loadFails = false, handle = 'someone' } = options
+    navigated = []
+    await TestBed.configureTestingModule({
+      imports: [LandingOverviewCardComponent],
+      providers: [
+        {
+          provide: LeagueFollowsService,
+          useValue: {
+            followed,
+            selectedLeagueId: null,
+            load: () => (loadFails ? throwError(() => new Error('down')) : of(loaded)),
+            select: () => undefined,
+          },
+        },
+        { provide: LeagueService, useValue: { clearForLeagueSwitch: () => undefined } },
+        { provide: UserProfileService, useValue: { getProfile: () => ({ sleeperUsername: handle }) } },
+        { provide: Router, useValue: { navigate: (c: unknown[]) => navigated.push(c) } },
+      ],
+    }).compileComponents()
+    fixture = TestBed.createComponent(LandingOverviewCardComponent)
+    fixture.detectChanges()
   }
-}
 
-function build(options: { followed?: FollowedLeague[]; selected?: string | null } = {}) {
-  const { followed = [league(), league({ leagueId: 'b', name: 'Other' })], selected = 'a' } =
-    options
+  const text = () => fixture.nativeElement.textContent as string
+  const actionLabels = () =>
+    fixture.debugElement.queryAll(By.css('.action-label')).map((e) => e.nativeElement.textContent.trim())
 
-  const follows = {
-    followed,
-    selectedLeagueId: selected,
-    select: jasmine.createSpy('select'),
-    load: () => of(followed),
-  }
-  const leagueService = { clearForLeagueSwitch: jasmine.createSpy('clear') }
-  const router = { navigate: jasmine.createSpy('navigate') }
+  afterEach(() => TestBed.resetTestingModule())
 
-  const component = new LandingOverviewCardComponent(
-    follows as never,
-    leagueService as never,
-    router as never,
-  )
-  return { component, follows, leagueService, router }
-}
+  it('names the handle it found nothing on', async () => {
+    await render({ handle: 'nobody123456' })
 
-describe('LandingOverviewCardComponent', () => {
-  it('shows the leagues already loaded by the guard', () => {
-    const { component } = build()
-
-    component.ngOnInit()
-
-    expect(component.leagues.length).toBe(2)
+    expect(text()).toContain('No leagues yet')
+    expect(text()).toContain('nobody123456')
   })
 
-  it('fetches on a cold navigation when nothing is loaded', () => {
-    const { component } = build({ followed: [] })
-    ;(component as unknown as { follows: { load: () => unknown } }).follows.load = () =>
-      of([league(), league({ leagueId: 'b', isFollowed: false })])
+  it('offers only actions that work without a league', async () => {
+    await render()
 
-    component.ngOnInit()
-
-    // Only followed leagues belong on this card.
-    expect(component.leagues.length).toBe(1)
+    // Team Analyzer, Trades, Live Draft and Standings all require one.
+    expect(actionLabels()).toEqual(['Search', 'Sleeper account'])
   })
 
-  it('switches and opens a different league', () => {
-    const { component, follows, leagueService, router } = build({ selected: 'a' })
-    component.ngOnInit()
+  it('shows the league-scoped actions once there is a league', async () => {
+    await render({ followed: [league('L1')] })
 
-    component.open(league({ leagueId: 'b' }))
-
-    expect(follows.select).toHaveBeenCalledWith('b')
-    // Every LeagueService cache is league-scoped; leaving them renders the
-    // new league's name over the old league's data.
-    expect(leagueService.clearForLeagueSwitch).toHaveBeenCalled()
-    expect(router.navigate).toHaveBeenCalledWith(['/league/standings'])
+    expect(text()).not.toContain('No leagues yet')
+    expect(actionLabels()).toContain('Team Analyzer')
+    expect(actionLabels()).not.toContain('Sleeper account')
   })
 
-  it('does not re-switch when opening the league already selected', () => {
-    const { component, follows, leagueService, router } = build({ selected: 'a' })
-    component.ngOnInit()
-
-    component.open(league({ leagueId: 'a' }))
-
-    expect(follows.select).not.toHaveBeenCalled()
-    expect(leagueService.clearForLeagueSwitch).not.toHaveBeenCalled()
-    // Still navigates — the user asked to open it.
-    expect(router.navigate).toHaveBeenCalledWith(['/league/standings'])
+  it('does not claim "no leagues" before the list resolves', async () => {
+    // The empty state is a statement of fact; making it before the answer
+    // arrives is how a loading state gets mistaken for an empty one.
+    const component = new LandingOverviewCardComponent(
+      { followed: [], load: () => of([]) } as never,
+      {} as never,
+      { getProfile: () => null } as never,
+      { navigate: () => undefined } as never,
+    )
+    expect(component.resolved).toBe(false)
   })
 
-  it('routes a quick action', () => {
-    const { component, router } = build()
+  it('still resolves when the league list fails to load', async () => {
+    await render({ loadFails: true })
 
-    component.go(component.actions[1])
-
-    expect(router.navigate).toHaveBeenCalledWith(['/trades'])
+    // Stuck at "not resolved" would render neither block: no leagues, and no
+    // explanation of why.
+    expect(text()).toContain('No leagues yet')
   })
 
-  it('labels league status readably', () => {
-    const { component } = build()
+  it('falls back when no Sleeper account is linked', async () => {
+    await render({ handle: '' })
 
-    expect(component.statusLabel(league({ status: 'pre_draft' }))).toBe('Pre-draft')
-    expect(component.statusLabel(league({ status: 'in_season' }))).toBe('In season')
-  })
-
-  it('offers every tool the app has', () => {
-    const { component } = build()
-
-    const routes = component.actions.map((a) => a.route)
-    expect(routes).toContain('/team-analyzer')
-    expect(routes).toContain('/trades')
-    expect(routes).toContain('/live-draft')
+    expect(text()).toContain('Link a Sleeper account')
   })
 })

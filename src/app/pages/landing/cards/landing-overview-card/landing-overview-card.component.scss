@@ -114,3 +114,15 @@
   font-size: $text-sm;
   font-weight: $font-weight-semibold;
 }
+
+.empty-note {
+  margin: 0 0 16px;
+  max-width: 52ch;
+  color: var(--text-dim, #9aa);
+  line-height: 1.5;
+
+  strong {
+    color: var(--text, #e8f0ee);
+    font-weight: 600;
+  }
+}
