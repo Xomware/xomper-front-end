@@ -7,6 +7,7 @@ import {
   LeagueFollowsService,
 } from 'src/app/services/league-follows.service'
 import { LeagueService } from 'src/app/services/league.service'
+import { UserProfileService } from 'src/app/services/user-profile.service'
 
 interface QuickAction {
   label: string
@@ -35,6 +36,32 @@ interface QuickAction {
 })
 export class LandingOverviewCardComponent implements OnInit {
   leagues: FollowedLeague[] = []
+
+  /** False until the league list has actually been fetched. */
+  resolved = false
+
+  /**
+   * Where someone with no leagues can actually go.
+   *
+   * Every action below is league-scoped and dead-ends on "No league
+   * selected", so offering them to a user with nothing is four doors that do
+   * not open. These two are the only real moves: look around, or link the
+   * Sleeper account that has their leagues on it.
+   */
+  readonly emptyActions: QuickAction[] = [
+    {
+      label: 'Search',
+      hint: 'Find a league or a player',
+      route: '/search',
+      svg: 'M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z',
+    },
+    {
+      label: 'Sleeper account',
+      hint: 'Link a different one',
+      route: '/settings',
+      svg: 'M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z',
+    },
+  ]
 
   readonly actions: QuickAction[] = [
     {
@@ -66,6 +93,7 @@ export class LandingOverviewCardComponent implements OnInit {
   constructor(
     private follows: LeagueFollowsService,
     private leagueService: LeagueService,
+    private profiles: UserProfileService,
     private router: Router,
   ) {}
 
@@ -73,11 +101,24 @@ export class LandingOverviewCardComponent implements OnInit {
     // AuthGuard loads the list on every protected navigation, so this is
     // usually already populated; the fetch is the cold-nav fallback.
     this.leagues = this.follows.followed
-    if (!this.leagues.length) {
-      this.follows.load().pipe(take(1)).subscribe((leagues) => {
-        this.leagues = leagues.filter((l) => l.isFollowed)
-      })
+    if (this.leagues.length) {
+      this.resolved = true
+      return
     }
+    this.follows.load().pipe(take(1)).subscribe({
+      next: (leagues) => {
+        this.leagues = leagues.filter((l) => l.isFollowed)
+        this.resolved = true
+      },
+      // An empty state is the honest answer either way -- what it must not do
+      // is claim "no leagues" while the request is still in flight.
+      error: () => (this.resolved = true),
+    })
+  }
+
+  /** The handle whose leagues we looked for, to say so by name. */
+  get sleeperUsername(): string {
+    return this.profiles.getProfile()?.sleeperUsername ?? ''
   }
 
   get selectedLeagueId(): string | null {

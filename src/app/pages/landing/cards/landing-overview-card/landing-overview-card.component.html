@@ -21,7 +21,39 @@
     </div>
   </div>
 
-  <div class="block">
+  <!--
+    No leagues: say so by name, and offer the two things that actually work.
+    The Jump to actions below are all league-scoped and would dead-end on
+    "No league selected".
+  -->
+  <div class="block" *ngIf="resolved && !leagues.length">
+    <h2 class="block-title">No leagues yet</h2>
+    <p class="empty-note">
+      <ng-container *ngIf="sleeperUsername; else noHandle">
+        Nothing found on <strong>{{ sleeperUsername }}</strong> for this season. Join a
+        league on Sleeper and it shows up here, or link a different account.
+      </ng-container>
+      <ng-template #noHandle>
+        Link a Sleeper account and your leagues show up here.
+      </ng-template>
+    </p>
+    <div class="action-grid">
+      <button
+        type="button"
+        class="action"
+        *ngFor="let action of emptyActions"
+        (click)="go(action)"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="action.svg" />
+        </svg>
+        <span class="action-label">{{ action.label }}</span>
+        <span class="action-hint">{{ action.hint }}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="block" *ngIf="leagues.length">
     <h2 class="block-title">Jump to</h2>
     <div class="action-grid">
       <button
