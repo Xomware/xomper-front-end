@@ -24,6 +24,7 @@ import {
   AdpPlayer,
   adpByName,
   adpFormatFor,
+  isDynastyLeague,
   adpKey,
   laterThanNextPick,
   LaterCandidate,
@@ -159,9 +160,11 @@ export class ManualDraftComponent implements OnInit {
   private loadAdp(league: unknown): void {
     const scoring = (league as { scoring_settings?: Record<string, number> })
       ?.scoring_settings
+    const leagueSettings = (league as { settings?: Record<string, unknown> })?.settings
     this.adpFormat = adpFormatFor(
       { slots_qb: 1, slots_flex: 1 } as never,
       scoring,
+      isDynastyLeague(leagueSettings),
     )
     if (!this.adpFormat) return
 
