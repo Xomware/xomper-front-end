@@ -72,3 +72,31 @@ describe('timing line', () => {
     expect(panel({ nextPickNo: null, picksAway: null }).timing).toBe('')
   })
 })
+
+
+describe('top pick risk', () => {
+  const base = { board: [candidate('Bijan')], nextPickNo: 65, picksAway: 25 }
+
+  it('is silent when the player should last', () => {
+    // Saying "should last" invites waiting, which is the advice a wrong number
+    // makes expensive. Only surface risk.
+    expect(panel({ ...base, topSurvival: 0.9 }).topRisk).toBe('')
+  })
+
+  it('warns when he probably will not', () => {
+    expect(panel({ ...base, topSurvival: 0.1 }).topRisk).toBe('gone by #65')
+  })
+
+  it('says coin flip in the middle', () => {
+    expect(panel({ ...base, topSurvival: 0.45 }).topRisk).toBe('coin flip by #65')
+  })
+
+  it('is silent with no prediction', () => {
+    expect(panel({ ...base, topSurvival: null }).topRisk).toBe('')
+  })
+
+  it('is silent on your own clock', () => {
+    // The question is not whether he lasts; you are picking now.
+    expect(panel({ ...base, myTurn: true, topSurvival: 0.1 }).topRisk).toBe('')
+  })
+})
