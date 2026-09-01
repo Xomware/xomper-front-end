@@ -15,6 +15,13 @@ import {
   adpKey,
 } from 'src/app/services/adp.service'
 import { survivalForBoard, BoardSurvival } from 'src/app/services/survival.service'
+import {
+  RankingsService,
+  RankingsSnapshot,
+  PlayerRanks,
+  disagreementLabel,
+  sourceRows,
+} from 'src/app/services/rankings.service'
 import { nextPickFor } from 'src/app/services/draft-order'
 import { pressureFrom, PositionPressure } from 'src/app/services/draft-context.service'
 import { DraftService } from 'src/app/services/draft.service'
@@ -151,6 +158,7 @@ export class DraftLiveComponent implements OnInit {
     private profiles: UserProfileService,
     private playerService: PlayerService,
     private playerValuesService: PlayerValuesService,
+    private rankingsService: RankingsService,
     private assistant: DraftAssistantService,
     private adpService: AdpService,
     private route: ActivatedRoute,
@@ -171,6 +179,7 @@ export class DraftLiveComponent implements OnInit {
     this.mySleeperUserId = profile?.sleeperUserId || null
 
     this.loadDraft()
+    this.loadRankings()
   }
 
   private loadDraft(): void {
@@ -325,6 +334,40 @@ export class DraftLiveComponent implements OnInit {
     const name = `${meta?.first_name ?? ''} ${meta?.last_name ?? ''}`.trim()
     const row = this.adp.get(adpKey(name, position))
     return row ? { adp: row.adp, stdev: row.stdev } : null
+  }
+
+  /**
+   * Consensus ranks, loaded once. Null until it arrives or if it fails, and the
+   * board renders fine without it — same rule as ADP.
+   */
+  private rankings: RankingsSnapshot | null = null
+
+  private loadRankings(): void {
+    this.rankingsService
+      .current()
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((snapshot) => {
+        this.rankings = snapshot
+      })
+  }
+
+  ranksFor(playerId: string): PlayerRanks | undefined {
+    return this.rankings?.players?.[playerId]
+  }
+
+  /** Range across sources, shown only when they genuinely disagree. */
+  disagreement(playerId: string): string {
+    return disagreementLabel(this.ranksFor(playerId))
+  }
+
+  /** Per-source ranks, most bullish first. */
+  sourceRanks(playerId: string): Array<{ source: string; rank: number }> {
+    return sourceRows(this.ranksFor(playerId))
+  }
+
+  /** Sources that failed in the last ingest, so the UI can name them. */
+  get missingSources(): string[] {
+    return Object.keys(this.rankings?.failed ?? {})
   }
 
   /** Overall pick currently on the clock. */
