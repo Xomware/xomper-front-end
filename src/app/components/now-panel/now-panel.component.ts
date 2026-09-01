@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core'
-import { NgIf, NgFor } from '@angular/common'
+import { NgIf, NgFor, DecimalPipe } from '@angular/common'
 import { DraftCandidate } from 'src/app/services/draft-assistant.service'
+import { survivalLabel } from 'src/app/services/survival.service'
 
 /**
  * The second-screen panel.
@@ -19,7 +20,7 @@ import { DraftCandidate } from 'src/app/services/draft-assistant.service'
   templateUrl: './now-panel.component.html',
   styleUrls: ['./now-panel.component.scss'],
   standalone: true,
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, DecimalPipe],
 })
 export class NowPanelComponent {
   /** Ranked candidates. Only the first three are shown. */
@@ -38,15 +39,16 @@ export class NowPanelComponent {
   @Input() pressureLines: string[] = []
 
   /**
-   * Players whose ADP sits past the user's next pick.
+   * Players likely to still be there at the user's next pick.
    *
-   * Shown so the board can be read two picks deep — take the one who will not
-   * come back, leave the one who probably will. This is ADP, not a probability:
-   * replaying real drafts found no held-out skill in predicting survival
-   * (SPIKE-adp-calibration.md), so the wording says "usually goes after" and
-   * never states odds.
+   * A calibrated probability, not an ADP heuristic — the model validates at
+   * +0.371 Brier skill on held-out drafts (SPIKE-survival-retest.md), which is
+   * what makes it honest to show a percentage.
    */
-  @Input() laterCandidates: Array<{ name: string; position: string; adp: number }> = []
+  @Input() laterCandidates: Array<{ name: string; position: string; p: number }> = []
+
+  /** Chance the top recommendation is gone by the next pick, 0..1 or null. */
+  @Input() topSurvival: number | null = null
 
   get top(): DraftCandidate | null {
     return this.board[0] ?? null
@@ -61,6 +63,17 @@ export class NowPanelComponent {
    * The urgency line. Always carries the pick number when one is known —
    * "on the clock" alone leaves you counting rounds in your head.
    */
+  /**
+   * Urgency on the top pick. Only shown when he is genuinely at risk — telling
+   * someone a player "should last" invites them to wait, which is the one piece
+   * of advice a miscalibrated number would make expensive.
+   */
+  get topRisk(): string {
+    if (this.topSurvival === null || this.myTurn) return ''
+    if (this.topSurvival >= 0.6) return ''
+    return `${survivalLabel(this.topSurvival)} by #${this.nextPickNo}`
+  }
+
   get timing(): string {
     if (this.nextPickNo === null) return this.myTurn ? 'On the clock' : ''
     if (this.myTurn) return `On the clock · #${this.nextPickNo}`

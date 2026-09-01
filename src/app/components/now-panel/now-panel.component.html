@@ -6,6 +6,7 @@
     <span class="now-name">{{ top.name }}</span>
   </div>
   <div class="now-reason" *ngIf="top.reason">{{ top.reason }}</div>
+  <div class="now-risk" *ngIf="topRisk">{{ topRisk }}</div>
 
   <ul class="now-alts" *ngIf="alternates.length">
     <li *ngFor="let alt of alternates">
@@ -15,12 +16,12 @@
   </ul>
 
   <div class="now-later" *ngIf="laterCandidates.length && nextPickNo">
-    <span class="now-later-head">Usually goes after #{{ nextPickNo }}</span>
+    <span class="now-later-head">Should still be there at #{{ nextPickNo }}</span>
     <ul>
       <li *ngFor="let c of laterCandidates">
         <span class="now-alt-pos">{{ c.position }}</span>
         <span class="now-alt-name">{{ c.name }}</span>
-        <span class="now-later-adp">ADP {{ c.adp }}</span>
+        <span class="now-later-adp">{{ c.p * 100 | number: '1.0-0' }}%</span>
       </li>
     </ul>
   </div>

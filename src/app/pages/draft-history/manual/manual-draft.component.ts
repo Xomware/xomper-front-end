@@ -26,9 +26,8 @@ import {
   adpFormatFor,
   isDynastyLeague,
   adpKey,
-  laterThanNextPick,
-  LaterCandidate,
 } from 'src/app/services/adp.service'
+import { survivalForBoard, BoardSurvival } from 'src/app/services/survival.service'
 import {
   ManualDraft,
   PlayerLookup,
@@ -177,16 +176,38 @@ export class ManualDraftComponent implements OnInit {
       })
   }
 
-  private adpFor(playerId: string, position: string): number | null {
+  /** ADP and its spread, which the survival model needs together. */
+  private adpRowFor(playerId: string, position: string): { adp: number; stdev: number } | null {
     if (!this.adpFormat) return null
     const player = this.players[playerId]
     const name = `${player?.first_name ?? ''} ${player?.last_name ?? ''}`.trim()
-    return this.adp.get(adpKey(name, position))?.adp ?? null
+    const row = this.adp.get(adpKey(name, position))
+    return row ? { adp: row.adp, stdev: row.stdev } : null
   }
 
-  /** Board entries who usually go after the user's next pick. */
-  get laterCandidates(): LaterCandidate[] {
-    return laterThanNextPick(this.board, (id, pos) => this.adpFor(id, pos), this.nextPickNo)
+  /** Survival for every board entry, keyed by player id. */
+  private get survival(): BoardSurvival[] {
+    if (this.nextPickNo === null) return []
+    return survivalForBoard(
+      this.board,
+      (id, pos) => this.adpRowFor(id, pos),
+      this.draft.picks.length + 1,
+      this.nextPickNo,
+      totalPicks(this.draft),
+    )
+  }
+
+  /** Chance the top recommendation lasts until the user's next pick. */
+  get topSurvival(): number | null {
+    return this.survival[0]?.p ?? null
+  }
+
+  /** Board entries that should still be available at the next pick. */
+  get laterCandidates(): Array<{ name: string; position: string; p: number }> {
+    return this.survival
+      .filter((c) => c.p !== null && c.p >= 0.6)
+      .slice(0, 3)
+      .map((c) => ({ name: c.name, position: c.position, p: c.p as number }))
   }
 
   /** How many picks until the user's turn, for the second-screen panel. */

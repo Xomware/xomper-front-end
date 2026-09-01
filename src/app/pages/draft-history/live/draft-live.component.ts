@@ -13,9 +13,8 @@ import {
   adpFormatFor,
   isDynastyLeague,
   adpKey,
-  laterThanNextPick,
-  LaterCandidate,
 } from 'src/app/services/adp.service'
+import { survivalForBoard, BoardSurvival } from 'src/app/services/survival.service'
 import { nextPickFor } from 'src/app/services/draft-order'
 import { pressureFrom, PositionPressure } from 'src/app/services/draft-context.service'
 import { DraftService } from 'src/app/services/draft.service'
@@ -316,19 +315,52 @@ export class DraftLiveComponent implements OnInit {
    */
   /** Raw ADP for a player, or null when this league has no ADP set. */
   adpFor(playerId: string, position: string): number | null {
+    return this.adpRowFor(playerId, position)?.adp ?? null
+  }
+
+  /** ADP and its spread, which the survival model needs together. */
+  adpRowFor(playerId: string, position: string): { adp: number; stdev: number } | null {
     if (!this.adpFormat) return null
     const meta = this.playerMap[playerId] as { first_name?: string; last_name?: string }
     const name = `${meta?.first_name ?? ''} ${meta?.last_name ?? ''}`.trim()
-    return this.adp.get(adpKey(name, position))?.adp ?? null
+    const row = this.adp.get(adpKey(name, position))
+    return row ? { adp: row.adp, stdev: row.stdev } : null
   }
 
-  /** Board entries who usually go after the user's next pick. */
-  get laterCandidates(): LaterCandidate[] {
-    return laterThanNextPick(
+  /** Overall pick currently on the clock. */
+  get currentPickNo(): number {
+    return this.latestPicks.reduce((max, p) => Math.max(max, p.pick_no ?? 0), 0) + 1
+  }
+
+  get totalPicks(): number {
+    const rounds = Number(this.draft?.settings?.rounds ?? 0)
+    const teams = Number(this.draft?.settings?.teams ?? 12)
+    return rounds * teams
+  }
+
+  /** Survival for every board entry, keyed by player id. */
+  private get survival(): BoardSurvival[] {
+    if (this.myNextPickNo === null) return []
+    return survivalForBoard(
       this.board,
-      (id, pos) => this.adpFor(id, pos),
-      this.myNextPickNo,
+      (id, pos) => this.adpRowFor(id, pos),
+      this.currentPickNo,
+      this.myNextPickNo as number,
+      this.totalPicks,
     )
+  }
+
+  /** Chance the top recommendation lasts until the user's next pick. */
+  get topSurvival(): number | null {
+    return this.survival[0]?.p ?? null
+  }
+
+  /** Board entries that should still be available at the next pick. */
+  get laterCandidates(): Array<{ name: string; position: string; p: number }> {
+    return this.survival
+      .filter((c) => c.p !== null && c.p >= 0.6)
+      .slice(0, 3)
+      .map((c) => ({ name: c.name, position: c.position, p: c.p as number }))
   }
 
   adpContext(playerId: string, position: string): string | null {
