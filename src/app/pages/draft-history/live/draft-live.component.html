@@ -95,6 +95,10 @@
           Before your next pick, {{ pressureLines.join(', ') }}
         </p>
 
+        <p class="rankings-missing" *ngIf="missingSources.length">
+          Rankings from {{ missingSources.join(', ') }} were unavailable in the last update.
+        </p>
+
         <ol class="board">
           <li
             class="board-row"
@@ -107,6 +111,11 @@
             <a class="board-name" [routerLink]="['/player', c.playerId]">{{ c.name }}</a>
             <span class="board-reason">{{ c.reason }}</span>
             <span class="board-adp" *ngIf="adpContext(c.playerId, c.position) as adp">{{ adp }}</span>
+            <span
+              class="board-split"
+              *ngIf="disagreement(c.playerId) as range"
+              [title]="'Sources disagree: ' + range"
+            >{{ range }}</span>
             <span class="board-value">{{ c.value | number: '1.0-0' }}</span>
             <span class="board-actions">
               <button
