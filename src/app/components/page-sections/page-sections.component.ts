@@ -90,7 +90,7 @@ export class PageSectionsComponent implements AfterViewInit, OnDestroy {
     if (!root) return
 
     const headings = Array.from(root.querySelectorAll<HTMLElement>(this.headingSelector))
-    this.sections = headings
+    const found = headings
       .filter((h) => (h.textContent ?? '').trim())
       .map((heading, index) => {
         // Give the heading an id if it has none, so the link has a target.
@@ -98,7 +98,19 @@ export class PageSectionsComponent implements AfterViewInit, OnDestroy {
         return { id: heading.id, label: (heading.textContent ?? '').trim() }
       })
 
+    // Bail when nothing changed. This component renders its own buttons
+    // inside the root it observes, so assigning unconditionally re-rendered
+    // them, which the MutationObserver saw as a change, which collected
+    // again -- an infinite loop that hung the whole page.
+    if (this.sameAs(found)) return
+
+    this.sections = found
     this.watch(headings)
+  }
+
+  private sameAs(found: Section[]): boolean {
+    if (found.length !== this.sections.length) return false
+    return found.every((s, i) => s.id === this.sections[i].id && s.label === this.sections[i].label)
   }
 
   /** Mark whichever section is on screen, so the index says where you are. */

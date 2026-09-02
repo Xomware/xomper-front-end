@@ -116,3 +116,70 @@ describe('PageSectionsComponent late sections', () => {
     }, 10)
   })
 })
+
+describe('PageSectionsComponent does not loop', () => {
+  let root: HTMLElement
+
+  afterEach(() => root?.remove())
+
+  it('stops collecting when nothing changed', () => {
+    root = document.createElement('div')
+    root.className = 'loop-scope'
+    root.innerHTML = '<h2 id="a">A</h2>'
+    document.body.appendChild(root)
+
+    const component = new PageSectionsComponent({
+      nativeElement: { ownerDocument: document },
+    } as never)
+    component.scope = '.loop-scope'
+    const collect = (component as never as { collect(): void }).collect.bind(component)
+
+    collect()
+    const first = component.sections
+
+    collect()
+
+    // Same array instance: this component renders its own buttons inside the
+    // root it observes, so reassigning re-rendered them, which the observer
+    // saw as a change, which collected again. That hung the page.
+    expect(component.sections).toBe(first)
+  })
+
+  it('still updates when a section really is added', () => {
+    root = document.createElement('div')
+    root.className = 'loop-scope-2'
+    root.innerHTML = '<h2 id="a">A</h2>'
+    document.body.appendChild(root)
+
+    const component = new PageSectionsComponent({
+      nativeElement: { ownerDocument: document },
+    } as never)
+    component.scope = '.loop-scope-2'
+    const collect = (component as never as { collect(): void }).collect.bind(component)
+
+    collect()
+    root.insertAdjacentHTML('beforeend', '<h2 id="b">B</h2>')
+    collect()
+
+    expect(component.sections.map((s) => s.label)).toEqual(['A', 'B'])
+  })
+
+  it('notices a renamed section', () => {
+    root = document.createElement('div')
+    root.className = 'loop-scope-3'
+    root.innerHTML = '<h2 id="a">Old</h2>'
+    document.body.appendChild(root)
+
+    const component = new PageSectionsComponent({
+      nativeElement: { ownerDocument: document },
+    } as never)
+    component.scope = '.loop-scope-3'
+    const collect = (component as never as { collect(): void }).collect.bind(component)
+
+    collect()
+    root.querySelector('h2')!.textContent = 'New'
+    collect()
+
+    expect(component.sections[0].label).toBe('New')
+  })
+})
