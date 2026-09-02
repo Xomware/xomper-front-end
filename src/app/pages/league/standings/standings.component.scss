@@ -232,3 +232,21 @@
     font-size: $text-3xs;
   }
 }
+
+// The "More" button was the only route to a team page, which nobody reads as
+// a link. The name is the thing people click.
+.team-name--link {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--accent, #3ddc97);
+    text-decoration: underline;
+  }
+}

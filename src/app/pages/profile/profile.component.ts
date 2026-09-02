@@ -9,13 +9,14 @@ import { UserModel } from 'src/app/models/user.model'
 import { LeagueModel } from 'src/app/models/league.model'
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { NgFor } from '@angular/common';
+import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
 
 @Component({
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss'],
     standalone: true,
-    imports: [LoaderComponent, NgFor],
+    imports: [BackLinkComponent, LoaderComponent, NgFor],
 })
 export class ProfileComponent implements OnInit {
   @Input() mode: 'my' | 'selected' = 'selected'
