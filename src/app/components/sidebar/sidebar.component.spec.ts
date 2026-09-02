@@ -45,7 +45,11 @@ function build(options: { signOutFails?: boolean; profile?: UserProfile | null }
     clear: jasmine.createSpy('clearFollows'),
   }
   const leagueService = { clearForLeagueSwitch: jasmine.createSpy('clearForLeagueSwitch') }
-  const router = { navigate: jasmine.createSpy('navigate') }
+  const router = {
+    navigate: jasmine.createSpy('navigate'),
+    navigateByUrl: jasmine.createSpy('navigateByUrl').and.returnValue(Promise.resolve(true)),
+    url: '/league/standings',
+  }
 
   const component = new SidebarComponent(
     profiles as never,
@@ -208,7 +212,6 @@ describe('SidebarComponent league switcher', () => {
     // Everything cached in LeagueService is scoped to one league, so leaving
     // any behind renders the old league's data under the new league's name.
     expect(leagueService.clearForLeagueSwitch).toHaveBeenCalled()
-    expect(router.navigate).toHaveBeenCalledWith(['/home'])
   })
 
   it('does nothing when picking the league already selected', () => {
@@ -230,5 +233,83 @@ describe('SidebarComponent league switcher', () => {
 
     // Otherwise the next account on this browser inherits the league list.
     expect(follows.clear).toHaveBeenCalled()
+  })
+})
+
+/**
+ * Switching leagues used to dump you on /home. Reported as: "if i switch
+ * leagues on top left i should remain on page im viewing just go to that
+ * leagues version".
+ */
+describe('SidebarComponent switching leagues', () => {
+  function build(url: string) {
+    const router = {
+      navigate: jasmine.createSpy('navigate'),
+      navigateByUrl: jasmine
+        .createSpy('navigateByUrl')
+        .and.returnValue(Promise.resolve(true)),
+      url,
+    }
+    const follows = {
+      selectedLeagueId: 'old',
+      select: jasmine.createSpy('select'),
+      followed: [],
+      selectedLeague: null,
+    }
+    const leagueService = { clearForLeagueSwitch: jasmine.createSpy('clear') }
+    const component = new SidebarComponent(
+      { getProfile: () => null } as never,
+      { buildAvatar: () => '', reset: () => undefined } as never,
+      { signOut: () => ({ subscribe: () => undefined }) } as never,
+      follows as never,
+      { pendingCount: 0, clear: () => undefined } as never,
+      leagueService as never,
+      router as never,
+      { bypassSecurityTrustHtml: (h: string) => h } as never,
+    )
+    return { component, router, follows }
+  }
+
+  const LEAGUE = { leagueId: 'new', name: 'New', isFollowed: true }
+
+  async function switchOn(url: string) {
+    const { component, router, follows } = build(url)
+    component.selectLeague(LEAGUE as never)
+    await Promise.resolve()
+    await Promise.resolve()
+    return { router, follows }
+  }
+
+  it('returns to the same page after switching', async () => {
+    const { router } = await switchOn('/league/standings')
+
+    // Angular reuses a component when the route does not change, so the page
+    // would keep the old league's rendered data. The throwaway hop forces a
+    // rebuild.
+    expect(router.navigateByUrl.calls.first().args[0]).toBe('/')
+    expect(router.navigateByUrl.calls.mostRecent().args[0]).toBe('/league/standings')
+  })
+
+  it('keeps deeper league pages too', async () => {
+    const { router } = await switchOn('/league/matchups')
+    expect(router.navigateByUrl.calls.mostRecent().args[0]).toBe('/league/matchups')
+  })
+
+  it('goes home from a page pinned to one league by query param', async () => {
+    const { router } = await switchOn('/selected-league?leagueId=other&view=league')
+
+    // That page is about a specific league, not whichever is selected.
+    // Reloading it would show the old league under the new league's name.
+    expect(router.navigateByUrl.calls.mostRecent().args[0]).toBe('/home')
+  })
+
+  it('goes home from a team-analyzer pinned by route param', async () => {
+    const { router } = await switchOn('/team-analyzer/other-league')
+    expect(router.navigateByUrl.calls.mostRecent().args[0]).toBe('/home')
+  })
+
+  it('stays on the plain team analyzer, which follows the selection', async () => {
+    const { router } = await switchOn('/team-analyzer')
+    expect(router.navigateByUrl.calls.mostRecent().args[0]).toBe('/team-analyzer')
   })
 })
