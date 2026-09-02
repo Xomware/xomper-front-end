@@ -4,19 +4,28 @@
     <p class="admin-subtitle">League management portal</p>
   </header>
 
-  <div class="tile-grid">
+  <!-- Tabs rather than a grid of cards: every section used to be two
+       navigations away, back to the menu and into the next one. -->
+  <nav class="admin-tabs" aria-label="Admin sections">
     <button
-      *ngFor="let tile of tiles"
-      class="tile"
-      [class.disabled]="tile.disabled"
-      [disabled]="tile.disabled ?? false"
-      (click)="navigate(tile)"
+      *ngFor="let tab of tabs"
+      type="button"
+      class="admin-tab"
+      [class.admin-tab--active]="isActive(tab)"
+      [class.admin-tab--disabled]="tab.disabled"
+      [disabled]="tab.disabled ?? false"
+      [attr.aria-current]="isActive(tab) ? 'page' : null"
+      [title]="tab.subtitle"
+      (click)="navigate(tab)"
     >
-      <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path [attr.d]="tile.iconPath"/></svg></span>
-      <span class="tile-label">{{ tile.label }}</span>
-      <span class="tile-subtitle">{{ tile.subtitle }}</span>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+        <path [attr.d]="tab.iconPath" />
+      </svg>
+      <span>{{ tab.label }}</span>
     </button>
-  </div>
+  </nav>
+
+  <p class="admin-hint" *ngIf="atRoot">Pick a section above.</p>
 
   <router-outlet />
 </div>

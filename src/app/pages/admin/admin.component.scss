@@ -26,49 +26,52 @@
   margin: 0;
 }
 
-.tile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: $spacing-md;
-}
 
-.tile {
-  @include xomper-card;
+
+
+
+
+// Tabs scroll rather than wrap: nine sections wrapping to three rows is the
+// card grid again with different corners.
+.admin-tabs {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: $spacing-sm;
-  padding: 20px $spacing-md;
-  cursor: pointer;
-  text-align: left;
-  transition: background $transition-fast, border-color $transition-fast;
-  border: 1px solid rgba($surface-light, 0.3);
-
-  &:hover:not(.disabled) {
-    background: $bg-card-hover;
-    border-color: $champion-gold;
-  }
-
-  &.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+  gap: 4px;
+  margin-bottom: $spacing-md;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
-.tile-icon {
-  font-size: $text-xl;
-  line-height: 1;
-}
-
-.tile-label {
-  font-size: $text-sm;
-  font-weight: $font-weight-semibold;
-  color: $text-primary;
-  line-height: 1.2;
-}
-
-.tile-subtitle {
-  font-size: $text-xs;
+.admin-tab {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px 8px 0 0;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
   color: $text-secondary;
-  line-height: 1.4;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+  padding: 8px 12px;
+  transition: color 140ms ease, background 140ms ease;
+
+  &:hover:not(&--disabled) {
+    background: rgba(255, 255, 255, 0.06);
+    color: $text-primary;
+  }
+
+  &--active {
+    background: rgba($champion-gold, 0.1);
+    border-bottom-color: $champion-gold;
+    color: $champion-gold;
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+
+.admin-hint {
+  color: $text-secondary;
 }
