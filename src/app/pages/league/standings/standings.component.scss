@@ -250,3 +250,38 @@
     text-decoration: underline;
   }
 }
+
+// A twelve-team league is a lot of rows to scan for one name.
+.standings-filter {
+  align-items: center;
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.filter-input {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: $text-primary;
+  flex: 1;
+  font: inherit;
+  padding: 9px 12px;
+
+  &::placeholder {
+    color: $text-secondary;
+  }
+
+  &:focus {
+    border-color: rgba($champion-gold, 0.5);
+    outline: none;
+  }
+}
+
+.filter-clear {
+  background: none;
+  border: none;
+  color: $accent-red;
+  cursor: pointer;
+  font: inherit;
+}

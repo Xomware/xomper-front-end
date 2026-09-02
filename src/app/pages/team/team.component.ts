@@ -16,6 +16,7 @@ import { NgStyle, NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { PlayerModalComponent } from '../../components/player-modal/player-modal.component';
 import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
+import { FormsModule } from '@angular/forms'
 
 @Component({
     selector: 'app-team',
@@ -23,6 +24,7 @@ import { BackLinkComponent } from 'src/app/components/back-link/back-link.compon
     styleUrls: ['./team.component.scss'],
     standalone: true,
     imports: [
+        FormsModule,
         BackLinkComponent,
         NgStyle,
         LoaderComponent,
@@ -49,6 +51,12 @@ export class TeamComponent implements OnInit {
   selectedPlayer: PlayerModel | null = null
   POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
+  /** Free-text filter across the whole roster. */
+  filterText = ''
+
+  /** Position filter, or empty for all. */
+  filterPosition = ''
+
   /** Field or list. Remembered, because it is a reading preference. */
   view: 'field' | 'list' = 'field'
 
@@ -67,19 +75,73 @@ export class TeamComponent implements OnInit {
       { label: 'Special', match: (p) => p.position === 'K' || p.position === 'DEF' },
     ]
 
+    const starters = this.match(this.starters)
     const placed = new Set<string>()
     const out = rows.map((row) => {
-      const players = this.starters.filter((p) => row.match(p))
+      const players = starters.filter((p) => row.match(p))
       players.forEach((p) => placed.add(p.player_id))
       return { label: row.label, players }
     })
 
     // Anything the rows do not name still has to appear; an IDP league would
     // otherwise lose half its lineup off the field.
-    const rest = this.starters.filter((p) => !placed.has(p.player_id))
+    const rest = starters.filter((p) => !placed.has(p.player_id))
     if (rest.length) out.push({ label: 'Other', players: rest })
 
     return out.filter((row) => row.players.length)
+  }
+
+  /** Positions actually on this roster, so the chips offer nothing empty. */
+  get availablePositions(): string[] {
+    const found = new Set<string>()
+    for (const p of [...this.starters, ...this.bench, ...this.taxi]) {
+      if (p.position) found.add(p.position)
+    }
+    return [...found].sort(
+      (a, b) =>
+        (this.POSITION_ORDER.indexOf(a) + 1 || 99) - (this.POSITION_ORDER.indexOf(b) + 1 || 99),
+    )
+  }
+
+  get filtering(): boolean {
+    return !!this.filterText.trim() || !!this.filterPosition
+  }
+
+  /**
+   * Apply the filter to one group.
+   *
+   * Matches name or team, because "who do I have on the Bears" is as common a
+   * question as looking up one player.
+   */
+  match(players: PlayerModel[]): PlayerModel[] {
+    const text = this.filterText.trim().toLowerCase()
+    return players.filter((p) => {
+      if (this.filterPosition && p.position !== this.filterPosition) return false
+      if (!text) return true
+      return (
+        (p.full_name ?? '').toLowerCase().includes(text) ||
+        (p.team ?? '').toLowerCase().includes(text)
+      )
+    })
+  }
+
+  togglePosition(position: string): void {
+    this.filterPosition = this.filterPosition === position ? '' : position
+  }
+
+  clearFilter(): void {
+    this.filterText = ''
+    this.filterPosition = ''
+  }
+
+  /** Nothing matched anywhere, as opposed to one group being empty. */
+  get noMatches(): boolean {
+    return (
+      this.filtering &&
+      !this.match(this.starters).length &&
+      !this.match(this.bench).length &&
+      !this.match(this.taxi).length
+    )
   }
 
   setView(view: 'field' | 'list'): void {

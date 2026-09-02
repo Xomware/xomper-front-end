@@ -416,3 +416,65 @@
   color: $text-secondary;
   font-size: 0.65rem;
 }
+
+.roster-filter {
+  display: grid;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.filter-input {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: $text-primary;
+  font: inherit;
+  padding: 9px 12px;
+  width: 100%;
+
+  &::placeholder {
+    color: $text-secondary;
+  }
+
+  &:focus {
+    border-color: rgba($champion-gold, 0.5);
+    outline: none;
+  }
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-chip,
+.filter-clear {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: $radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: $text-secondary;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.filter-chip--active {
+  background: rgba($champion-gold, 0.15);
+  border-color: rgba($champion-gold, 0.5);
+  color: $champion-gold;
+}
+
+.filter-clear {
+  color: $accent-red;
+}
+
+.no-matches {
+  color: $text-secondary;
+  padding: $spacing-md 0;
+}

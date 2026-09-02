@@ -112,6 +112,35 @@
       </div>
     </div>
 
+    <!-- Filter first: a roster is 20-odd cards and finding one meant
+         scrolling all of them. -->
+    <div class="roster-filter">
+      <input
+        type="search"
+        class="filter-input"
+        placeholder="Filter by player or team"
+        aria-label="Filter roster"
+        [(ngModel)]="filterText"
+      />
+      <div class="filter-chips">
+        <button
+          type="button"
+          class="filter-chip"
+          *ngFor="let position of availablePositions"
+          [class.filter-chip--active]="filterPosition === position"
+          [attr.aria-pressed]="filterPosition === position"
+          (click)="togglePosition(position)"
+        >
+          {{ position }}
+        </button>
+        <button type="button" class="filter-clear" *ngIf="filtering" (click)="clearFilter()">
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <p class="no-matches" *ngIf="noMatches">Nobody on this roster matches.</p>
+
     <!-- Starters -->
     <div class="player-group" *ngIf="starters.length > 0">
       <div class="group-head">
@@ -171,27 +200,27 @@
       </div>
 
       <div class="roster" *ngIf="view === 'list'">
-        <ng-container *ngFor="let player of starters">
+        <ng-container *ngFor="let player of match(starters)">
           <ng-container *ngTemplateOutlet="playerCard; context: { $implicit: player }"></ng-container>
         </ng-container>
       </div>
     </div>
 
     <!-- Bench -->
-    <div class="player-group" *ngIf="bench.length > 0">
+    <div class="player-group" *ngIf="match(bench).length > 0">
       <h2 class="group-title">Bench</h2>
       <div class="roster">
-        <ng-container *ngFor="let player of bench">
+        <ng-container *ngFor="let player of match(bench)">
           <ng-container *ngTemplateOutlet="playerCard; context: { $implicit: player }"></ng-container>
         </ng-container>
       </div>
     </div>
 
     <!-- Taxi Squad -->
-    <div class="player-group" *ngIf="taxi.length > 0">
+    <div class="player-group" *ngIf="match(taxi).length > 0">
       <h2 class="group-title">Taxi Squad</h2>
       <div class="roster">
-        <ng-container *ngFor="let player of taxi">
+        <ng-container *ngFor="let player of match(taxi)">
           <ng-container *ngTemplateOutlet="playerCard; context: { $implicit: player }"></ng-container>
         </ng-container>
       </div>
