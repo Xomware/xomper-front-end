@@ -1,0 +1,125 @@
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
+
+.career {
+  @include xomper-card;
+  padding: $spacing-lg;
+}
+
+.career-head {
+  align-items: baseline;
+  display: flex;
+  gap: $spacing-md;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.career-title {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.career-link {
+  color: $champion-gold;
+  font-size: 0.85rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.career-grid {
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.career-stat {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  display: grid;
+  gap: 2px;
+  padding: $spacing-md;
+}
+
+.career-value {
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.career-label {
+  color: $text-secondary;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.owned {
+  margin-top: $spacing-lg;
+}
+
+.owned-title {
+  font-size: 0.9rem;
+  margin: 0 0 $spacing-sm;
+}
+
+.owned-list {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.owned-item {
+  align-items: center;
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: minmax(90px, 1fr) minmax(50px, 2fr) 24px;
+}
+
+.owned-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.owned-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  height: 7px;
+  overflow: hidden;
+}
+
+// The bars wipe in on a stagger, so the list arrives rather than appearing.
+.owned-fill {
+  animation: owned-grow 520ms ease-out both;
+  background: $gold-accent;
+  display: block;
+  height: 100%;
+  transform-origin: left;
+}
+
+@keyframes owned-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+// Someone who asked for less motion gets the numbers without the theatre.
+@media (prefers-reduced-motion: reduce) {
+  .owned-fill {
+    animation: none;
+  }
+}
+
+.owned-count {
+  color: $text-secondary;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
