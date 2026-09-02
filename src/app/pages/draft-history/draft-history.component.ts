@@ -8,7 +8,7 @@ import { LoaderComponent } from '../../components/loader/loader.component'
 import { NgIf, NgFor, NgClass } from '@angular/common'
 import { getCurrentSeason } from 'src/app/constants/season'
 
-type SubTab = 'live' | 'manual' | 'picks' | 'recap' | 'mocks'
+type SubTab = 'live' | 'picks' | 'recap' | 'mocks'
 
 @Component({
   selector: 'app-draft-history',
@@ -111,14 +111,13 @@ export class DraftHistoryComponent implements OnInit {
 
   subTabsForYear(year: string): SubTab[] {
     return year === this.currentSeason
-      ? ['live', 'manual', 'mocks', 'recap']
+      ? ['live', 'mocks', 'recap']
       : ['picks', 'recap']
   }
 
   subTabLabel(tab: SubTab): string {
     const labels: Record<SubTab, string> = {
       live: 'Live',
-      manual: 'Mark off',
       picks: 'Picks',
       recap: 'Recap',
       mocks: 'Mocks',

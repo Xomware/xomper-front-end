@@ -337,18 +337,23 @@ export const routes: Routes = [
   // redirect ends up at /draft-history/:season/live -- an honest URL, at the
   // cost of routerLinkActive tracking the resolved path rather than this one.
   { path: 'live-draft', redirectTo: 'draft-history', pathMatch: 'full' },
+
+  // Mark-off is top level, not a Draft History sub-tab. It is a live tool for a
+  // draft happening now, and Draft History is scoped by year — nesting it there
+  // meant a season in the URL that the component never read.
+  {
+    path: 'mark-off',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./pages/draft-history/manual/manual-draft.component').then(
+        (m) => m.ManualDraftComponent,
+      ),
+  },
   {
     path: 'draft-history/:year',
     component: DraftHistoryComponent,
     canActivate: [AuthGuard],
     children: [
-      {
-        path: 'manual',
-        loadComponent: () =>
-          import('./pages/draft-history/manual/manual-draft.component').then(
-            (m) => m.ManualDraftComponent,
-          ),
-      },
       {
         path: 'live',
         loadComponent: () =>
