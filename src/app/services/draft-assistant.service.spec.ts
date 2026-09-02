@@ -206,3 +206,75 @@ describe('DraftAssistantService', () => {
     expect(board.length).toBe(4)
   })
 })
+
+/**
+ * Reported live: "why does it show best available and its players that arent
+ * available in my dynasty league".
+ *
+ * The board excluded only players drafted in THIS draft. In a dynasty league
+ * almost nobody in the pool is free -- they were drafted in an earlier season
+ * and kept, so they never appear in this draft's picks.
+ */
+describe('DraftAssistantService availability in a keeper league', () => {
+  const service = new DraftAssistantService()
+
+  const playerMap = {
+    p1: { position: 'RB', first_name: 'A', last_name: 'One' },
+    p2: { position: 'WR', first_name: 'B', last_name: 'Two' },
+    p3: { position: 'QB', first_name: 'C', last_name: 'Three' },
+  } as never
+
+  const book = {
+    playerIds: ['p1', 'p2', 'p3'],
+    value: (id: string) => ({ known: true, value: { p1: 30, p2: 20, p3: 10 }[id] ?? 0 }),
+    position: (id: string) => ({ p1: 'RB', p2: 'WR', p3: 'QB' }[id] ?? ''),
+  } as never
+
+  const prefs = { preset: 'bpa', likes: new Set<string>(), dislikes: new Set<string>() } as never
+
+  it('collects every rostered player id', () => {
+    const ids = service.rosteredIds([
+      { players: ['p1', 'p2'] },
+      { players: ['p3'] },
+    ])
+
+    expect([...ids].sort()).toEqual(['p1', 'p2', 'p3'])
+  })
+
+  it('survives a roster with no players', () => {
+    expect(service.rosteredIds([{ players: null }, {}]).size).toBe(0)
+  })
+
+  it('leaves rostered players off the board', () => {
+    const rostered = service.rosteredIds([{ players: ['p1'] }])
+
+    const board = service.suggest([], playerMap, book, prefs, null, 25, rostered)
+
+    // p1 is the highest value in the book and would otherwise lead the board
+    // while sitting on someone's dynasty roster.
+    expect(board.map((c) => c.playerId)).toEqual(['p2', 'p3'])
+  })
+
+  it('still excludes players drafted in this draft', () => {
+    const picks = [{ player_id: 'p2' }] as never
+
+    const board = service.suggest(picks, playerMap, book, prefs, null, 25, new Set())
+
+    expect(board.map((c) => c.playerId)).toEqual(['p1', 'p3'])
+  })
+
+  it('excludes both sources at once', () => {
+    const picks = [{ player_id: 'p2' }] as never
+    const rostered = service.rosteredIds([{ players: ['p1'] }])
+
+    const board = service.suggest(picks, playerMap, book, prefs, null, 25, rostered)
+
+    expect(board.map((c) => c.playerId)).toEqual(['p3'])
+  })
+
+  it('offers everyone in a startup draft, where nobody is rostered yet', () => {
+    const board = service.suggest([], playerMap, book, prefs, null, 25, new Set())
+
+    expect(board.map((c) => c.playerId)).toEqual(['p1', 'p2', 'p3'])
+  })
+})

@@ -93,6 +93,24 @@ export class DraftAssistantService {
     return new Set(picks.map((p) => p.player_id).filter(Boolean))
   }
 
+  /**
+   * Everyone already on a roster in this league.
+   *
+   * In a dynasty league almost nobody in the pool is actually free: they were
+   * drafted in an earlier season and kept, so they never appear in this
+   * draft's picks. Ranking on picks alone offered players who have been
+   * rostered for years as "best available".
+   */
+  rosteredIds(rosters: Array<{ players?: string[] | null }>): Set<string> {
+    const ids = new Set<string>()
+    for (const roster of rosters) {
+      for (const playerId of roster.players ?? []) {
+        if (playerId) ids.add(playerId)
+      }
+    }
+    return ids
+  }
+
   /** How many of each position the given user has taken so far. */
   positionCounts(
     picks: DraftPick[],
@@ -124,6 +142,11 @@ export class DraftAssistantService {
     prefs: BoardPrefs,
     myUserId: string | null,
     limit = 25,
+    /**
+     * Already rostered, so unavailable regardless of this draft. Empty for a
+     * startup draft, where every pick is the only claim on a player.
+     */
+    rostered: Set<string> = new Set(),
   ): DraftCandidate[] {
     const drafted = this.draftedIds(picks)
     const counts = this.positionCounts(picks, playerMap, myUserId)
@@ -131,7 +154,7 @@ export class DraftAssistantService {
     const candidates: DraftCandidate[] = []
 
     for (const playerId of book.playerIds) {
-      if (drafted.has(playerId)) continue
+      if (drafted.has(playerId) || rostered.has(playerId)) continue
 
       const meta = playerMap[playerId]
       const position = meta?.position ?? book.position(playerId) ?? ''
