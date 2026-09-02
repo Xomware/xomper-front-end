@@ -166,12 +166,17 @@ export class DraftLiveComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const league = this.leagueService.getMyLeague()
-    if (!league) {
+    // getActiveLeagueId, not getMyLeague: the latter is whichever league
+    // loaded first, so a live draft in any other league bounced home.
+    const leagueId = this.leagueService.getActiveLeagueId()
+    if (!leagueId) {
       this.router.navigate(['/home'])
       return
     }
-    this.leagueId = league.getId()
+    this.leagueId = leagueId
+
+    // Empty at /live-draft, which has no :year. The live draft is always the
+    // current one, so there is nothing for a year to select.
     this.year = this.route.parent?.snapshot.paramMap.get('year') ?? ''
 
     // Resolve my sleeper user id from profile

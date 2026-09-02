@@ -8,7 +8,7 @@ import { LoaderComponent } from '../../components/loader/loader.component'
 import { NgIf, NgFor, NgClass } from '@angular/common'
 import { getCurrentSeason } from 'src/app/constants/season'
 
-type SubTab = 'live' | 'picks' | 'recap' | 'mocks'
+type SubTab = 'picks' | 'recap' | 'mocks'
 
 @Component({
   selector: 'app-draft-history',
@@ -35,15 +35,21 @@ export class DraftHistoryComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const league = this.leagueService.getMyLeague()
-    if (!league) {
-      this.toastService.showNegativeToast('No league loaded')
+    // getActiveLeagueId, not getMyLeague: the latter is whichever league
+    // loaded first, so on any other league this bounced to /home with
+    // "No league loaded" -- which is why history failed for some leagues.
+    const leagueId = this.leagueService.getActiveLeagueId()
+    if (!leagueId) {
+      this.toastService.showNegativeToast('No league selected')
       this.router.navigate(['/home'])
       return
     }
 
-    this.leagueName = league.getDisplayName()
-    this.leagueId = league.getId()
+    this.leagueId = leagueId
+    this.leagueName =
+      this.leagueService.getCurrentLeague()?.name ??
+      this.leagueService.getMyLeague()?.getDisplayName() ??
+      'League' 
 
     // Sync selected year from route :year param
     const yearParam = this.route.snapshot.paramMap.get('year')
@@ -76,13 +82,13 @@ export class DraftHistoryComponent implements OnInit {
           // If no year selected yet (root /draft-history), navigate to current season default
           if (!this.selectedYear) {
             const defaultYear = this.availableSeasons[0]
-            const defaultSubTab = this.defaultSubTab(defaultYear)
+            const defaultSubTab = this.defaultSubTab()
             this.router.navigate(['/draft-history', defaultYear, defaultSubTab], { replaceUrl: true })
           } else if (!this.availableSeasons.includes(this.selectedYear)) {
             // Requested year not in list — fall back to most recent
             const fallback = this.availableSeasons[0]
             this.selectedYear = fallback
-            this.router.navigate(['/draft-history', fallback, this.defaultSubTab(fallback)], { replaceUrl: true })
+            this.router.navigate(['/draft-history', fallback, this.defaultSubTab()], { replaceUrl: true })
           }
         }
 
@@ -95,8 +101,8 @@ export class DraftHistoryComponent implements OnInit {
     })
   }
 
-  defaultSubTab(year: string): SubTab {
-    return year === this.currentSeason ? 'live' : 'picks'
+  defaultSubTab(): SubTab {
+    return 'picks'
   }
 
   isCurrentSeason(year: string): boolean {
@@ -105,19 +111,23 @@ export class DraftHistoryComponent implements OnInit {
 
   selectYear(year: string): void {
     this.selectedYear = year
-    const subTab = this.defaultSubTab(year)
+    const subTab = this.defaultSubTab()
     this.router.navigate(['/draft-history', year, subTab])
   }
 
+  /**
+   * The current season used to offer live, mocks and recap -- and no picks
+   * at all, so the season being drafted was the one season whose picks you
+   * could not read. Live moved out to its own page; picks is now everywhere.
+   */
   subTabsForYear(year: string): SubTab[] {
     return year === this.currentSeason
-      ? ['live', 'mocks', 'recap']
+      ? ['picks', 'mocks', 'recap']
       : ['picks', 'recap']
   }
 
   subTabLabel(tab: SubTab): string {
     const labels: Record<SubTab, string> = {
-      live: 'Live',
       picks: 'Picks',
       recap: 'Recap',
       mocks: 'Mocks',

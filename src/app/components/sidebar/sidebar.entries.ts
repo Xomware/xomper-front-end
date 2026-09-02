@@ -147,11 +147,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         route: '/live-draft',
       },
       {
-        label: 'Mark Off',
-        svg: ICONS.markOff,
-        route: '/mark-off',
-      },
-      {
         label: 'Draft History',
         svg: ICONS.draftHistory,
         route: '/draft-history',
@@ -186,6 +181,9 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         label: 'Draft Order',
         svg: ICONS.draftOrder,
         route: '/league/draft-order',
+        // Projected order for a draft that has not happened. Useful to an
+        // admin setting one up, noise for everyone else.
+        adminOnly: true,
       },
     ],
   },

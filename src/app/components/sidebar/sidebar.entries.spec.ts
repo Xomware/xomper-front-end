@@ -56,27 +56,26 @@ describe('sidebar entries', () => {
 })
 
 
-describe('mark-off is top level', () => {
+describe('draft entries', () => {
   const links = SIDEBAR_SECTIONS.flatMap((s) => s.entries)
 
-  it('has its own sidebar entry', () => {
-    // It is a live tool for a draft happening now, not a historical view.
-    expect(links.find((e) => e.route === '/mark-off')?.label).toBe('Mark Off')
+  it('keeps mark-off off the main nav', () => {
+    // It is the fallback for a draft Sleeper cannot read, surfaced from the
+    // live draft that failed to find one -- not a tool competing with it.
+    expect(links.find((e) => e.route === '/mark-off')).toBeUndefined()
   })
 
-  it('is reachable from exactly one place', () => {
-    // It used to be a Draft History sub-tab as well. Two entry points to one
-    // page is how nav drifts out of step with itself.
-    expect(links.filter((e) => e.route === '/mark-off').length).toBe(1)
+  it('sends Live Draft to its own page, not into draft history', () => {
+    const live = links.find((e) => e.label === 'Live Draft')
+
+    expect(live?.route).toBe('/live-draft')
   })
 
-  it('is no longer nested under a year', () => {
-    // The old route carried a season the component never read.
-    expect(routePaths(routes)).not.toContain('/draft-history/:year/manual')
-  })
+  it('keeps draft order to admins', () => {
+    const order = links.find((e) => e.route === '/league/draft-order')
 
-  it('uses an svg icon, not an emoji glyph', () => {
-    const entry = links.find((e) => e.route === '/mark-off')
-    expect(entry?.svg).toContain('<svg')
+    // A projected order for a draft that has not happened is useful to an
+    // admin setting one up and noise for everyone else.
+    expect(order?.adminOnly).toBe(true)
   })
 })
