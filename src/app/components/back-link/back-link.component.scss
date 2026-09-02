@@ -1,0 +1,26 @@
+@import 'styles/variables';
+
+.back-link {
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-dim, #9aa);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 6px;
+  padding: 6px 2px;
+
+  svg {
+    transition: transform 140ms ease;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--text, #e8f0ee);
+
+    svg {
+      transform: translateX(-2px);
+    }
+  }
+}

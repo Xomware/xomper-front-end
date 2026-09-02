@@ -15,6 +15,7 @@ import { PlayerService } from 'src/app/services/player.service'
 import { NgStyle, NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { PlayerModalComponent } from '../../components/player-modal/player-modal.component';
+import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
 
 @Component({
     selector: 'app-team',
@@ -22,6 +23,7 @@ import { PlayerModalComponent } from '../../components/player-modal/player-modal
     styleUrls: ['./team.component.scss'],
     standalone: true,
     imports: [
+        BackLinkComponent,
         NgStyle,
         LoaderComponent,
         NgClass,

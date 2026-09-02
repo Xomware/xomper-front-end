@@ -1,5 +1,6 @@
 <div class="player-page">
   <app-loader [loading]="loading" message="Looking up the player"></app-loader>
+  <app-back-link></app-back-link>
 
   <div class="state state--error" *ngIf="error" role="alert">
     <p>{{ error }}</p>

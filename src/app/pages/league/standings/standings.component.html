@@ -48,7 +48,14 @@
       </span>
       <div class="team-info">
         <img [src]="team.avatar" class="team-pic" alt="Team Avatar" />
-        <span class="team-name">{{ team.teamName }}</span>
+        <button
+          type="button"
+          class="team-name team-name--link"
+          [title]="'Open ' + team.teamName"
+          (click)="selectCurrentTeam(team)"
+        >
+          {{ team.teamName }}
+        </button>
       </div>
       <span
         class="user-name clickable"
@@ -111,7 +118,14 @@
         </span>
         <div class="team-info">
           <img [src]="team.avatar" class="team-pic" alt="Team Avatar" />
-          <span class="team-name">{{ team.teamName }}</span>
+          <button
+            type="button"
+            class="team-name team-name--link"
+            [title]="'Open ' + team.teamName"
+            (click)="selectCurrentTeam(team)"
+          >
+            {{ team.teamName }}
+          </button>
         </div>
         <span
           class="user-name clickable"

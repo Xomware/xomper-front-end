@@ -12,6 +12,7 @@ import { Player } from 'src/app/models/player.interface'
 import { Roster } from 'src/app/models/roster.interface'
 import { User } from 'src/app/models/user.interface'
 import { ValueBook } from 'src/app/models/value-book.model'
+import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
 
 interface Fact {
   label: string
@@ -30,7 +31,7 @@ interface Fact {
 @Component({
   selector: 'app-player-profile',
   standalone: true,
-  imports: [NgIf, NgFor, DecimalPipe, LoaderComponent, CommentThreadComponent],
+  imports: [BackLinkComponent, NgIf, NgFor, DecimalPipe, LoaderComponent, CommentThreadComponent],
   templateUrl: './player-profile.component.html',
   styleUrls: ['./player-profile.component.scss'],
 })
