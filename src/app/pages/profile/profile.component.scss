@@ -184,3 +184,114 @@
     font-size: $text-xs;
   }
 }
+
+.stats {
+  margin: $spacing-lg 0;
+}
+
+.stats-title {
+  font-size: 1.05rem;
+  margin: 0 0 $spacing-sm;
+}
+
+.stats-hint,
+.stats-note {
+  color: $text-secondary;
+  margin: 0 0 $spacing-sm;
+}
+
+.stat-grid {
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.stat {
+  @include xomper-card;
+  display: grid;
+  gap: 2px;
+  padding: $spacing-md;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  color: $text-secondary;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.season-table {
+  @include xomper-card;
+  overflow-x: auto;
+  padding: $spacing-sm;
+}
+
+.season-row {
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: 70px 1fr 90px 80px;
+  padding: 8px 4px;
+
+  & + & {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  &--head {
+    color: $text-secondary;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  span {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.season-league {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.owned {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.owned-row {
+  align-items: center;
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: minmax(120px, 1fr) minmax(60px, 2fr) auto;
+}
+
+// The bar carries the comparison; the number is there for the exact figure.
+.owned-bar {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.owned-fill {
+  background: $gold-accent;
+  display: block;
+  height: 100%;
+  transition: width 400ms ease;
+}
+
+.owned-share {
+  color: $text-secondary;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

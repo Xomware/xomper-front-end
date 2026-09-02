@@ -7,8 +7,11 @@ import { ToastService } from 'src/app/services/toast.service'
 import { LeagueService } from 'src/app/services/league.service'
 import { UserModel } from 'src/app/models/user.model'
 import { LeagueModel } from 'src/app/models/league.model'
+import { ProfileStatsService, ProfileStats } from 'src/app/services/profile-stats.service'
+import { PlayerService } from 'src/app/services/player.service'
+import { DecimalPipe } from '@angular/common'
 import { LoaderComponent } from '../../components/loader/loader.component';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
 
 @Component({
@@ -16,7 +19,7 @@ import { BackLinkComponent } from 'src/app/components/back-link/back-link.compon
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss'],
     standalone: true,
-    imports: [BackLinkComponent, LoaderComponent, NgFor],
+    imports: [BackLinkComponent, LoaderComponent, NgFor, NgIf, DecimalPipe],
 })
 export class ProfileComponent implements OnInit {
   @Input() mode: 'my' | 'selected' = 'selected'
@@ -26,10 +29,18 @@ export class ProfileComponent implements OnInit {
   userLeagues: LeagueModel[] = []
   loading = false
 
+  stats: ProfileStats | null = null
+  statsLoading = false
+
+  /** playerId -> display name, for the ownership list. */
+  playerNames: Record<string, string> = {}
+
   /** Sleeper rolls the season over in spring, so this is not the calendar year. */
   readonly season = getCurrentSeason()
 
   constructor(
+    private profileStats: ProfileStatsService,
+    private playerService: PlayerService,
     private userService: UserService,
     private leagueService: LeagueService,
     private router: Router,
@@ -84,6 +95,54 @@ export class ProfileComponent implements OnInit {
     })
   }
 
+  /**
+   * Career and per-season numbers, once the league list is known.
+   *
+   * Separate from the page load: it walks every league's season chain, so
+   * blocking the profile on it would leave a name and avatar waiting on a
+   * dozen requests.
+   */
+  private loadStats(): void {
+    const user = this.user
+    if (!user || !this.userLeagues.length) return
+
+    this.statsLoading = true
+    this.profileStats
+      .forUser(user.getUserId(), this.userLeagues)
+      .pipe(take(1))
+      .subscribe({
+        next: (stats) => {
+          this.stats = stats
+          this.statsLoading = false
+          this.resolveOwnedNames(stats)
+        },
+        error: () => {
+          this.statsLoading = false
+        },
+      })
+  }
+
+  private resolveOwnedNames(stats: ProfileStats): void {
+    if (!stats.mostOwned.length) return
+    this.playerService
+      .getPlayerMap()
+      .pipe(take(1))
+      .subscribe((map) => {
+        for (const owned of stats.mostOwned) {
+          const meta = map[owned.playerId] as { full_name?: string } | undefined
+          this.playerNames[owned.playerId] = meta?.full_name ?? owned.playerId
+        }
+      })
+  }
+
+  /** Career win rate, or null before anyone has played a game. */
+  get winRate(): number | null {
+    const c = this.stats?.career
+    if (!c) return null
+    const games = c.wins + c.losses + c.ties
+    return games ? c.wins / games : null
+  }
+
   private setupUser(): void {
     if (!this.user) return
     this.profilePicture = this.user.getProfilePicture()
@@ -93,7 +152,9 @@ export class ProfileComponent implements OnInit {
     if (Object.keys(this.userLeagues).length === 0) {
       this.loading = true
       this.getUserLeagues()
+      return
     }
+    this.loadStats()
   }
 
   getUserLeagues(): void {
@@ -117,6 +178,7 @@ export class ProfileComponent implements OnInit {
           }
           this.userLeagues = this.user!.getUserLeagues()
           this.toastService.showPositiveToast('Leagues Found.')
+          this.loadStats()
         },
         error: () => {
           this.toastService.showNegativeToast('Error Finding Leagues.')

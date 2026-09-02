@@ -13,6 +13,84 @@
       <h1 class="user-name">{{ userName }}</h1>
     </div>
 
+
+    <!-- Career -->
+    <section class="stats" *ngIf="stats && stats.career.seasons">
+      <h2 class="stats-title">Career</h2>
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-value">
+            {{ stats.career.wins }}-{{ stats.career.losses }}<ng-container
+              *ngIf="stats.career.ties"
+            >-{{ stats.career.ties }}</ng-container>
+          </span>
+          <span class="stat-label">All-time record</span>
+        </div>
+        <div class="stat" *ngIf="winRate !== null">
+          <span class="stat-value">{{ winRate * 100 | number: '1.0-1' }}%</span>
+          <span class="stat-label">Win rate</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ stats.career.seasons }}</span>
+          <span class="stat-label">Seasons</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ stats.career.leagues }}</span>
+          <span class="stat-label">Leagues</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ stats.career.pointsFor | number: '1.0-0' }}</span>
+          <span class="stat-label">Points for</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ stats.career.pointsAgainst | number: '1.0-0' }}</span>
+          <span class="stat-label">Points against</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Season by season -->
+    <section class="stats" *ngIf="stats && stats.seasons.length">
+      <h2 class="stats-title">Season by season</h2>
+      <div class="season-table" role="table">
+        <div class="season-row season-row--head" role="row">
+          <span role="columnheader">Season</span>
+          <span role="columnheader">League</span>
+          <span role="columnheader">Record</span>
+          <span role="columnheader">PF</span>
+        </div>
+        <div class="season-row" role="row" *ngFor="let row of stats.seasons">
+          <span role="cell">{{ row.season }}</span>
+          <span role="cell" class="season-league">{{ row.leagueName }}</span>
+          <span role="cell">
+            {{ row.wins }}-{{ row.losses }}<ng-container *ngIf="row.ties">-{{ row.ties }}</ng-container>
+          </span>
+          <span role="cell">{{ row.pointsFor | number: '1.0-0' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ownership across the portfolio -->
+    <section class="stats" *ngIf="stats && stats.mostOwned.length">
+      <h2 class="stats-title">Players you keep drafting</h2>
+      <p class="stats-hint">
+        Held in more than one of your {{ stats.currentLeagues }} leagues this season.
+      </p>
+      <ul class="owned">
+        <li class="owned-row" *ngFor="let owned of stats.mostOwned">
+          <span class="owned-name">{{ playerNames[owned.playerId] || owned.playerId }}</span>
+          <span class="owned-bar" aria-hidden="true">
+            <span class="owned-fill" [style.width.%]="owned.share * 100"></span>
+          </span>
+          <span class="owned-share">
+            {{ owned.share * 100 | number: '1.0-0' }}% · {{ owned.leagues }} leagues
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <p class="stats-note" *ngIf="statsLoading">Reading your seasons…</p>
+
     <!-- League Section Header -->
     <h2 class="leagues-title">{{ season }} Leagues</h2>
 
