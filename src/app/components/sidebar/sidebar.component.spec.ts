@@ -58,6 +58,7 @@ function build(options: { signOutFails?: boolean; profile?: UserProfile | null }
     follows as never,
     { pendingCount: 0, clear: jasmine.createSpy('clearFriends') } as never,
     leagueService as never,
+    { available: [], selected: '2026', select: () => undefined, reset: () => undefined } as never,
     router as never,
     { bypassSecurityTrustHtml: (v: string) => v } as never,
   )
@@ -257,6 +258,12 @@ describe('SidebarComponent switching leagues', () => {
       selectedLeague: null,
     }
     const leagueService = { clearForLeagueSwitch: jasmine.createSpy('clear') }
+    const seasons = {
+      available: [],
+      selected: '2026',
+      select: jasmine.createSpy('selectSeason'),
+      reset: jasmine.createSpy('resetSeason'),
+    }
     const component = new SidebarComponent(
       { getProfile: () => null } as never,
       { buildAvatar: () => '', reset: () => undefined } as never,
@@ -264,10 +271,11 @@ describe('SidebarComponent switching leagues', () => {
       follows as never,
       { pendingCount: 0, clear: () => undefined } as never,
       leagueService as never,
+      seasons as never,
       router as never,
       { bypassSecurityTrustHtml: (h: string) => h } as never,
     )
-    return { component, router, follows }
+    return { component, router, follows, seasons }
   }
 
   const LEAGUE = { leagueId: 'new', name: 'New', isFollowed: true }
@@ -311,5 +319,64 @@ describe('SidebarComponent switching leagues', () => {
   it('stays on the plain team analyzer, which follows the selection', async () => {
     const { router } = await switchOn('/team-analyzer')
     expect(router.navigateByUrl.calls.mostRecent().args[0]).toBe('/team-analyzer')
+  })
+})
+
+describe('SidebarComponent season switcher', () => {
+  function build() {
+    const seasons = {
+      available: ['2026', '2025'],
+      selected: '2026',
+      select: jasmine.createSpy('select'),
+      reset: jasmine.createSpy('reset'),
+    }
+    const component = new SidebarComponent(
+      { getProfile: () => null } as never,
+      { buildAvatar: () => '', reset: () => undefined } as never,
+      {} as never,
+      { selectedLeagueId: 'a', select: () => undefined, followed: [], selectedLeague: null } as never,
+      { pendingCount: 0, clear: () => undefined } as never,
+      { clearForLeagueSwitch: () => undefined } as never,
+      seasons as never,
+      { navigate: () => undefined, navigateByUrl: () => Promise.resolve(true), url: '/home' } as never,
+      { bypassSecurityTrustHtml: (h: string) => h } as never,
+    )
+    return { component, seasons }
+  }
+
+  it('reads the shared selection', () => {
+    const { component } = build()
+
+    expect(component.selectedSeason).toBe('2026')
+    expect(component.availableSeasons).toEqual(['2026', '2025'])
+  })
+
+  it('closes the menu when a season is picked', () => {
+    const { component, seasons } = build()
+    component.seasonMenuOpen = true
+
+    component.selectSeason('2025')
+
+    expect(seasons.select).toHaveBeenCalledWith('2025')
+    expect(component.seasonMenuOpen).toBe(false)
+  })
+
+  it('closes on a click elsewhere', () => {
+    const { component } = build()
+    component.seasonMenuOpen = true
+
+    component.onDocumentClick()
+
+    expect(component.seasonMenuOpen).toBe(false)
+  })
+
+  it('resets the season when the league changes', () => {
+    const { component, seasons } = build()
+
+    component.selectLeague({ leagueId: 'b' } as never)
+
+    // A new league has its own chain, so keeping the old list would offer
+    // seasons it never played.
+    expect(seasons.reset).toHaveBeenCalled()
   })
 })

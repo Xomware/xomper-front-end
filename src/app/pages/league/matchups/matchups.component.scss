@@ -2,248 +2,133 @@
 @import 'styles/mixins';
 @import 'styles/theme';
 
-// Season Selector
-.season-selector {
-  display: flex;
-  justify-content: center;
-  gap: $spacing-sm;
-  margin-bottom: $spacing-xl;
-  flex-wrap: wrap;
-}
-
-.season-btn {
-  @include xomper-chip-outline;
-  padding: 8px 20px;
-  border-radius: $radius-xl;
-  font-size: $text-sm;
-  cursor: pointer;
-  transition: all $transition-base;
-
-  &:hover {
-    border-color: $champion-gold;
-    color: $champion-gold;
-  }
-
-  &.active {
-    background: $champion-gold;
-    border-color: $champion-gold;
-    color: $deep-navy;
-  }
-}
-
-// Empty State
 .empty-state {
+  padding: $spacing-xl 0;
   text-align: center;
-  padding: $spacing-2xl;
-  @include xomper-card;
-  border: 1px solid rgba($surface-light, 0.2);
-
-  p {
-    font-size: $text-lg;
-    color: $text-secondary;
-    margin: 0;
-  }
 
   .hint {
-    font-size: $text-sm;
-    color: $text-muted;
-    margin-top: $spacing-sm;
-  }
-}
-
-// Weeks Container
-.weeks-container {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.week-section {
-  @include xomper-card;
-  border: 1px solid rgba($surface-light, 0.2);
-  overflow: hidden;
-  transition: all $transition-base;
-
-  &.expanded {
-    border-color: rgba($champion-gold, 0.4);
-
-    .week-header {
-      border-bottom: 1px solid rgba($surface-light, 0.3);
-    }
-
-    .expand-icon {
-      transform: rotate(180deg);
-    }
-  }
-}
-
-.week-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: $spacing-md $spacing-lg;
-  cursor: pointer;
-  transition: background-color $transition-fast;
-
-  &:hover {
-    background: rgba($surface-light, 0.1);
-  }
-
-  .week-info {
-    display: flex;
-    align-items: center;
-    gap: $spacing-md;
-  }
-
-  .week-title {
-    font-family: $font-display;
-    font-size: $text-lg;
-    letter-spacing: $tracking-normal;
-    color: $champion-gold;
-    margin: 0;
-  }
-
-  .matchup-count {
-    font-size: $text-sm;
     color: $text-secondary;
-    background: rgba($surface-light, 0.3);
-    padding: 4px 12px;
-    border-radius: $radius-xl;
-  }
-
-  .expand-icon {
-    fill: $text-secondary;
-    transition: transform $transition-base;
   }
 }
 
-// Matchups Grid
-.matchups-grid {
+// Weeks read left to right like a schedule. The accordion this replaces made
+// the season a stack of collapsed rows, so seeing any week meant opening one.
+.week-rail {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-  padding: $spacing-lg;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 $spacing-sm;
+  scrollbar-width: thin;
 }
 
-.history-matchup-card {
-  display: flex;
-  align-items: stretch;
-  background: rgba($dark-navy, 0.5);
-  border: 1px solid rgba($surface-light, 0.2);
-  border-radius: $radius-lg;
-  overflow: hidden;
+.week-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: $radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: $text-secondary;
   cursor: pointer;
-  transition: all $transition-base;
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  min-width: 38px;
+  padding: 6px 10px;
+  transition: background 140ms ease, color 140ms ease, transform 140ms ease;
 
   &:hover {
-    border-color: rgba($champion-gold, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: $text-primary;
+    transform: translateY(-1px);
+  }
+
+  &--active {
+    background: rgba($champion-gold, 0.16);
+    border-color: rgba($champion-gold, 0.5);
+    color: $champion-gold;
   }
 }
 
-.team-side {
-  flex: 1;
+.board-head {
+  align-items: baseline;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: $spacing-md $spacing-lg;
-  transition: background-color $transition-fast;
+  flex-wrap: wrap;
+  gap: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-md;
+}
 
-  &.winner {
-    background: rgba($success-green, 0.15);
+.board-title {
+  font-size: 1.25rem;
+  margin: 0;
+}
 
-    .team-score {
-      color: $success-green;
-    }
-  }
+.board-note {
+  color: $text-secondary;
+  margin: 0;
 
-  &.loser {
-    background: rgba($error-red, 0.1);
-
-    .team-score {
-      color: $error-red;
-    }
-  }
-
-  .team-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .team-name {
-    font-weight: $font-weight-semibold;
-    font-size: $text-base;
+  strong {
     color: $text-primary;
   }
+}
 
-  .team-user {
-    font-size: $text-sm;
-    color: $text-secondary;
+.games {
+  display: grid;
+  gap: $spacing-md;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.game {
+  @include xomper-card;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  padding: $spacing-md;
+  transition: transform 160ms ease, border-color 160ms ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba($champion-gold, 0.45);
+    transform: translateY(-2px);
   }
 
-  .team-score {
-    font-family: $font-mono;
-    font-size: $text-xl;
-    font-weight: $font-weight-bold;
-    color: $champion-gold;
+  // A one-score game is the thing you look for on a scoreboard.
+  &--close {
+    border-color: rgba($champion-gold, 0.4);
   }
 }
 
-.vs-divider {
-  display: flex;
-  flex-direction: column;
+.side {
   align-items: center;
-  justify-content: center;
-  padding: $spacing-sm $spacing-md;
-  background: rgba($deep-navy, 0.8);
-  min-width: 80px;
+  display: flex;
+  gap: $spacing-sm;
+  justify-content: space-between;
+  padding: 6px 0;
 
-  .vs-text {
-    font-size: $text-sm;
-    font-weight: $font-weight-bold;
-    color: $text-muted;
-    letter-spacing: $tracking-wide;
-  }
-
-  .points-diff {
-    font-size: $text-xs;
-    color: $text-secondary;
-    margin-top: 2px;
+  &--won .side-name,
+  &--won .side-score {
+    color: $text-primary;
+    font-weight: 600;
   }
 }
 
-// Mobile
-@media (max-width: 768px) {
-  .week-header {
-    padding: $spacing-md;
+.side-name {
+  color: $text-secondary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-    .week-title {
-      font-size: $text-md;
-    }
-  }
+.side-score {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
 
-  .matchups-grid {
-    padding: $spacing-md;
-  }
+.game-foot {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: $text-secondary;
+  display: flex;
+  gap: $spacing-sm;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 6px;
+}
 
-  .history-matchup-card {
-    flex-direction: column;
-  }
-
-  .team-side {
-    padding: $spacing-sm $spacing-md;
-
-    &:first-child {
-      border-bottom: 1px solid rgba($surface-light, 0.2);
-    }
-  }
-
-  .vs-divider {
-    flex-direction: row;
-    gap: $spacing-sm;
-    padding: $spacing-xs $spacing-md;
-    min-width: auto;
-  }
+.tag {
+  color: $champion-gold;
 }

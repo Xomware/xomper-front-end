@@ -405,3 +405,66 @@ ul {
   text-align: center;
   top: -2px;
 }
+
+// Season reuses the league chip's shape: they are the same kind of control,
+// and giving them different affordances would suggest they are not.
+.season-switcher {
+  position: relative;
+}
+
+.season-chip {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: $text-secondary;
+  cursor: pointer;
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+  padding: 6px 10px;
+  width: 100%;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.season-name {
+  font-variant-numeric: tabular-nums;
+}
+
+.season-dropdown {
+  background: $bg-dark;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  left: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 40;
+}
+
+.season-option {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: $text-secondary;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  padding: 8px 10px;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: $text-primary;
+  }
+
+  &--active {
+    color: $champion-gold;
+  }
+}
