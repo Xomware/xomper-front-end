@@ -1,78 +1,69 @@
-<app-loader [loading]="loading"></app-loader>
+<app-loader [loading]="loading" message="Reading the season"></app-loader>
 
-<!-- Season Selector -->
-<div class="season-selector" *ngIf="availableSeasons.length > 1">
-  <button
-    *ngFor="let season of availableSeasons"
-    class="season-btn"
-    [class.active]="selectedSeason === season"
-    (click)="selectSeason(season)"
-  >
-    {{ season }}
-  </button>
+<div class="empty-state" *ngIf="!weeklyMatchups.length && !loading">
+  <p>No matchups yet.</p>
+  <p class="hint">Games appear here once the season is underway.</p>
 </div>
 
-<!-- Empty State -->
-<div class="empty-state" *ngIf="weeklyMatchups.length === 0 && !loading">
-  <p>No matchup history available yet.</p>
-  <p class="hint">Results will appear here as weeks complete.</p>
-</div>
+<section class="scoreboard" *ngIf="weeklyMatchups.length">
+  <!-- Weeks read left to right like a schedule, so the whole season is one
+       glance rather than a stack of collapsed rows. -->
+  <nav class="week-rail" aria-label="Week">
+    <button
+      type="button"
+      class="week-pill"
+      *ngFor="let week of weeks"
+      [class.week-pill--active]="week === selectedWeek"
+      [attr.aria-current]="week === selectedWeek ? 'true' : null"
+      (click)="selectWeek(week)"
+    >
+      {{ week }}
+    </button>
+  </nav>
 
-<!-- Weekly Matchups -->
-<div class="weeks-container" *ngIf="weeklyMatchups.length > 0">
-  <div
-    class="week-section"
-    *ngFor="let weekData of weeklyMatchups"
-    [class.expanded]="selectedHistoryWeek === weekData.week"
-  >
-    <div class="week-header" (click)="selectHistoryWeek(weekData.week)">
-      <div class="week-info">
-        <h2 class="week-title">Week {{ weekData.week }}</h2>
-        <span class="matchup-count">{{ weekData.matchups.length }} matchups</span>
-      </div>
-      <svg class="expand-icon" viewBox="0 0 24 24" width="24" height="24">
-        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-      </svg>
-    </div>
+  <header class="board-head">
+    <h2 class="board-title">Week {{ selectedWeek }}</h2>
+    <p class="board-note" *ngIf="weekIsUnplayed">Not played yet</p>
+    <p class="board-note" *ngIf="topScore as top">
+      High score <strong>{{ top.points.toFixed(1) }}</strong> · {{ top.team }}
+    </p>
+  </header>
 
-    <div class="matchups-grid" *ngIf="selectedHistoryWeek === weekData.week">
+  <div class="games">
+    <article
+      class="game"
+      *ngFor="let matchup of boardGames"
+      [class.game--close]="isClose(matchup)"
+      (click)="openMatchupDetail(matchup, $event)"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="
+        matchup.team_a_team_name + ' versus ' + matchup.team_b_team_name
+      "
+    >
       <div
-        class="history-matchup-card"
-        *ngFor="let matchup of weekData.matchups"
-        (click)="openMatchupDetail(matchup, $event)"
+        class="side"
+        [class.side--won]="getMatchupResult(matchup, matchup.team_a_roster_id) === 'win'"
       >
-        <div
-          class="team-side"
-          [class.winner]="getMatchupResult(matchup, matchup.team_a_roster_id) === 'win'"
-          [class.loser]="getMatchupResult(matchup, matchup.team_a_roster_id) === 'loss'"
-        >
-          <div class="team-info">
-            <span class="team-name">{{ matchup.team_a_team_name || matchup.team_a_username }}</span>
-            <span class="team-user" *ngIf="matchup.team_a_team_name">{{ matchup.team_a_username }}</span>
-          </div>
-          <div class="team-score">{{ matchup.team_a_points.toFixed(2) }}</div>
-        </div>
-
-        <div class="vs-divider">
-          <span class="vs-text">VS</span>
-          <span class="points-diff">{{ getPointsDiff(matchup) }} pts</span>
-        </div>
-
-        <div
-          class="team-side"
-          [class.winner]="getMatchupResult(matchup, matchup.team_b_roster_id) === 'win'"
-          [class.loser]="getMatchupResult(matchup, matchup.team_b_roster_id) === 'loss'"
-        >
-          <div class="team-info">
-            <span class="team-name">{{ matchup.team_b_team_name || matchup.team_b_username }}</span>
-            <span class="team-user" *ngIf="matchup.team_b_team_name">{{ matchup.team_b_username }}</span>
-          </div>
-          <div class="team-score">{{ matchup.team_b_points.toFixed(2) }}</div>
-        </div>
+        <span class="side-name">{{ matchup.team_a_team_name || matchup.team_a_username }}</span>
+        <span class="side-score">{{ matchup.team_a_points.toFixed(1) }}</span>
       </div>
-    </div>
+
+      <div
+        class="side"
+        [class.side--won]="getMatchupResult(matchup, matchup.team_b_roster_id) === 'win'"
+      >
+        <span class="side-name">{{ matchup.team_b_team_name || matchup.team_b_username }}</span>
+        <span class="side-score">{{ matchup.team_b_points.toFixed(1) }}</span>
+      </div>
+
+      <footer class="game-foot">
+        <span class="margin" *ngIf="!weekIsUnplayed">{{ getPointsDiff(matchup) }} pts</span>
+        <span class="tag" *ngIf="isClose(matchup)">Close</span>
+      </footer>
+    </article>
   </div>
-</div>
+</section>
 
 <app-matchup-modal
   *ngIf="selectedMatchupDetail"

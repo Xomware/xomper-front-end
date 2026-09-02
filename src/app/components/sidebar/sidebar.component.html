@@ -55,6 +55,43 @@
   </div>
 
   <!-- League switcher: only meaningful once the user follows more than one -->
+  <!-- Season sits beside league because it is the same kind of choice: a
+       mode the whole app is in, not a filter belonging to one page. -->
+  <div class="season-switcher" *ngIf="availableSeasons.length > 1">
+    <button
+      type="button"
+      class="season-chip"
+      (click)="toggleSeasonMenu($event)"
+      [attr.aria-expanded]="seasonMenuOpen"
+      aria-haspopup="menu"
+      aria-label="Switch season"
+    >
+      <span class="season-name">{{ selectedSeason }}</span>
+      <svg
+        class="chevron"
+        [class.chevron--open]="seasonMenuOpen"
+        viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+      </svg>
+    </button>
+
+    <div *ngIf="seasonMenuOpen" class="season-dropdown" role="menu">
+      <button
+        type="button"
+        role="menuitemradio"
+        *ngFor="let season of availableSeasons"
+        class="season-option"
+        [class.season-option--active]="season === selectedSeason"
+        [attr.aria-checked]="season === selectedSeason"
+        (click)="selectSeason(season)"
+      >
+        {{ season }}
+      </button>
+    </div>
+  </div>
+
   <div class="league-switcher" *ngIf="followedLeagues.length">
     <button
       type="button"

@@ -6,6 +6,7 @@ import { CognitoService } from 'src/app/services/cognito.service'
 import { UserProfileService, UserProfile } from 'src/app/services/user-profile.service'
 import { LeagueFollowsService, FollowedLeague } from 'src/app/services/league-follows.service'
 import { LeagueService } from 'src/app/services/league.service'
+import { SeasonService } from 'src/app/services/season.service'
 import { FriendsService } from 'src/app/services/friends.service'
 import { UserService } from 'src/app/services/user.service'
 import { SidebarSection, SidebarEntry } from './sidebar.entries'
@@ -29,6 +30,9 @@ export class SidebarComponent {
   /** Whether the league switcher is showing. */
   leagueMenuOpen = false
 
+  /** Whether the season switcher is showing. */
+  seasonMenuOpen = false
+
   constructor(
     public profiles: UserProfileService,
     public userService: UserService,
@@ -36,6 +40,7 @@ export class SidebarComponent {
     private follows: LeagueFollowsService,
     private friends: FriendsService,
     private leagueService: LeagueService,
+    private seasons: SeasonService,
     private router: Router,
     private sanitizer: DomSanitizer,
   ) {}
@@ -79,6 +84,24 @@ export class SidebarComponent {
     return this.follows.selectedLeague?.name ?? 'Select a league'
   }
 
+  get availableSeasons(): string[] {
+    return this.seasons.available
+  }
+
+  get selectedSeason(): string {
+    return this.seasons.selected
+  }
+
+  toggleSeasonMenu(event: Event): void {
+    event.stopPropagation()
+    this.seasonMenuOpen = !this.seasonMenuOpen
+  }
+
+  selectSeason(season: string): void {
+    this.seasonMenuOpen = false
+    this.seasons.select(season)
+  }
+
   toggleLeagueMenu(event: Event): void {
     event.stopPropagation()
     this.leagueMenuOpen = !this.leagueMenuOpen
@@ -102,6 +125,7 @@ export class SidebarComponent {
 
     this.follows.select(league.leagueId)
     this.leagueService.clearForLeagueSwitch()
+    this.seasons.reset()
 
     const target = this.pageToReturnTo()
     this.router
@@ -154,12 +178,14 @@ export class SidebarComponent {
   onDocumentClick(): void {
     this.closeProfileMenu()
     this.leagueMenuOpen = false
+    this.seasonMenuOpen = false
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.closeProfileMenu()
     this.leagueMenuOpen = false
+    this.seasonMenuOpen = false
   }
 
   signOut(): void {
