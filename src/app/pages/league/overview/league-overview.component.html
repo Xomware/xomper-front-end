@@ -7,7 +7,82 @@
   </div>
 
   <ng-container *ngIf="!loading && !error">
-    <section class="power" *ngIf="rows.length">
+    <!-- Power rankings were the whole page, so anything else about the
+         league had nowhere to go. Tabs give each its own room. -->
+    <nav class="ov-tabs" aria-label="League overview sections">
+      <button
+        type="button"
+        class="ov-tab"
+        [class.ov-tab--active]="tab === 'league'"
+        [attr.aria-current]="tab === 'league' ? 'true' : null"
+        (click)="tab = 'league'"
+      >
+        League
+      </button>
+      <button
+        type="button"
+        class="ov-tab"
+        [class.ov-tab--active]="tab === 'power'"
+        [attr.aria-current]="tab === 'power' ? 'true' : null"
+        (click)="tab = 'power'"
+      >
+        Power rankings
+      </button>
+      <button
+        type="button"
+        class="ov-tab"
+        [class.ov-tab--active]="tab === 'chat'"
+        [attr.aria-current]="tab === 'chat' ? 'true' : null"
+        (click)="tab = 'chat'"
+      >
+        Chat
+      </button>
+    </nav>
+
+    <section class="summary" *ngIf="tab === 'league' && summary as s">
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-value">{{ s.teams }}</span>
+          <span class="stat-label">Teams</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ s.averageValue | number: '1.0-0' }}</span>
+          <span class="stat-label">Average roster</span>
+        </div>
+        <div class="stat" *ngIf="s.spread">
+          <span class="stat-value">{{ s.spread | number: '1.1-1' }}x</span>
+          <span class="stat-label">Top over bottom</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ s.totalValue | number: '1.0-0' }}</span>
+          <span class="stat-label">League value</span>
+        </div>
+      </div>
+
+      <div class="callouts">
+        <p class="callout">
+          <strong>{{ s.strongest.team }}</strong> has the strongest roster, led by
+          {{ s.strongest.position }}.
+        </p>
+        <p class="callout">
+          <strong>{{ s.deepest.team }}</strong> carries the most on the bench.
+        </p>
+      </div>
+
+      <h3 class="section-title">Where the value sits</h3>
+      <p class="section-hint">Share of all starter value across the league.</p>
+      <ul class="pos-bars">
+        <li class="pos-row" *ngFor="let p of s.positionShare">
+          <span class="pos-name">{{ p.position }}</span>
+          <span class="pos-bar" aria-hidden="true">
+            <span class="pos-fill" [style.width.%]="p.share * 100"></span>
+          </span>
+          <span class="pos-share">{{ p.share * 100 | number: '1.0-0' }}%</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="power" *ngIf="tab === 'power' && rows.length">
       <h2 class="section-title">Power rankings</h2>
       <!-- Records are 0-0 all preseason; roster value is the only honest
            ranking available before a game is played. -->
@@ -36,6 +111,7 @@
     </section>
 
     <app-comment-thread
+      *ngIf="tab === 'chat'"
       targetType="league"
       [targetId]="leagueId"
       heading="League chat"
