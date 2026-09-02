@@ -2,6 +2,15 @@
 @import 'styles/mixins';
 @import 'styles/theme';
 
+// The host is the overlay. Left as a normal block it sits wherever the
+// component happens to appear in the page, which is what put the modal below
+// the content the reader was looking at.
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -462,5 +471,21 @@
     width: 24px;
     height: 18px;
     font-size: $text-3xs;
+  }
+}
+
+// Player rows are buttons now: a name you can read but not open is a dead end
+// mid-matchup, which is exactly when you want to look someone up.
+.player-card--link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(255, 255, 255, 0.05);
   }
 }

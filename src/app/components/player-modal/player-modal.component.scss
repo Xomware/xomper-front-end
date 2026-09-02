@@ -2,6 +2,15 @@
 @import 'styles/mixins';
 @import 'styles/theme';
 
+// The host is the overlay. Left as a normal block it sits wherever the
+// component happens to appear in the page, which is what put the modal below
+// the content the reader was looking at.
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;

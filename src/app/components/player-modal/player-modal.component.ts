@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, HostBinding } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { PlayerModel } from 'src/app/models/player.model';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { TEAM_COLORS } from 'src/app/constants/team-colors';
@@ -14,10 +14,6 @@ import { NgStyle } from '@angular/common';
     imports: [NgStyle]
 })
 export class PlayerModalComponent {
-  @Input() startPos!: { top: number, left: number, width: number, height: number };
-  @HostBinding('@zoomAnimation') get zoom() {
-    return { value: '', params: this.startPos || { top: 0, left: 0, width: 0, height: 0 } };
-  }
   @Input() player!: PlayerModel;
   @Output() close = new EventEmitter<void>();
 

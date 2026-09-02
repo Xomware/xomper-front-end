@@ -47,12 +47,6 @@ export class TeamComponent implements OnInit {
   teamLeague!: LeagueModel
   loading = false
   selectedPlayer: PlayerModel | null = null
-  modalStart: {
-    top: number
-    left: number
-    width: number
-    height: number
-  } | null = null
   POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
   constructor(
@@ -171,19 +165,11 @@ export class TeamComponent implements OnInit {
   }
 
   openPlayerModal(player: PlayerModel, event: MouseEvent): void {
-    const card = (event.currentTarget as HTMLElement).getBoundingClientRect()
-    this.modalStart = {
-      top: card.top,
-      left: card.left,
-      width: card.width,
-      height: card.height,
-    }
     this.selectedPlayer = player
   }
 
   closePlayerModal(): void {
     this.selectedPlayer = null
-    this.modalStart = null
   }
 
   getTeamStyle(team: string | undefined): Record<string, string> {

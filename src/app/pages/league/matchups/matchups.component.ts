@@ -24,7 +24,6 @@ export class MatchupsComponent implements OnInit {
   selectedHistoryWeek: number | null = null
   matchupHistoryLoaded = false
   selectedMatchupDetail: MatchupDetailInput | null = null
-  modalStart: { top: number; left: number; width: number; height: number } | null = null
 
   private leagueId = ''
 
@@ -110,8 +109,6 @@ export class MatchupsComponent implements OnInit {
   }
 
   openMatchupDetail(record: MatchupHistoryRecord, event: MouseEvent): void {
-    const card = (event.currentTarget as HTMLElement).getBoundingClientRect()
-    this.modalStart = { top: card.top, left: card.left, width: card.width, height: card.height }
 
     this.leagueService.getLeagueMatchups(record.league_id, record.week)
       .pipe(take(1))
@@ -171,6 +168,5 @@ export class MatchupsComponent implements OnInit {
 
   closeMatchupModal(): void {
     this.selectedMatchupDetail = null
-    this.modalStart = null
   }
 }
