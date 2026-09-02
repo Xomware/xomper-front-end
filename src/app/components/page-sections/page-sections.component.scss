@@ -1,0 +1,38 @@
+@import 'styles/variables';
+
+.sections {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: $spacing-md;
+}
+
+.sections-label {
+  color: $text-secondary;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  margin-right: 4px;
+  text-transform: uppercase;
+}
+
+.section-link {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: $radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: $text-secondary;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+
+  &:hover {
+    color: $text-primary;
+  }
+
+  &--active {
+    background: rgba($champion-gold, 0.14);
+    border-color: rgba($champion-gold, 0.45);
+    color: $champion-gold;
+  }
+}

@@ -17,13 +17,14 @@ import { DecimalPipe } from '@angular/common'
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { NgFor, NgIf } from '@angular/common';
 import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
+import { PageSectionsComponent } from 'src/app/components/page-sections/page-sections.component'
 
 @Component({
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss'],
     standalone: true,
-    imports: [BackLinkComponent, LoaderComponent, NgFor, NgIf, DecimalPipe],
+    imports: [PageSectionsComponent, BackLinkComponent, LoaderComponent, NgFor, NgIf, DecimalPipe],
 })
 export class ProfileComponent implements OnInit {
   @Input() mode: 'my' | 'selected' = 'selected'
