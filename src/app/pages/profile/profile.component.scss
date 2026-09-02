@@ -12,16 +12,19 @@
   color: $text-primary;
 }
 
+// 450px was right for a name, an avatar and a league list. With a career,
+// a season table and an ownership chart in it, that column truncated every
+// league name and left most of the page empty.
 .profile-container {
   @include xomper-card;
-  text-align: center;
-  padding: $spacing-xl;
-  width: 450px;
-  max-width: 95vw;
-  min-height: 500px;
+  align-items: stretch;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  max-width: 100%;
+  min-height: 500px;
+  padding: $spacing-xl;
+  text-align: center;
+  width: 980px;
 }
 
 .profile-header {
@@ -294,4 +297,21 @@
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+// The header stays centred; everything below it reads as rows and wants the
+// full width.
+.stats,
+.stats-title,
+.stats-hint,
+.stats-note,
+.owned,
+.season-table {
+  text-align: left;
+}
+
+.season-row {
+  // League names were truncating to "Charlotte D...". Give the column the
+  // room and let the numbers stay narrow.
+  grid-template-columns: 80px minmax(0, 1fr) 110px 100px;
 }
