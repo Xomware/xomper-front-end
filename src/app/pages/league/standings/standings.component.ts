@@ -8,13 +8,14 @@ import { UserService } from 'src/app/services/user.service'
 import { LeagueModel } from 'src/app/models/league.model'
 import { StandingsTeamModel } from 'src/app/models/standings.model'
 import { LoaderComponent } from '../../../components/loader/loader.component'
+import { FormsModule } from '@angular/forms'
 
 @Component({
   selector: 'app-standings',
   templateUrl: './standings.component.html',
   styleUrls: ['./standings.component.scss'],
   standalone: true,
-  imports: [LoaderComponent, NgClass, NgIf, NgFor, KeyValuePipe],
+  imports: [FormsModule, LoaderComponent, NgClass, NgIf, NgFor, KeyValuePipe],
 })
 export class StandingsComponent implements OnInit {
   loading = false
@@ -39,6 +40,33 @@ export class StandingsComponent implements OnInit {
     this.leaguePlayoffTeams = this.league.getPlayoffTeams()
     this.standings = this.league.getStandingsTeams()
     this.standingsByDivision = this.standingsService.buildDivisionStandings(this.standings)
+  }
+
+  /** Free-text jump to a team, by team name or manager. */
+  filterText = ''
+
+  /**
+   * Teams matching the filter.
+   *
+   * Matches the manager as well as the team name: half of remembering a team
+   * is remembering who runs it.
+   */
+  matchTeams(teams: StandingsTeamModel[]): StandingsTeamModel[] {
+    const text = this.filterText.trim().toLowerCase()
+    if (!text) return teams
+    return teams.filter(
+      (t) =>
+        (t.teamName ?? '').toLowerCase().includes(text) ||
+        (t.userName ?? '').toLowerCase().includes(text),
+    )
+  }
+
+  get filtering(): boolean {
+    return !!this.filterText.trim()
+  }
+
+  clearFilter(): void {
+    this.filterText = ''
   }
 
   selectCurrentTeam(team: StandingsTeamModel): void {

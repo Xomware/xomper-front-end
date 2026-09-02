@@ -14,7 +14,16 @@ describe('TeamComponent formation', () => {
   const component = Object.create(TeamComponent.prototype) as TeamComponent
 
   const formationFor = (starters: unknown[]) => {
-    ;(component as never as { starters: unknown[] }).starters = starters
+    const c = component as never as {
+      starters: unknown[]
+      filterText: string
+      filterPosition: string
+    }
+    c.starters = starters
+    // Object.create skips field initialisers, and formation now reads the
+    // roster filter.
+    c.filterText = ''
+    c.filterPosition = ''
     return component.formation
   }
 

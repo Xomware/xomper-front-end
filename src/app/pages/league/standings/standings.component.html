@@ -1,3 +1,16 @@
+<div class="standings-filter">
+  <input
+    type="search"
+    class="filter-input"
+    placeholder="Jump to a team or manager"
+    aria-label="Filter teams"
+    [(ngModel)]="filterText"
+  />
+  <button type="button" class="filter-clear" *ngIf="filtering" (click)="clearFilter()">
+    Clear
+  </button>
+</div>
+
 <!-- Toggle Buttons (League vs Divisions) -->
 <div class="switch-container">
   <div class="view-buttons">
@@ -37,7 +50,7 @@
 
     <div
       class="standings-row"
-      *ngFor="let team of standings; let i = index"
+      *ngFor="let team of matchTeams(standings); let i = index"
       [ngClass]="{ 'playoff-divider': i + 1 === leaguePlayoffTeams }"
     >
       <span
@@ -108,7 +121,7 @@
 
       <div
         class="standings-row"
-        *ngFor="let team of division.value; let i = index"
+        *ngFor="let team of matchTeams(division.value); let i = index"
       >
         <span
           class="rank-number"
