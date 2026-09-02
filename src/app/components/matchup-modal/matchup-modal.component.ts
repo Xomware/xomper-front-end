@@ -1,9 +1,10 @@
-import { Component, EventEmitter, HostBinding, Input, OnChanges, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core'
 import { forkJoin } from 'rxjs'
 import { zoomModalAnimation } from 'src/app/animations/zoom-modal.animation'
 import { MatchupDetailInput } from 'src/app/models/matchup-detail-input.interface'
 import { Player } from 'src/app/models/player.interface'
 import { PlayerModel } from 'src/app/models/player.model'
+import { Router } from '@angular/router'
 import { PlayerService } from 'src/app/services/player.service'
 import { NgIf, NgFor } from '@angular/common';
 
@@ -17,12 +18,7 @@ import { NgIf, NgFor } from '@angular/common';
 })
 export class MatchupModalComponent implements OnChanges {
   @Input() matchupDetail!: MatchupDetailInput
-  @Input() startPos!: { top: number; left: number; width: number; height: number }
   @Output() close = new EventEmitter<void>()
-
-  @HostBinding('@zoomAnimation') get zoom() {
-    return { value: '', params: this.startPos || { top: 0, left: 0, width: 0, height: 0 } }
-  }
 
   teamAStarters: PlayerModel[] = []
   teamABench: PlayerModel[] = []
@@ -32,7 +28,22 @@ export class MatchupModalComponent implements OnChanges {
 
   POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
-  constructor(private playerService: PlayerService) {}
+  constructor(
+    private playerService: PlayerService,
+    private router: Router,
+  ) {}
+
+  /**
+   * Open a player from inside the matchup.
+   *
+   * Closes first: leaving the modal stacked over the page it navigated away
+   * from means coming back to a dialog the reader did not open.
+   */
+  openPlayer(player: PlayerModel): void {
+    if (!player?.player_id) return
+    this.close.emit()
+    this.router.navigate(['/player', player.player_id])
+  }
 
   ngOnChanges() {
     if (!this.matchupDetail) return

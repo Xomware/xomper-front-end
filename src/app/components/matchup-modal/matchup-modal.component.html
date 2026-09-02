@@ -42,7 +42,7 @@
     <h2 class="group-title">Starters</h2>
     <div class="roster two-col">
       <div class="roster-col">
-        <div class="player-card" *ngFor="let player of teamAStarters">
+        <button type="button" class="player-card player-card--link" (click)="openPlayer(player)" *ngFor="let player of teamAStarters">
           <span class="position-badge" [attr.data-position]="player.position">{{ player.position }}</span>
           <img [src]="'https://sleepercdn.com/content/nfl/players/thumb/' + player.player_id + '.jpg'"
             (error)="player.photoError = true" alt="{{ player.full_name }}" class="player-pic">
@@ -51,13 +51,13 @@
             <span class="player-meta">{{ player.team || 'FA' }}</span>
           </div>
           <span class="player-points">{{ getPlayerPoints(player.player_id, 'A').toFixed(1) }}</span>
-        </div>
+        </button>
       </div>
 
       <div class="col-divider"></div>
 
       <div class="roster-col">
-        <div class="player-card" *ngFor="let player of teamBStarters">
+        <button type="button" class="player-card player-card--link" (click)="openPlayer(player)" *ngFor="let player of teamBStarters">
           <span class="position-badge" [attr.data-position]="player.position">{{ player.position }}</span>
           <img [src]="'https://sleepercdn.com/content/nfl/players/thumb/' + player.player_id + '.jpg'"
             (error)="player.photoError = true" alt="{{ player.full_name }}" class="player-pic">
@@ -66,7 +66,7 @@
             <span class="player-meta">{{ player.team || 'FA' }}</span>
           </div>
           <span class="player-points">{{ getPlayerPoints(player.player_id, 'B').toFixed(1) }}</span>
-        </div>
+        </button>
       </div>
     </div>
   </div>
@@ -76,27 +76,27 @@
     <h2 class="group-title">Bench</h2>
     <div class="roster two-col">
       <div class="roster-col">
-        <div class="player-card bench" *ngFor="let player of teamABench">
+        <button type="button" class="player-card bench player-card--link" (click)="openPlayer(player)" *ngFor="let player of teamABench">
           <span class="position-badge" [attr.data-position]="player.position">{{ player.position }}</span>
           <div class="player-info">
             <span class="player-name">{{ player.full_name }}</span>
             <span class="player-meta">{{ player.team || 'FA' }}</span>
           </div>
           <span class="player-points muted">{{ getPlayerPoints(player.player_id, 'A').toFixed(1) }}</span>
-        </div>
+        </button>
       </div>
 
       <div class="col-divider"></div>
 
       <div class="roster-col">
-        <div class="player-card bench" *ngFor="let player of teamBBench">
+        <button type="button" class="player-card bench player-card--link" (click)="openPlayer(player)" *ngFor="let player of teamBBench">
           <span class="position-badge" [attr.data-position]="player.position">{{ player.position }}</span>
           <div class="player-info">
             <span class="player-name">{{ player.full_name }}</span>
             <span class="player-meta">{{ player.team || 'FA' }}</span>
           </div>
           <span class="player-points muted">{{ getPlayerPoints(player.player_id, 'B').toFixed(1) }}</span>
-        </div>
+        </button>
       </div>
     </div>
   </div>

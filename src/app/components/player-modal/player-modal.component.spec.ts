@@ -29,7 +29,6 @@ describe('PlayerModalComponent', () => {
     fixture = TestBed.createComponent(PlayerModalComponent)
     component = fixture.componentInstance
     component.player = mockPlayer
-    component.startPos = { top: 0, left: 0, width: 100, height: 100 }
     fixture.detectChanges()
   })
 
