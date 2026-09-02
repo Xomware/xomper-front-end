@@ -444,6 +444,8 @@ export class DraftLiveComponent implements OnInit {
       this.book,
       this.prefs,
       this.mySleeperUserId,
+      25,
+      this.assistant.rosteredIds(this.rosters),
     )
   }
 
