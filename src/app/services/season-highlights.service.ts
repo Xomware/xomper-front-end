@@ -86,7 +86,15 @@ export class SeasonHighlightsService {
         const weekCalls = mine.flatMap(({ season, rosterId }) =>
           Array.from({ length: REGULAR_WEEKS }, (_, i) => i + 1).map((week) =>
             this.leagues.getLeagueMatchups(season.getId(), week).pipe(
-              map((rows) => ({ season: season.season, week, rosterId, rows })),
+              // getLeagueMatchups pairs rosters into {teamA, teamB} for the
+              // matchup view. Searching those pairs for a roster_id never
+              // matched, so every week looked unplayed.
+              map((pairs) => ({
+                season: season.season,
+                week,
+                rosterId,
+                rows: (pairs ?? []).flatMap((pair) => [pair.teamA, pair.teamB]).filter(Boolean),
+              })),
               // A week that never happened 404s or comes back empty; that is
               // not a failure worth losing the other sixteen over.
               catchError(() => of({ season: season.season, week, rosterId, rows: [] as never[] })),
