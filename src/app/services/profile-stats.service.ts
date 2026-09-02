@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Observable, forkJoin, of } from 'rxjs'
+import { tap } from 'rxjs/operators'
 import { catchError, map, switchMap } from 'rxjs/operators'
 import { LeagueService } from './league.service'
 import { LeagueModel } from '../models/league.model'
@@ -46,6 +47,17 @@ function points(whole: unknown, decimal: unknown): number {
   return Number(whole ?? 0) + Number(decimal ?? 0) / 100
 }
 
+const CACHE_KEY = 'xomper.profileStats'
+
+/** How long a cached record is served without a background refresh. */
+const FRESH_MS = 15 * 60 * 1000
+
+interface CachedStats {
+  userId: string
+  at: number
+  stats: ProfileStats
+}
+
 /**
  * A person's record across every league they play, season by season.
  *
@@ -58,6 +70,44 @@ function points(whole: unknown, decimal: unknown): number {
 @Injectable({ providedIn: 'root' })
 export class ProfileStatsService {
   constructor(private leagues: LeagueService) {}
+
+  /**
+   * Cached stats for this user, if any.
+   *
+   * Completed seasons never change -- a 2023 record is final -- and the
+   * current one moves once a week. So the honest cost of this page is one
+   * fetch, not one per visit: sixteen league chains and a roster call per
+   * season is around forty requests, and the landing card asks for the same
+   * thing.
+   */
+  cached(userId: string): ProfileStats | null {
+    const entry = this.readCache()
+    return entry && entry.userId === userId ? entry.stats : null
+  }
+
+  /** True when the cache is recent enough not to bother refreshing. */
+  isFresh(userId: string): boolean {
+    const entry = this.readCache()
+    return !!entry && entry.userId === userId && Date.now() - entry.at < FRESH_MS
+  }
+
+  private readCache(): CachedStats | null {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY)
+      return raw ? (JSON.parse(raw) as CachedStats) : null
+    } catch {
+      // Private browsing, blocked storage, or a shape from an older build.
+      return null
+    }
+  }
+
+  private writeCache(userId: string, stats: ProfileStats): void {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ userId, at: Date.now(), stats }))
+    } catch {
+      // See readCache. A missed cache costs requests, not correctness.
+    }
+  }
 
   /**
    * Walk every league this user is in, and every season those leagues ran.
@@ -91,6 +141,7 @@ export class ProfileStatsService {
         return forkJoin(rosterCalls)
       }),
       map((entries) => this.assemble(sleeperUserId, entries, leagues.length)),
+      tap((stats) => this.writeCache(sleeperUserId, stats)),
     )
   }
 

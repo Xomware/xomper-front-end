@@ -52,6 +52,17 @@ export class LandingCareerCardComponent implements OnInit, OnDestroy {
       return
     }
 
+    // The profile asks for exactly this, so a cached answer means opening
+    // home after a profile visit costs nothing.
+    const cachedStats = this.profileStats.cached(me.getUserId())
+    if (cachedStats) {
+      this.stats = cachedStats
+      this.loading = false
+      this.countUp(cachedStats)
+      this.resolveNames(cachedStats)
+      if (this.profileStats.isFresh(me.getUserId())) return
+    }
+
     // getUserLeagues() is only populated once the profile page has fetched
     // them, so on a cold landing it is empty and this card rendered nothing.
     // Fetch when it is.
@@ -75,6 +86,7 @@ export class LandingCareerCardComponent implements OnInit, OnDestroy {
         next: (stats) => {
           this.loading = false
           if (!stats) return
+          if (this.stats && this.sameTotals(this.stats, stats)) return
           this.stats = stats
           this.countUp(stats)
           this.resolveNames(stats)
@@ -137,6 +149,16 @@ export class LandingCareerCardComponent implements OnInit, OnDestroy {
           this.playerNames[owned.playerId] = meta?.full_name ?? owned.playerId
         }
       })
+  }
+
+  /** A refresh that changed nothing should not replay the count-up. */
+  private sameTotals(a: ProfileStats, b: ProfileStats): boolean {
+    return (
+      a.career.wins === b.career.wins &&
+      a.career.losses === b.career.losses &&
+      a.career.seasons === b.career.seasons &&
+      a.career.leagues === b.career.leagues
+    )
   }
 
   get topOwned() {
