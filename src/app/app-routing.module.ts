@@ -376,13 +376,6 @@ export const routes: Routes = [
             (m) => m.DraftRecapComponent,
           ),
       },
-      {
-        path: 'mocks',
-        loadComponent: () =>
-          import('./pages/draft-history/mocks/draft-mocks.component').then(
-            (m) => m.DraftMocksComponent,
-          ),
-      },
       // Default sub-tab: DraftHistoryComponent.ngOnInit redirects per isCurrentSeason
       { path: '', redirectTo: 'picks', pathMatch: 'full' },
     ],
