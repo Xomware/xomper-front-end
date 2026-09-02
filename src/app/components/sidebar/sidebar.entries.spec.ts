@@ -54,3 +54,29 @@ describe('sidebar entries', () => {
     expect(links.filter((l) => !l.route.startsWith('/'))).toEqual([])
   })
 })
+
+
+describe('mark-off is top level', () => {
+  const links = SIDEBAR_SECTIONS.flatMap((s) => s.entries)
+
+  it('has its own sidebar entry', () => {
+    // It is a live tool for a draft happening now, not a historical view.
+    expect(links.find((e) => e.route === '/mark-off')?.label).toBe('Mark Off')
+  })
+
+  it('is reachable from exactly one place', () => {
+    // It used to be a Draft History sub-tab as well. Two entry points to one
+    // page is how nav drifts out of step with itself.
+    expect(links.filter((e) => e.route === '/mark-off').length).toBe(1)
+  })
+
+  it('is no longer nested under a year', () => {
+    // The old route carried a season the component never read.
+    expect(routePaths(routes)).not.toContain('/draft-history/:year/manual')
+  })
+
+  it('uses an svg icon, not an emoji glyph', () => {
+    const entry = links.find((e) => e.route === '/mark-off')
+    expect(entry?.svg).toContain('<svg')
+  })
+})
