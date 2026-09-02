@@ -161,3 +161,100 @@ describe('ProfileStatsService', () => {
     })
   })
 })
+
+/**
+ * "why load all that? do we need it all? will it change page?"
+ *
+ * Mostly it will not. A completed season's record is final; only the current
+ * one moves, and weekly. So the honest cost is one fetch, not one per visit
+ * -- sixteen league chains plus a roster call per season is around forty
+ * requests, and the landing card asks for the same thing.
+ */
+describe('ProfileStatsService caching', () => {
+  function service() {
+    const leagues = {
+      getLeagueChain: (id: string) => of([{ getId: () => id, season: '2026', getDisplayName: () => 'L' }]),
+      findLeagueRosters: () => of([{ owner_id: 'me', settings: { wins: 4, losses: 1 }, players: [] }]),
+    }
+    return new ProfileStatsService(leagues as never)
+  }
+
+  const oneLeague = [{ getId: () => 'A', season: '2026', getDisplayName: () => 'L' }]
+
+  beforeEach(() => localStorage.clear())
+  afterEach(() => localStorage.clear())
+
+  it('has nothing cached to begin with', () => {
+    expect(service().cached('me')).toBeNull()
+    expect(service().isFresh('me')).toBe(false)
+  })
+
+  it('caches what it computed', (done) => {
+    const s = service()
+    s.forUser('me', oneLeague as never).subscribe(() => {
+      expect(s.cached('me')?.career.wins).toBe(4)
+      done()
+    })
+  })
+
+  it('serves the cache to a second instance', (done) => {
+    service()
+      .forUser('me', oneLeague as never)
+      .subscribe(() => {
+        // The landing card is a different component asking the same question.
+        expect(service().cached('me')?.career.wins).toBe(4)
+        done()
+      })
+  })
+
+  it('does not hand one user another user cache', (done) => {
+    const s = service()
+    s.forUser('me', oneLeague as never).subscribe(() => {
+      expect(s.cached('someone-else')).toBeNull()
+      done()
+    })
+  })
+
+  it('counts a just-written cache as fresh', (done) => {
+    const s = service()
+    s.forUser('me', oneLeague as never).subscribe(() => {
+      expect(s.isFresh('me')).toBe(true)
+      done()
+    })
+  })
+
+  it('counts an old cache as stale', (done) => {
+    const s = service()
+    s.forUser('me', oneLeague as never).subscribe(() => {
+      const raw = JSON.parse(localStorage.getItem('xomper.profileStats')!)
+      raw.at = Date.now() - 60 * 60 * 1000
+      localStorage.setItem('xomper.profileStats', JSON.stringify(raw))
+
+      // Still served, so the page is not blank; just refreshed behind it.
+      expect(s.cached('me')).not.toBeNull()
+      expect(s.isFresh('me')).toBe(false)
+      done()
+    })
+  })
+
+  it('ignores a cache it cannot parse', () => {
+    localStorage.setItem('xomper.profileStats', 'not json')
+
+    expect(service().cached('me')).toBeNull()
+  })
+
+  it('survives blocked storage', (done) => {
+    const original = localStorage.setItem
+    localStorage.setItem = () => {
+      throw new Error('blocked')
+    }
+    const s = service()
+
+    s.forUser('me', oneLeague as never).subscribe((stats) => {
+      // A missed cache costs requests, not correctness.
+      expect(stats.career.wins).toBe(4)
+      localStorage.setItem = original
+      done()
+    })
+  })
+})

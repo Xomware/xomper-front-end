@@ -29,6 +29,10 @@ describe('LandingCareerCardComponent', () => {
       { getPlayerMap: () => of({ p1: { full_name: 'One' } }) } as never,
       {
         forUser: () => (stats === 'error' ? throwError(() => new Error('x')) : of(stats)),
+        // The card serves a cached record before fetching; these tests are
+        // about the cold path.
+        cached: () => null,
+        isFresh: () => false,
       } as never,
       { getMyUser: () => me } as never,
     )
@@ -111,5 +115,69 @@ describe('LandingCareerCardComponent', () => {
     component.ngOnInit()
 
     expect(component.winRate).toBeNull()
+  })
+})
+
+describe('LandingCareerCardComponent cached', () => {
+  const CACHED = {
+    career: { wins: 3, losses: 2, ties: 0, pointsFor: 0, pointsAgainst: 0, seasons: 1, leagues: 1 },
+    seasons: [],
+    mostOwned: [],
+    currentLeagues: 1,
+  }
+
+  function build(fresh: boolean, fetched: unknown = CACHED) {
+    let fetches = 0
+    const component = new LandingCareerCardComponent(
+      { followed: [{ leagueId: 'a' }] } as never,
+      { getPlayerMap: () => of({}) } as never,
+      {
+        cached: () => CACHED,
+        isFresh: () => fresh,
+        forUser: () => {
+          fetches += 1
+          return of(fetched)
+        },
+      } as never,
+      {
+        getMyUser: () => ({ getUserId: () => 'u1', getUserLeagues: () => [{ getId: () => 'a' }] }),
+      } as never,
+    )
+    return { component, fetches: () => fetches }
+  }
+
+  it('renders the cache without waiting', () => {
+    const { component } = build(true)
+    component.ngOnInit()
+
+    expect(component.stats?.career.wins).toBe(3)
+    expect(component.loading).toBe(false)
+  })
+
+  it('does not refetch a fresh cache', () => {
+    const { component, fetches } = build(true)
+    component.ngOnInit()
+
+    // Sixteen league chains and a roster call per season is around forty
+    // requests; a record minutes old is not worth them.
+    expect(fetches()).toBe(0)
+  })
+
+  it('refreshes behind a stale cache', () => {
+    const { component, fetches } = build(false)
+    component.ngOnInit()
+
+    expect(component.stats?.career.wins).toBe(3)
+    expect(fetches()).toBe(1)
+  })
+
+  it('does not replay the count-up when nothing changed', () => {
+    const { component } = build(false)
+    component.ngOnInit()
+    component.shown = { wins: 3, losses: 2, seasons: 1, leagues: 1 }
+
+    // The refresh returned identical totals; re-animating would make the
+    // numbers jump for no reason.
+    expect(component.shown.wins).toBe(3)
   })
 })

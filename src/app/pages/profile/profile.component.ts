@@ -117,7 +117,16 @@ export class ProfileComponent implements OnInit {
     const user = this.user
     if (!user || !this.userLeagues.length) return
 
-    this.statsLoading = true
+    // Serve what we have first: this walks sixteen league chains, and a
+    // record that is a few minutes old is not worth a blank page.
+    const cached = this.profileStats.cached(user.getUserId())
+    if (cached) {
+      this.stats = cached
+      this.resolveOwnedNames(cached)
+      if (this.profileStats.isFresh(user.getUserId())) return
+    }
+
+    this.statsLoading = !cached
     this.profileStats
       .forUser(user.getUserId(), this.userLeagues)
       .pipe(take(1))
