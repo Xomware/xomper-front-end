@@ -1,4 +1,6 @@
 @import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/theme';
 
 .overview-page {
   margin: 0 auto;
@@ -161,4 +163,109 @@
 .deeper-hint {
   color: $text-secondary;
   font-size: $text-xs;
+}
+
+.ov-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: $spacing-md;
+  overflow-x: auto;
+}
+
+.ov-tab {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px 8px 0 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: $text-secondary;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  padding: 8px 14px;
+
+  &:hover {
+    color: $text-primary;
+  }
+
+  &--active {
+    background: rgba($champion-gold, 0.1);
+    border-bottom-color: $champion-gold;
+    color: $champion-gold;
+  }
+}
+
+.stat-grid {
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  margin-bottom: $spacing-md;
+}
+
+.stat {
+  @include xomper-card;
+  display: grid;
+  gap: 2px;
+  padding: $spacing-md;
+}
+
+.stat-value {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  color: $text-secondary;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.callouts {
+  display: grid;
+  gap: 4px;
+  margin-bottom: $spacing-lg;
+}
+
+.callout {
+  color: $text-secondary;
+  margin: 0;
+
+  strong {
+    color: $text-primary;
+  }
+}
+
+.pos-bars {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pos-row {
+  align-items: center;
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: 40px 1fr 48px;
+}
+
+.pos-bar {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.pos-fill {
+  background: $gold-accent;
+  display: block;
+  height: 100%;
+  transition: width 400ms ease;
+}
+
+.pos-share {
+  color: $text-secondary;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }

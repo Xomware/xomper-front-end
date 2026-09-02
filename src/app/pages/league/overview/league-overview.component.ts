@@ -27,6 +27,23 @@ export interface PowerRow {
   isMine: boolean
 }
 
+/**
+ * League-wide numbers.
+ *
+ * Everything here comes from the rosters, users and value book the power
+ * rankings already fetch, so the extra depth costs no extra requests.
+ */
+interface LeagueSummary {
+  teams: number
+  totalValue: number
+  averageValue: number
+  /** Top roster over bottom roster. A league at 1.2 is close; at 3 it is not. */
+  spread: number
+  strongest: { team: string; position: string }
+  deepest: { team: string; bench: number }
+  positionShare: Array<{ position: string; share: number }>
+}
+
 interface DeeperLink {
   label: string
   hint: string
@@ -60,6 +77,12 @@ export class LeagueOverviewComponent implements OnInit {
   leagueId = ''
 
   rows: PowerRow[] = []
+
+  /** Which section of the overview is showing. */
+  tab: 'league' | 'power' | 'chat' = 'league'
+
+  /** League-wide numbers, from the same fetch the rankings use. */
+  summary: LeagueSummary | null = null
 
   readonly deeper: DeeperLink[] = [
     { label: 'Standings', hint: 'Records and ranks', route: '/league/standings' },
@@ -111,6 +134,7 @@ export class LeagueOverviewComponent implements OnInit {
         next: ([rosters, users, book, playerMap]) => {
           const analyses = this.teamAnalysisService.build(rosters, users, playerMap, book)
           this.rows = this.rank(analyses)
+          this.summary = this.summarise(analyses)
           this.loading = false
         },
         error: (err) => {
@@ -157,6 +181,48 @@ export class LeagueOverviewComponent implements OnInit {
     ]
     const sorted = groups.sort((x, y) => y[1] - x[1])
     return which === 'max' ? sorted[0][0] : sorted[sorted.length - 1][0]
+  }
+
+  private summarise(analyses: TeamAnalysis[]): LeagueSummary | null {
+    if (!analyses.length) return null
+
+    const totals = analyses.map((a) => totalValue(a)).sort((x, y) => y - x)
+    const total = totals.reduce((sum, v) => sum + v, 0)
+    const bottom = totals[totals.length - 1]
+
+    const positions: Array<[string, (a: TeamAnalysis) => number]> = [
+      ['QB', (a) => a.qbValue],
+      ['RB', (a) => a.rbValue],
+      ['WR', (a) => a.wrValue],
+      ['TE', (a) => a.teValue],
+    ]
+
+    const starterTotal = positions.reduce(
+      (sum, [, read]) => sum + analyses.reduce((s, a) => s + read(a), 0),
+      0,
+    )
+
+    const best = analyses.reduce((top, a) => (totalValue(a) > totalValue(top) ? a : top))
+    const deepest = analyses.reduce((top, a) =>
+      (a.benchValue ?? 0) > (top.benchValue ?? 0) ? a : top,
+    )
+
+    return {
+      teams: analyses.length,
+      totalValue: total,
+      averageValue: total / analyses.length,
+      // Guarded: a league where the bottom roster prices at zero would
+      // otherwise report an infinite spread.
+      spread: bottom > 0 ? totals[0] / bottom : 0,
+      strongest: { team: best.teamName, position: this.extreme(best, 'max') },
+      deepest: { team: deepest.teamName, bench: deepest.benchValue ?? 0 },
+      positionShare: positions.map(([position, read]) => ({
+        position,
+        share: starterTotal
+          ? analyses.reduce((sum, a) => sum + read(a), 0) / starterTotal
+          : 0,
+      })),
+    }
   }
 
   go(route: string): void {
