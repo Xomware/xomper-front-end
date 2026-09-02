@@ -5,7 +5,7 @@
  * picking the wrong format for a league, and giving a player someone else's
  * number through a sloppy name match. Both are pinned here.
  */
-import { adpFormatFor, adpByName, adpKey, AdpSnapshot } from './adp.service'
+import { adpFormatFor, adpByName, adpKey, isDynastyLeague, AdpSnapshot } from './adp.service'
 import { DraftSettings } from '../models/draft.interface'
 
 function settings(over: Partial<DraftSettings> = {}): DraftSettings {
@@ -51,6 +51,43 @@ describe('adpFormatFor', () => {
 
   it('returns null without settings', () => {
     expect(adpFormatFor(null, { rec: 1 })).toBeNull()
+  })
+})
+
+describe('isDynastyLeague', () => {
+  it('reads Sleeper league type', () => {
+    expect(isDynastyLeague({ type: 0 })).toBe(false)
+    expect(isDynastyLeague({ type: 1 })).toBe(true)
+    expect(isDynastyLeague({ type: 2 })).toBe(true)
+  })
+
+  it('defaults to dynasty when type is absent', () => {
+    // Must match league-settings-fingerprint.service.ts. If the two disagree a
+    // league gets dynasty values under redraft ADP - the original bug, hidden.
+    expect(isDynastyLeague({})).toBe(true)
+    expect(isDynastyLeague(null)).toBe(true)
+  })
+})
+
+describe('adpFormatFor and dynasty', () => {
+  it('serves dynasty ADP to a dynasty league', () => {
+    // Rookies go rounds earlier in dynasty, so redraft numbers are not an
+    // approximation here - they are wrong for the players the format is about.
+    expect(adpFormatFor(settings(), { rec: 1 }, true)).toBe('dynasty')
+  })
+
+  it('prefers dynasty over superflex', () => {
+    // FFC has no dynasty-superflex set. Dynasty is the bigger distortion, so it
+    // wins and the precision loss is accepted.
+    expect(adpFormatFor(settings({ slots_qb: 2 }), { rec: 1 }, true)).toBe('dynasty')
+  })
+
+  it('still returns null for TE premium in a dynasty league', () => {
+    expect(adpFormatFor(settings(), { rec: 1, bonus_rec_te: 0.5 }, true)).toBeNull()
+  })
+
+  it('leaves redraft leagues alone', () => {
+    expect(adpFormatFor(settings(), { rec: 1 }, false)).toBe('ppr')
   })
 })
 
