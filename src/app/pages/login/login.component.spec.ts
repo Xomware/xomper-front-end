@@ -18,6 +18,7 @@ function build(options: { signInError?: Partial<Error>; signUpUsername?: string 
   const router = { navigate: jasmine.createSpy('navigate') }
   const cognito = {
     isReady$: of(true),
+    isAuthenticated$: of(false),
     isAuthenticated: () => false,
     signIn: () =>
       signInError ? throwError(() => Object.assign(new Error(), signInError)) : of({}),
@@ -132,5 +133,97 @@ describe('LoginComponent signup and verification', () => {
     expect(component.authMode).toBe('verify')
 
     localStorage.setItem = original
+  })
+})
+
+/**
+ * Reported live: "sign in with google kept saying failed to start sign in
+ * then randomly signed me in".
+ *
+ * Two separate causes. Amplify's signInWithRedirect calls
+ * assertUserNotAuthenticated and throws when a session already exists, which
+ * the Google handler reported as a generic failure. And the page sampled auth
+ * once on ready, so a session resolving later (the redirect landing back here
+ * and firing a Hub event) left the user sitting on the login page while
+ * actually signed in.
+ */
+import { Subject } from 'rxjs'
+
+describe('LoginComponent Google sign-in', () => {
+  function build(options: { signInError?: Partial<Error>; authed$?: Subject<boolean> } = {}) {
+    const { signInError, authed$ } = options
+    const router = { navigate: jasmine.createSpy('navigate') }
+    const toasts = {
+      showPositiveToast: jasmine.createSpy('pos'),
+      showNegativeToast: jasmine.createSpy('neg'),
+    }
+    const cognito = {
+      isReady$: of(true),
+      isAuthenticated$: authed$ ?? of(false),
+      isAuthenticated: () => false,
+      signInWithGoogle: () =>
+        signInError ? throwError(() => Object.assign(new Error(), signInError)) : of(undefined),
+    }
+    const component = new LoginComponent(cognito as never, router as never, toasts as never)
+    return { component, router, toasts }
+  }
+
+  it('takes an already-signed-in user home instead of claiming failure', () => {
+    const { component, router, toasts } = build({
+      signInError: { name: 'UserAlreadyAuthenticatedException' },
+    })
+
+    component.signInWithGoogle()
+
+    // "Failed to start sign in" is the opposite of what happened.
+    expect(toasts.showNegativeToast).not.toHaveBeenCalled()
+    expect(router.navigate).toHaveBeenCalledWith(['/home'])
+    expect(component.loading).toBe(false)
+  })
+
+  it('still reports a genuine failure to start', () => {
+    const { component, toasts, router } = build({
+      signInError: { name: 'NetworkError' },
+    })
+
+    component.signInWithGoogle()
+
+    expect(toasts.showNegativeToast).toHaveBeenCalledWith('Failed to start sign in')
+    expect(router.navigate).not.toHaveBeenCalled()
+  })
+
+  it('navigates when the session resolves after init, not only on ready', () => {
+    const authed$ = new Subject<boolean>()
+    const { component, router } = build({ authed$ })
+
+    component.ngOnInit()
+    expect(router.navigate).not.toHaveBeenCalled()
+
+    // The redirect lands back here and Amplify's Hub event resolves auth a
+    // moment later. Sampling once on ready missed this entirely.
+    authed$.next(true)
+
+    expect(router.navigate).toHaveBeenCalledWith(['/home'])
+  })
+
+  it('does not navigate while still signed out', () => {
+    const authed$ = new Subject<boolean>()
+    const { component, router } = build({ authed$ })
+
+    component.ngOnInit()
+    authed$.next(false)
+
+    expect(router.navigate).not.toHaveBeenCalled()
+  })
+
+  it('stops watching once destroyed', () => {
+    const authed$ = new Subject<boolean>()
+    const { component, router } = build({ authed$ })
+
+    component.ngOnInit()
+    component.ngOnDestroy()
+    authed$.next(true)
+
+    expect(router.navigate).not.toHaveBeenCalled()
   })
 })

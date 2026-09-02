@@ -92,12 +92,16 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cognito.isReady$
       .pipe(filter((ready) => ready), take(1), takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.checkingAuth = false
-        if (this.cognito.isAuthenticated()) {
-          this.router.navigate(['/home'])
-        }
-      })
+      .subscribe(() => (this.checkingAuth = false))
+
+    // Watched, not sampled once. A Google redirect lands back here and
+    // resolves through a Hub event some time after init, so a single check
+    // on ready saw "signed out", stopped listening, and left the user on the
+    // login page while actually authenticated -- until any later navigation
+    // let them in, which reads as being signed in at random.
+    this.cognito.isAuthenticated$
+      .pipe(filter((authed) => authed), take(1), takeUntil(this.destroy$))
+      .subscribe(() => this.router.navigate(['/home']))
   }
 
   ngOnDestroy(): void {
@@ -152,8 +156,17 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loading = true
     this.cognito.signInWithGoogle().pipe(take(1)).subscribe({
       // The page navigates away on success, so there is nothing to do here.
-      error: () => {
+      error: (err) => {
         this.loading = false
+
+        // Amplify's signInWithRedirect refuses to start when a session
+        // already exists (assertUserNotAuthenticated). That is not a
+        // failure to report -- the user is signed in, so take them in.
+        if (err?.name === 'UserAlreadyAuthenticatedException') {
+          this.router.navigate(['/home'])
+          return
+        }
+
         this.toastService.showNegativeToast('Failed to start sign in')
       },
     })
