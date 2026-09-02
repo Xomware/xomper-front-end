@@ -49,6 +49,61 @@ export class TeamComponent implements OnInit {
   selectedPlayer: PlayerModel | null = null
   POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
+  /** Field or list. Remembered, because it is a reading preference. */
+  view: 'field' | 'list' = 'field'
+
+  /**
+   * Starters laid out as a formation.
+   *
+   * Grouped by position rather than by the league's roster slots: Sleeper
+   * gives slot order in `roster_positions`, but a FLEX holding a WR should
+   * still stand among the receivers on a field. Position is what a reader is
+   * actually looking for.
+   */
+  get formation(): Array<{ label: string; players: PlayerModel[] }> {
+    const rows: Array<{ label: string; match: (p: PlayerModel) => boolean }> = [
+      { label: 'Backfield', match: (p) => p.position === 'QB' || p.position === 'RB' },
+      { label: 'Receivers', match: (p) => p.position === 'WR' || p.position === 'TE' },
+      { label: 'Special', match: (p) => p.position === 'K' || p.position === 'DEF' },
+    ]
+
+    const placed = new Set<string>()
+    const out = rows.map((row) => {
+      const players = this.starters.filter((p) => row.match(p))
+      players.forEach((p) => placed.add(p.player_id))
+      return { label: row.label, players }
+    })
+
+    // Anything the rows do not name still has to appear; an IDP league would
+    // otherwise lose half its lineup off the field.
+    const rest = this.starters.filter((p) => !placed.has(p.player_id))
+    if (rest.length) out.push({ label: 'Other', players: rest })
+
+    return out.filter((row) => row.players.length)
+  }
+
+  setView(view: 'field' | 'list'): void {
+    this.view = view
+    try {
+      localStorage.setItem('xomper.teamView', view)
+    } catch {
+      // Private browsing throws; a remembered preference is not worth failing
+      // over.
+    }
+  }
+
+  private restoreView(): void {
+    let stored: string | null = null
+    try {
+      stored = localStorage.getItem('xomper.teamView')
+    } catch {
+      // See setView.
+    }
+    // Set both ways rather than only on a hit, so this states the default
+    // instead of depending on the field initialiser having run.
+    this.view = stored === 'list' ? 'list' : 'field'
+  }
+
   constructor(
     private toastService: ToastService,
     private teamService: TeamService,
@@ -59,6 +114,7 @@ export class TeamComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.restoreView()
     if (this.mode === 'my') {
       this.team = this.teamService.getMyTeam()!
     } else {

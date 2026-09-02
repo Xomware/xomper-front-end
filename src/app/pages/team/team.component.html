@@ -114,8 +114,63 @@
 
     <!-- Starters -->
     <div class="player-group" *ngIf="starters.length > 0">
-      <h2 class="group-title">Starters</h2>
-      <div class="roster">
+      <div class="group-head">
+        <h2 class="group-title">Starters</h2>
+        <div class="view-toggle" role="group" aria-label="Starter layout">
+          <button
+            type="button"
+            class="view-btn"
+            [class.view-btn--active]="view === 'field'"
+            [attr.aria-pressed]="view === 'field'"
+            (click)="setView('field')"
+          >
+            Field
+          </button>
+          <button
+            type="button"
+            class="view-btn"
+            [class.view-btn--active]="view === 'list'"
+            [attr.aria-pressed]="view === 'list'"
+            (click)="setView('list')"
+          >
+            List
+          </button>
+        </div>
+      </div>
+
+      <!-- Formation: a lineup reads faster as a shape than as a list of
+           identical cards. -->
+      <div class="field" *ngIf="view === 'field'">
+        <div class="field-row" *ngFor="let row of formation">
+          <span class="field-row-label">{{ row.label }}</span>
+          <div class="field-slots">
+            <a
+              class="chip"
+              *ngFor="let player of row.players"
+              [routerLink]="['/player', player.player_id]"
+              [attr.data-position]="player.position"
+              [title]="player.full_name"
+            >
+              <img
+                [src]="
+                  player.photoError
+                    ? 'assets/img/luke.PNG'
+                    : 'https://sleepercdn.com/content/nfl/players/thumb/' +
+                      player.player_id + '.jpg'
+                "
+                (error)="player.photoError = true"
+                alt=""
+                class="chip-pic"
+              />
+              <span class="chip-pos">{{ player.position }}</span>
+              <span class="chip-name">{{ player.full_name }}</span>
+              <span class="chip-team">{{ player.team || 'FA' }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="roster" *ngIf="view === 'list'">
         <ng-container *ngFor="let player of starters">
           <ng-container *ngTemplateOutlet="playerCard; context: { $implicit: player }"></ng-container>
         </ng-container>

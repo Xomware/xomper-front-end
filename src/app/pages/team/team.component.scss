@@ -294,3 +294,125 @@
     outline-offset: 2px;
   }
 }
+
+.group-head {
+  align-items: center;
+  display: flex;
+  gap: $spacing-md;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+}
+
+.view-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border: none;
+  color: $text-secondary;
+  cursor: pointer;
+  font: inherit;
+  padding: 5px 12px;
+
+  &--active {
+    background: rgba($champion-gold, 0.15);
+    color: $champion-gold;
+  }
+}
+
+// Yard lines, drawn rather than pictured: an image would fight the theme and
+// cost a request for something that is four gradients.
+.field {
+  background:
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.05) 0 1px,
+      transparent 1px 10%
+    ),
+    linear-gradient(180deg, rgba($champion-gold, 0.05), transparent 60%),
+    rgba(255, 255, 255, 0.015);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: $spacing-lg;
+  padding: $spacing-lg $spacing-md;
+}
+
+.field-row {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.field-row-label {
+  color: $text-secondary;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.field-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  justify-content: center;
+}
+
+.chip {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: $text-primary;
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: $spacing-sm;
+  text-decoration: none;
+  transition: transform 160ms ease, border-color 160ms ease;
+  width: 104px;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba($champion-gold, 0.5);
+    transform: translateY(-3px);
+  }
+
+  &[data-position='QB'] { border-top: 2px solid #ff6b7a; }
+  &[data-position='RB'] { border-top: 2px solid #4dd4ac; }
+  &[data-position='WR'] { border-top: 2px solid #5aa9ff; }
+  &[data-position='TE'] { border-top: 2px solid #ffb454; }
+  &[data-position='K'],
+  &[data-position='DEF'] { border-top: 2px solid #b18cff; }
+}
+
+.chip-pic {
+  border-radius: $radius-full;
+  height: 44px;
+  object-fit: cover;
+  width: 44px;
+}
+
+.chip-pos {
+  color: $text-secondary;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+.chip-name {
+  font-size: 0.78rem;
+  line-height: 1.15;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.chip-team {
+  color: $text-secondary;
+  font-size: 0.65rem;
+}
