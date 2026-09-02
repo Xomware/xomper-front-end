@@ -91,6 +91,79 @@
 
     <p class="stats-note" *ngIf="statsLoading">Reading your seasons…</p>
 
+
+    <!-- What actually happened. Read on demand: seventeen weeks per season
+         per league is a lot of requests to spend before anyone asks. -->
+    <section class="stats" *ngIf="userLeagues.length">
+      <h2 class="stats-title">Best and worst</h2>
+
+      <div class="hl-pick" *ngIf="!highlights && !highlightsLoading">
+        <p class="stats-hint">Pick a league to read its weeks.</p>
+        <div class="hl-buttons">
+          <button
+            type="button"
+            class="btn"
+            *ngFor="let league of userLeagues"
+            (click)="loadHighlights(league)"
+          >
+            {{ league.getDisplayName() }}
+          </button>
+        </div>
+      </div>
+
+      <p class="stats-note" *ngIf="highlightsLoading">
+        Reading every week of {{ highlightsLeague }}…
+      </p>
+
+      <ng-container *ngIf="highlights as h">
+        <p class="stats-hint">
+          {{ highlightsLeague }} · {{ h.weeksRead }} weeks played
+        </p>
+
+        <div class="hl-empty" *ngIf="!h.weeksRead">
+          <p>No weeks played in this league yet.</p>
+        </div>
+
+        <div class="hl-cols" *ngIf="h.weeksRead">
+          <div class="hl-col" *ngIf="h.bestPlayerWeeks.length">
+            <h3 class="hl-title">Biggest player weeks</h3>
+            <ul class="hl-list">
+              <li class="hl-row" *ngFor="let p of h.bestPlayerWeeks">
+                <span class="hl-name">{{ playerNames[p.playerId] || p.playerId }}</span>
+                <span class="hl-when">{{ p.season }} wk {{ p.week }}</span>
+                <span class="hl-points">{{ p.points | number: '1.1-1' }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="hl-col" *ngIf="h.bestTeamWeeks.length">
+            <h3 class="hl-title">Your biggest weeks</h3>
+            <ul class="hl-list">
+              <li class="hl-row" *ngFor="let w of h.bestTeamWeeks">
+                <span class="hl-name">Week {{ w.week }}</span>
+                <span class="hl-when">{{ w.season }}</span>
+                <span class="hl-points">{{ w.points | number: '1.1-1' }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="hl-col" *ngIf="h.worstDecisions.length">
+            <h3 class="hl-title">Left on the bench</h3>
+            <ul class="hl-list">
+              <li class="hl-row hl-row--miss" *ngFor="let m of h.worstDecisions">
+                <span class="hl-name">
+                  {{ playerNames[m.benchedId] || m.benchedId }}
+                  <span class="hl-over">over {{ playerNames[m.startedId] || m.startedId }}</span>
+                </span>
+                <span class="hl-when">{{ m.season }} wk {{ m.week }}</span>
+                <span class="hl-points hl-points--miss">+{{ m.margin | number: '1.1-1' }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+
     <!-- League Section Header -->
     <h2 class="leagues-title">{{ season }} Leagues</h2>
 

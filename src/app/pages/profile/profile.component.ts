@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { take } from 'rxjs'
+import { switchMap, take } from 'rxjs'
 import { UserService } from 'src/app/services/user.service'
 import { getCurrentSeason } from 'src/app/constants/season'
 import { ToastService } from 'src/app/services/toast.service'
@@ -8,6 +8,10 @@ import { LeagueService } from 'src/app/services/league.service'
 import { UserModel } from 'src/app/models/user.model'
 import { LeagueModel } from 'src/app/models/league.model'
 import { ProfileStatsService, ProfileStats } from 'src/app/services/profile-stats.service'
+import {
+  SeasonHighlightsService,
+  SeasonHighlights,
+} from 'src/app/services/season-highlights.service'
 import { PlayerService } from 'src/app/services/player.service'
 import { DecimalPipe } from '@angular/common'
 import { LoaderComponent } from '../../components/loader/loader.component';
@@ -35,10 +39,16 @@ export class ProfileComponent implements OnInit {
   /** playerId -> display name, for the ownership list. */
   playerNames: Record<string, string> = {}
 
+  highlights: SeasonHighlights | null = null
+  highlightsLoading = false
+  /** Which league the highlights were read from. */
+  highlightsLeague = ''
+
   /** Sleeper rolls the season over in spring, so this is not the calendar year. */
   readonly season = getCurrentSeason()
 
   constructor(
+    private highlightsService: SeasonHighlightsService,
     private profileStats: ProfileStatsService,
     private playerService: PlayerService,
     private userService: UserService,
@@ -131,6 +141,57 @@ export class ProfileComponent implements OnInit {
         for (const owned of stats.mostOwned) {
           const meta = map[owned.playerId] as { full_name?: string } | undefined
           this.playerNames[owned.playerId] = meta?.full_name ?? owned.playerId
+        }
+      })
+  }
+
+  /**
+   * Best weeks and worst start-sits, for one league.
+   *
+   * Deliberately not the whole portfolio: this reads seventeen weeks per
+   * season per league, so a career sweep is hundreds of requests. One league
+   * at a time is a page load; all of them is a stall.
+   */
+  loadHighlights(league: LeagueModel): void {
+    const user = this.user
+    if (!user || this.highlightsLoading) return
+
+    this.highlightsLoading = true
+    this.highlightsLeague = league.getDisplayName()
+
+    this.leagueService
+      .getLeagueChain(league.getId())
+      .pipe(
+        take(1),
+        switchMap((chain) => this.highlightsService.forLeagueChain(chain, user.getUserId())),
+        take(1),
+      )
+      .subscribe({
+        next: (highlights) => {
+          this.highlights = highlights
+          this.highlightsLoading = false
+          this.resolveHighlightNames(highlights)
+        },
+        error: () => (this.highlightsLoading = false),
+      })
+  }
+
+  private resolveHighlightNames(highlights: SeasonHighlights): void {
+    const ids = new Set<string>()
+    highlights.bestPlayerWeeks.forEach((p) => ids.add(p.playerId))
+    highlights.worstDecisions.forEach((m) => {
+      ids.add(m.benchedId)
+      ids.add(m.startedId)
+    })
+    if (!ids.size) return
+
+    this.playerService
+      .getPlayerMap()
+      .pipe(take(1))
+      .subscribe((map) => {
+        for (const id of ids) {
+          const meta = map[id] as { full_name?: string } | undefined
+          this.playerNames[id] = meta?.full_name ?? id
         }
       })
   }

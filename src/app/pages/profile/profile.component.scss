@@ -315,3 +315,71 @@
   // room and let the numbers stay narrow.
   grid-template-columns: 80px minmax(0, 1fr) 110px 100px;
 }
+
+.hl-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.hl-cols {
+  display: grid;
+  gap: $spacing-md;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.hl-col {
+  @include xomper-card;
+  padding: $spacing-md;
+}
+
+.hl-title {
+  font-size: 0.9rem;
+  margin: 0 0 $spacing-sm;
+}
+
+.hl-list {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hl-row {
+  align-items: baseline;
+  display: grid;
+  gap: $spacing-sm;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.hl-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hl-over {
+  color: $text-secondary;
+  font-size: 0.78rem;
+}
+
+.hl-when {
+  color: $text-secondary;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hl-points {
+  font-variant-numeric: tabular-nums;
+
+  // A miss is a cost, so it should not read like a high score.
+  &--miss {
+    color: $accent-red;
+  }
+}
+
+.hl-empty {
+  color: $text-secondary;
+}
