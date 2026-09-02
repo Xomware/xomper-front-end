@@ -1,5 +1,6 @@
 import { Component } from '@angular/core'
 import { LandingOverviewCardComponent } from './cards/landing-overview-card/landing-overview-card.component'
+import { LandingCareerCardComponent } from './cards/landing-career-card/landing-career-card.component'
 import { LandingHeadlineCardComponent } from './cards/landing-headline-card/landing-headline-card.component'
 import { LandingDraftCountdownCardComponent } from './cards/landing-draft-countdown-card/landing-draft-countdown-card.component'
 import { LandingAnnouncementsCardComponent } from './cards/landing-announcements-card/landing-announcements-card.component'
@@ -19,6 +20,7 @@ import { LandingThisWeekCardComponent } from './cards/landing-this-week-card/lan
   standalone: true,
   imports: [
     LandingOverviewCardComponent,
+    LandingCareerCardComponent,
     LandingHeadlineCardComponent,
     LandingDraftCountdownCardComponent,
     LandingAnnouncementsCardComponent,

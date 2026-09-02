@@ -1,0 +1,42 @@
+<section class="career" *ngIf="stats && stats.career.seasons">
+  <header class="career-head">
+    <h2 class="career-title">Your record</h2>
+    <a class="career-link" routerLink="/profile">Full profile</a>
+  </header>
+
+  <div class="career-grid">
+    <div class="career-stat">
+      <span class="career-value">{{ shown.wins }}-{{ shown.losses }}</span>
+      <span class="career-label">All time</span>
+    </div>
+    <div class="career-stat" *ngIf="winRate !== null">
+      <span class="career-value">{{ winRate * 100 | number: '1.0-1' }}%</span>
+      <span class="career-label">Win rate</span>
+    </div>
+    <div class="career-stat">
+      <span class="career-value">{{ shown.seasons }}</span>
+      <span class="career-label">Seasons</span>
+    </div>
+    <div class="career-stat">
+      <span class="career-value">{{ shown.leagues }}</span>
+      <span class="career-label">Leagues</span>
+    </div>
+  </div>
+
+  <div class="owned" *ngIf="topOwned.length">
+    <h3 class="owned-title">Players you keep drafting</h3>
+    <ul class="owned-list">
+      <li class="owned-item" *ngFor="let owned of topOwned; let i = index">
+        <span class="owned-name">{{ playerNames[owned.playerId] || owned.playerId }}</span>
+        <span class="owned-track" aria-hidden="true">
+          <span
+            class="owned-fill"
+            [style.width.%]="owned.share * 100"
+            [style.animation-delay.ms]="i * 70"
+          ></span>
+        </span>
+        <span class="owned-count">{{ owned.leagues }}</span>
+      </li>
+    </ul>
+  </div>
+</section>
