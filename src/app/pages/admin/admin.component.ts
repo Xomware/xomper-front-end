@@ -2,24 +2,25 @@ import { Component } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router, RouterModule } from '@angular/router'
 
-interface AdminTile {
+interface AdminTab {
   label: string
   subtitle: string
   /** SVG path data, not emoji — emoji are not used in Xomware product UI. */
   iconPath: string
   route: string | null
-  /** Logs tile is deferred per D-D. */
+  /** Logs is deferred per D-D. */
   disabled?: boolean
 }
 
 /**
- * Admin shell — 8-tile menu mirroring iOS AdminView.
- * Accessible only via AdminGuard (/admin). Each tile navigates to a
- * nested child route. Logs tile is disabled ("Coming soon") per D-D.
+ * Admin shell — a tab bar over the section currently open.
  *
- * PR 7a ships: AI Review, Test Email, Email Archive tiles (active).
- * PR 7b ships: Announcements, Tables, Audit, Cron (active) — routes already
- * registered in app-routing but components land in 7b.
+ * This was a grid of nine cards that filled the screen, so every section was
+ * two navigations away: back to the menu, then into the next one. As tabs the
+ * sections sit above whichever one is open and switching is one click, which
+ * is how a portal someone works in all day should behave.
+ *
+ * Accessible only via AdminGuard. Logs is disabled ("Coming soon") per D-D.
  */
 @Component({
   selector: 'app-admin',
@@ -29,7 +30,7 @@ interface AdminTile {
   styleUrls: ['./admin.component.scss'],
 })
 export class AdminComponent {
-  readonly tiles: AdminTile[] = [
+  readonly tabs: AdminTab[] = [
     {
       label: 'AI Review',
       subtitle: 'Trigger + preview reports',
@@ -89,8 +90,18 @@ export class AdminComponent {
 
   constructor(private router: Router) {}
 
-  navigate(tile: AdminTile): void {
-    if (tile.disabled || !tile.route) return
-    this.router.navigate([tile.route])
+  navigate(tab: AdminTab): void {
+    if (tab.disabled || !tab.route) return
+    this.router.navigate([tab.route])
+  }
+
+  /** True when the tab's section is the one on screen. */
+  isActive(tab: AdminTab): boolean {
+    return !!tab.route && this.router.url.startsWith(tab.route)
+  }
+
+  /** No section open yet, so the shell shows what the portal covers. */
+  get atRoot(): boolean {
+    return this.router.url === '/admin'
   }
 }
