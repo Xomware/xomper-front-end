@@ -85,13 +85,16 @@ export class SidebarComponent {
   }
 
   /**
-   * Switch the app to another league.
+   * Switch the app to another league, staying on the page you are reading.
    *
    * Everything cached in LeagueService is scoped to one league — rosters, the
    * season chain, resolved ids, the current team — so it all has to go, or
-   * the new league renders with the old one's data under its name. Navigating
-   * to /home rather than staying put avoids re-entering a page mid-load with
-   * its inputs pulled out from under it.
+   * the new league renders with the old one's data under its name.
+   *
+   * Re-navigating through a throwaway URL rather than calling navigate() with
+   * the same path: Angular reuses a component when the route does not change,
+   * so the page would keep the old league's already-rendered data. This
+   * forces it to build again and re-read the new selection.
    */
   selectLeague(league: FollowedLeague): void {
     this.leagueMenuOpen = false
@@ -99,8 +102,27 @@ export class SidebarComponent {
 
     this.follows.select(league.leagueId)
     this.leagueService.clearForLeagueSwitch()
-    this.router.navigate(['/home'])
+
+    const target = this.pageToReturnTo()
+    this.router
+      .navigateByUrl('/', { skipLocationChange: true })
+      .then(() => this.router.navigateByUrl(target))
     this.onEntryClick()
+  }
+
+  /**
+   * Where to land after a switch.
+   *
+   * Usually right back where you were. The exception is a page pinned to one
+   * league by its own URL — /selected-league?leagueId=, /team-analyzer/:id —
+   * which is about that league specifically, not about whichever is selected.
+   * Reloading it would show the old league under the new league's name.
+   */
+  private pageToReturnTo(): string {
+    const url = this.router.url
+    const pinned =
+      url.includes('leagueId=') || /\/team-analyzer\/[^/?]+/.test(url)
+    return pinned ? '/home' : url
   }
 
   get visibleSections(): SidebarSection[] {
