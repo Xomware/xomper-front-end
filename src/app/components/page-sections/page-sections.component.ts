@@ -54,17 +54,33 @@ export class PageSectionsComponent implements AfterViewInit, OnDestroy {
   activeId = ''
 
   private observer: IntersectionObserver | null = null
+  private mutations: MutationObserver | null = null
 
   constructor(private host: ElementRef<HTMLElement>) {}
 
   ngAfterViewInit(): void {
-    // A tick late: the sections are rendered by the page around this
-    // component, and on first paint some are still resolving.
-    setTimeout(() => this.collect(), 0)
+    // The sections around this component arrive with their data, well after
+    // first paint -- collecting once found only whatever had rendered
+    // already, which on the profile was the league list and nothing else.
+    setTimeout(() => {
+      this.collect()
+      this.watchForSections()
+    }, 0)
   }
 
   ngOnDestroy(): void {
     this.observer?.disconnect()
+    this.mutations?.disconnect()
+  }
+
+  /** Re-collect when the page grows a section. */
+  private watchForSections(): void {
+    if (typeof MutationObserver === 'undefined') return
+    const root = this.scope ? document.querySelector(this.scope) : null
+    if (!root) return
+
+    this.mutations = new MutationObserver(() => this.collect())
+    this.mutations.observe(root, { childList: true, subtree: true })
   }
 
   private collect(): void {

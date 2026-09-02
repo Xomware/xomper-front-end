@@ -28,8 +28,12 @@ describe('SeasonHighlightsService', () => {
   function build(rows: unknown, rosters: unknown = [{ owner_id: 'me', roster_id: 1 }]) {
     const leagues = {
       findLeagueRosters: () => of(rosters),
+      // getLeagueMatchups pairs rosters for the matchup view; the service
+      // has to flatten them back out.
       getLeagueMatchups: () =>
-        rows === 'error' ? throwError(() => new Error('gone')) : of(rows),
+        rows === 'error'
+          ? throwError(() => new Error('gone'))
+          : of((rows as unknown[]).map((row) => ({ teamA: row, teamB: { roster_id: 99 } }))),
     }
     return new SeasonHighlightsService(leagues as never)
   }
@@ -141,6 +145,31 @@ describe('SeasonHighlightsService', () => {
       .subscribe((h) => {
         const margins = h.worstDecisions.map((m) => m.margin)
         expect(margins).toEqual([...margins].sort((a, b) => b - a))
+        done()
+      })
+  })
+})
+
+
+describe('SeasonHighlightsService matchup shape', () => {
+  it('reads a roster from the far side of a pair', (done) => {
+    const leagues = {
+      findLeagueRosters: () => of([{ owner_id: 'me', roster_id: 7 }]),
+      getLeagueMatchups: () =>
+        of([
+          {
+            teamA: { roster_id: 1, points: 50, players: ['x'], starters: ['x'], players_points: { x: 50 } },
+            teamB: { roster_id: 7, points: 90, players: ['a'], starters: ['a'], players_points: { a: 90 } },
+          },
+        ]),
+    }
+    const service = new SeasonHighlightsService(leagues as never)
+
+    service
+      .forLeagueChain([{ getId: () => 'L', season: '2025' }] as never, 'me')
+      .subscribe((h) => {
+        // Whichever side of the pair you are on, it is still your week.
+        expect(h.bestTeamWeeks[0].points).toBe(90)
         done()
       })
   })

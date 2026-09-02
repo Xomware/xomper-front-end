@@ -86,3 +86,33 @@ describe('PageSectionsComponent', () => {
     expect(() => c.ngOnDestroy()).not.toThrow()
   })
 })
+
+describe('PageSectionsComponent late sections', () => {
+  let root: HTMLElement
+
+  afterEach(() => root?.remove())
+
+  it('picks up a section that renders after it', (done) => {
+    root = document.createElement('div')
+    root.className = 'late-scope'
+    root.innerHTML = '<h2>First</h2>'
+    document.body.appendChild(root)
+
+    const component = new PageSectionsComponent({
+      nativeElement: { ownerDocument: document },
+    } as never)
+    component.scope = '.late-scope'
+    component.ngAfterViewInit()
+
+    setTimeout(() => {
+      // Stats sections arrive with their data, well after first paint.
+      root.insertAdjacentHTML('beforeend', '<h2>Second</h2>')
+
+      setTimeout(() => {
+        expect(component.sections.map((s) => s.label)).toEqual(['First', 'Second'])
+        component.ngOnDestroy()
+        done()
+      }, 30)
+    }, 10)
+  })
+})

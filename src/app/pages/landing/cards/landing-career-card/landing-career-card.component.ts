@@ -1,11 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { NgFor, NgIf, DecimalPipe } from '@angular/common'
 import { RouterLink } from '@angular/router'
-import { take } from 'rxjs/operators'
+import { of } from 'rxjs'
+import { catchError, map, switchMap, take } from 'rxjs/operators'
 import { LeagueFollowsService } from 'src/app/services/league-follows.service'
 import { PlayerService } from 'src/app/services/player.service'
 import { ProfileStatsService, ProfileStats } from 'src/app/services/profile-stats.service'
 import { UserService } from 'src/app/services/user.service'
+import { LeagueModel } from 'src/app/models/league.model'
 
 /**
  * Your record across every league, on the way in.
@@ -50,21 +52,30 @@ export class LandingCareerCardComponent implements OnInit, OnDestroy {
       return
     }
 
-    // FollowedLeague is the sidebar's shape; the stats service wants the
-    // league models, which UserService already resolved for the profile.
-    const models = me.getUserLeagues()
-    if (!models.length) {
-      this.loading = false
-      return
-    }
+    // getUserLeagues() is only populated once the profile page has fetched
+    // them, so on a cold landing it is empty and this card rendered nothing.
+    // Fetch when it is.
+    const cached = me.getUserLeagues()
+    const leagues$ = cached.length
+      ? of(cached)
+      : this.users.findUserLeagues(me.getUserId()).pipe(
+          map((rows) => rows.map((row) => new LeagueModel(row))),
+          catchError(() => of([] as LeagueModel[])),
+        )
 
-    this.profileStats
-      .forUser(me.getUserId(), models)
+    leagues$
+      .pipe(
+        take(1),
+        switchMap((models) =>
+          models.length ? this.profileStats.forUser(me.getUserId(), models) : of(null),
+        ),
+      )
       .pipe(take(1))
       .subscribe({
         next: (stats) => {
-          this.stats = stats
           this.loading = false
+          if (!stats) return
+          this.stats = stats
           this.countUp(stats)
           this.resolveNames(stats)
         },
