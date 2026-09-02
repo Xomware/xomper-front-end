@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core'
-import { NgIf, NgFor } from '@angular/common'
+import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common'
 import { forkJoin, take } from 'rxjs'
 import { LeagueService } from 'src/app/services/league.service'
 import { ToastService } from 'src/app/services/toast.service'
@@ -12,14 +12,14 @@ import { LoaderComponent } from '../../../components/loader/loader.component'
   templateUrl: './playoffs.component.html',
   styleUrls: ['./playoffs.component.scss'],
   standalone: true,
-  imports: [LoaderComponent, NgIf, NgFor],
+  imports: [LoaderComponent, NgIf, NgFor, NgTemplateOutlet],
 })
 export class PlayoffsComponent implements OnInit {
   loading = false
   winnersBracket: PlayoffBracketMatch[] = []
   losersBracket: PlayoffBracketMatch[] = []
-  bracketRounds: { round: number; matches: PlayoffBracketMatch[] }[] = []
-  loserRounds: { round: number; matches: PlayoffBracketMatch[] }[] = []
+  bracketRounds: { round: number; label: string; matches: PlayoffBracketMatch[] }[] = []
+  loserRounds: { round: number; label: string; matches: PlayoffBracketMatch[] }[] = []
   playoffsLoaded = false
   private standings: StandingsTeamModel[] = []
   private leagueId = ''
@@ -30,10 +30,12 @@ export class PlayoffsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const league = this.leagueService.getMyLeague()
-    if (!league) return
-    this.leagueId = league.getId()
-    this.standings = league.getStandingsTeams()
+    // getActiveLeagueId, not getMyLeague: the latter is whichever league
+    // loaded first, so this read the wrong league's bracket after a switch.
+    const leagueId = this.leagueService.getActiveLeagueId()
+    if (!leagueId) return
+    this.leagueId = leagueId
+    this.standings = this.leagueService.getMyLeague()?.getStandingsTeams() ?? []
     this.loadPlayoffBracket()
   }
 
@@ -60,17 +62,35 @@ export class PlayoffsComponent implements OnInit {
       })
   }
 
+  /**
+   * Name the round from the end backwards.
+   *
+   * "Round 3" tells a reader nothing; "Final" and "Semifinal" tell them where
+   * they are. Numbered only when a bracket is deep enough that names run out.
+   */
+  private labelForRound(round: number, total: number): string {
+    const fromEnd = total - round
+    if (fromEnd === 0) return 'Final'
+    if (fromEnd === 1) return 'Semifinal'
+    if (fromEnd === 2) return 'Quarterfinal'
+    return `Round ${round}`
+  }
+
   private groupBracketByRound(
     matches: PlayoffBracketMatch[],
-  ): { round: number; matches: PlayoffBracketMatch[] }[] {
+  ): { round: number; label: string; matches: PlayoffBracketMatch[] }[] {
     const roundMap = new Map<number, PlayoffBracketMatch[]>()
     matches.forEach((m) => {
       if (!roundMap.has(m.r)) roundMap.set(m.r, [])
       roundMap.get(m.r)!.push(m)
     })
-    return Array.from(roundMap.entries())
-      .map(([round, matches]) => ({ round, matches }))
-      .sort((a, b) => a.round - b.round)
+    const rounds = Array.from(roundMap.entries()).sort((a, b) => a[0] - b[0])
+    const last = rounds.length ? rounds[rounds.length - 1][0] : 0
+    return rounds.map(([round, matches]) => ({
+      round,
+      label: this.labelForRound(round, last),
+      matches,
+    }))
   }
 
   getTeamName(rosterId: number | null): string {
@@ -83,6 +103,22 @@ export class PlayoffsComponent implements OnInit {
     if (!rosterId) return 'assets/img/nfl.png'
     const team = this.standings.find((s) => s.roster.roster_id === rosterId)
     return team?.avatar || 'assets/img/nfl.png'
+  }
+
+  /** Nothing has been played, so the bracket is a shape with no teams in it. */
+  get bracketIsEmpty(): boolean {
+    return !this.bracketRounds.length && !this.loserRounds.length
+  }
+
+  /**
+   * A slot with no team yet.
+   *
+   * Sleeper fills `t1`/`t2` as earlier rounds resolve, so mid-playoffs half
+   * the bracket is legitimately blank -- that is a slot waiting on a winner,
+   * not missing data.
+   */
+  isPending(rosterId: number | null): boolean {
+    return !rosterId
   }
 
   getBracketMatchLabel(match: PlayoffBracketMatch): string {
