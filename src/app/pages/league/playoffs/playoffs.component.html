@@ -1,54 +1,82 @@
-<app-loader [loading]="loading"></app-loader>
+<app-loader [loading]="loading" message="Building the bracket"></app-loader>
 
-<div class="bracket-container" *ngIf="playoffsLoaded">
-  <!-- Winners Bracket -->
-  <h2 class="bracket-title">Winners Bracket</h2>
+<div class="empty-state" *ngIf="playoffsLoaded && bracketIsEmpty">
+  <p>No bracket yet.</p>
+  <p class="hint">It appears once the regular season ends and seeding is set.</p>
+</div>
+
+<ng-template #bracketTemplate let-rounds="rounds" let-showSeeds="showSeeds">
+  <!-- Rounds are columns and each match is centred against the pair that
+       feeds it, so the shape carries the progression without a caption. -->
   <div class="bracket">
-    <div class="bracket-round" *ngFor="let roundData of bracketRounds">
-      <div class="round-label">Round {{ roundData.round }}</div>
-      <div class="round-matches">
+    <section class="round" *ngFor="let roundData of rounds; let roundIndex = index">
+      <h3 class="round-label">{{ roundData.label }}</h3>
+
+      <div class="round-body">
         <div
-          class="bracket-match"
+          class="match"
           *ngFor="let match of roundData.matches"
-          [class.championship]="match.p === 1"
+          [class.match--final]="match.p === 1"
         >
-          <div class="match-label" *ngIf="getBracketMatchLabel(match)">
+          <span class="match-tag" *ngIf="getBracketMatchLabel(match)">
             {{ getBracketMatchLabel(match) }}
+          </span>
+
+          <div
+            class="slot"
+            [class.slot--won]="match.w === match.t1"
+            [class.slot--out]="match.w && match.w !== match.t1"
+            [class.slot--pending]="isPending(match.t1)"
+          >
+            <img
+              *ngIf="!isPending(match.t1)"
+              [src]="getTeamAvatar(match.t1)"
+              class="slot-pic"
+              alt=""
+            />
+            <span class="slot-name">{{ getTeamName(match.t1) }}</span>
+            <span class="slot-seed" *ngIf="showSeeds && roundIndex === 0 && match.t1">
+              {{ match.t1 }}
+            </span>
           </div>
-          <div class="bracket-team" [class.winner]="match.w === match.t1" [class.loser]="match.w && match.w !== match.t1">
-            <img [src]="getTeamAvatar(match.t1)" class="bracket-team-pic" alt="" />
-            <span class="bracket-team-name">{{ getTeamName(match.t1) }}</span>
-            <span class="bracket-seed" *ngIf="roundData.round === 1 && match.t1">{{ match.t1 }}</span>
-          </div>
-          <div class="bracket-team" [class.winner]="match.w === match.t2" [class.loser]="match.w && match.w !== match.t2">
-            <img [src]="getTeamAvatar(match.t2)" class="bracket-team-pic" alt="" />
-            <span class="bracket-team-name">{{ getTeamName(match.t2) }}</span>
-            <span class="bracket-seed" *ngIf="roundData.round === 1 && match.t2">{{ match.t2 }}</span>
+
+          <div
+            class="slot"
+            [class.slot--won]="match.w === match.t2"
+            [class.slot--out]="match.w && match.w !== match.t2"
+            [class.slot--pending]="isPending(match.t2)"
+          >
+            <img
+              *ngIf="!isPending(match.t2)"
+              [src]="getTeamAvatar(match.t2)"
+              class="slot-pic"
+              alt=""
+            />
+            <span class="slot-name">{{ getTeamName(match.t2) }}</span>
+            <span class="slot-seed" *ngIf="showSeeds && roundIndex === 0 && match.t2">
+              {{ match.t2 }}
+            </span>
           </div>
         </div>
       </div>
-    </div>
+    </section>
+  </div>
+</ng-template>
+
+<div class="playoffs" *ngIf="playoffsLoaded && !bracketIsEmpty">
+  <h2 class="bracket-title">Championship</h2>
+  <div class="bracket-scroll">
+    <ng-container
+      *ngTemplateOutlet="bracketTemplate; context: { rounds: bracketRounds, showSeeds: true }"
+    ></ng-container>
   </div>
 
-  <!-- Losers Bracket -->
-  <div *ngIf="loserRounds.length > 0">
-    <h2 class="bracket-title consolation">Consolation Bracket</h2>
-    <div class="bracket">
-      <div class="bracket-round" *ngFor="let roundData of loserRounds">
-        <div class="round-label">Round {{ roundData.round }}</div>
-        <div class="round-matches">
-          <div class="bracket-match" *ngFor="let match of roundData.matches">
-            <div class="bracket-team" [class.winner]="match.w === match.t1" [class.loser]="match.w && match.w !== match.t1">
-              <img [src]="getTeamAvatar(match.t1)" class="bracket-team-pic" alt="" />
-              <span class="bracket-team-name">{{ getTeamName(match.t1) }}</span>
-            </div>
-            <div class="bracket-team" [class.winner]="match.w === match.t2" [class.loser]="match.w && match.w !== match.t2">
-              <img [src]="getTeamAvatar(match.t2)" class="bracket-team-pic" alt="" />
-              <span class="bracket-team-name">{{ getTeamName(match.t2) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+  <ng-container *ngIf="loserRounds.length">
+    <h2 class="bracket-title bracket-title--consolation">Consolation</h2>
+    <div class="bracket-scroll">
+      <ng-container
+        *ngTemplateOutlet="bracketTemplate; context: { rounds: loserRounds, showSeeds: false }"
+      ></ng-container>
     </div>
-  </div>
+  </ng-container>
 </div>

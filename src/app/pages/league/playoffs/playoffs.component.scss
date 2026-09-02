@@ -1,140 +1,140 @@
 @import 'styles/variables';
 @import 'styles/mixins';
+@import 'styles/theme';
 
-.bracket-container {
-  padding: $spacing-md 0;
+.empty-state {
+  padding: $spacing-xl 0;
+  text-align: center;
+
+  .hint {
+    color: $text-secondary;
+  }
 }
 
 .bracket-title {
-  font-family: $font-display;
-  font-size: $text-2xl;
-  letter-spacing: $tracking-wide;
-  color: $champion-gold;
-  text-align: center;
-  margin-bottom: $spacing-lg;
+  font-size: 1.15rem;
+  margin: $spacing-lg 0 $spacing-sm;
 
-  &.consolation {
+  &--consolation {
     color: $text-secondary;
-    margin-top: $spacing-2xl;
   }
+}
+
+// A bracket is wider than a phone and that is fine. Scrolling it beats
+// stacking the rounds, which loses the progression the shape exists to show.
+.bracket-scroll {
+  overflow-x: auto;
+  padding-bottom: $spacing-sm;
 }
 
 .bracket {
+  align-items: stretch;
   display: flex;
-  gap: $spacing-lg;
-  overflow-x: auto;
-  padding: $spacing-md;
-  align-items: flex-start;
+  gap: $spacing-xl;
+  min-width: min-content;
 }
 
-.bracket-round {
+.round {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
-  min-width: 220px;
+  min-width: 200px;
 }
 
 .round-label {
-  font-family: $font-display;
-  font-size: $text-base;
-  letter-spacing: $tracking-wide;
   color: $text-secondary;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  margin: 0 0 $spacing-sm;
   text-transform: uppercase;
-  text-align: center;
-  margin-bottom: $spacing-sm;
 }
 
-.round-matches {
+// Matches spread evenly down the column, so a round with half as many games
+// sits centred against the pair feeding it without any hardcoded offsets.
+.round-body {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
   justify-content: space-around;
-  min-height: 100%;
 }
 
-.bracket-match {
-  background: rgba($dark-navy, 0.6);
-  border: 1px solid rgba($surface-light, 0.3);
-  border-radius: $radius-md;
-  overflow: hidden;
+.match {
+  @include xomper-card;
+  padding: $spacing-sm;
+  position: relative;
 
-  &.championship {
+  &--final {
     border-color: rgba($champion-gold, 0.5);
-    box-shadow: 0 0 12px rgba($champion-gold, 0.15);
+  }
+
+  // The connector out of each match toward the next round.
+  .round:not(:last-child) &::after {
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    content: '';
+    left: 100%;
+    position: absolute;
+    top: 50%;
+    width: $spacing-xl;
   }
 }
 
-.match-label {
-  text-align: center;
-  font-family: $font-display;
-  font-size: $text-sm;
-  letter-spacing: $tracking-wide;
+.match-tag {
   color: $champion-gold;
-  padding: 4px;
-  background: rgba($champion-gold, 0.1);
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
 }
 
-.bracket-team {
-  display: flex;
+.slot {
   align-items: center;
+  border-radius: 6px;
+  display: flex;
   gap: $spacing-sm;
-  padding: 10px $spacing-md;
-  transition: background-color $transition-fast;
+  padding: 6px;
 
-  &:first-of-type {
-    border-bottom: 1px solid rgba($surface-light, 0.2);
+  & + & {
+    margin-top: 4px;
   }
 
-  &.winner {
-    background: rgba($success-green, 0.12);
+  &--won {
+    background: rgba($champion-gold, 0.12);
 
-    .bracket-team-name {
-      color: $success-green;
-      font-weight: $font-weight-bold;
+    .slot-name {
+      color: $text-primary;
+      font-weight: 600;
     }
   }
 
-  &.loser {
-    opacity: 0.6;
+  &--out .slot-name {
+    color: $text-secondary;
+    opacity: 0.65;
+  }
+
+  // Waiting on an earlier round, not missing data.
+  &--pending .slot-name {
+    color: $text-secondary;
+    font-style: italic;
   }
 }
 
-.bracket-team-pic {
-  width: 28px;
-  height: 28px;
+.slot-pic {
   border-radius: $radius-full;
+  height: 22px;
   object-fit: cover;
-  border: 1px solid $surface-light;
-  flex-shrink: 0;
+  width: 22px;
 }
 
-.bracket-team-name {
-  font-size: $text-sm;
-  font-weight: $font-weight-medium;
-  color: $text-primary;
+.slot-name {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.bracket-seed {
-  font-size: $text-xs;
-  font-family: $font-mono;
-  color: $text-muted;
-  background: rgba($surface-light, 0.2);
-  padding: 2px 6px;
-  border-radius: $radius-sm;
-}
-
-// Mobile
-@media (max-width: 768px) {
-  .bracket {
-    gap: $spacing-md;
-    padding: $spacing-sm;
-  }
-
-  .bracket-round {
-    min-width: 180px;
-  }
+.slot-seed {
+  color: $text-secondary;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
 }
