@@ -331,16 +331,14 @@ export const routes: Routes = [
   // /draft-history/:currentSeason/live (or picks for past seasons).
   { path: 'draft-history', component: DraftHistoryComponent, canActivate: [AuthGuard] },
 
-  // Top-level entry point for the live draft, which was previously reachable
-  // only by opening Draft History and finding the tab. DraftHistoryComponent
-  // resolves the current season and lands on its live sub-tab, so this
-  // redirect ends up at /draft-history/:season/live -- an honest URL, at the
-  // cost of routerLinkActive tracking the resolved path rather than this one.
-  { path: 'live-draft', redirectTo: 'draft-history', pathMatch: 'full' },
-
-  // Mark-off is top level, not a Draft History sub-tab. It is a live tool for a
-  // draft happening now, and Draft History is scoped by year — nesting it there
-  // meant a season in the URL that the component never read.
+  // Live Draft is its own page, not a tab inside Draft History. Clicking
+  // "Live Draft" and landing on a page headed "Draft History" -- with year
+  // chips for seasons already finished -- read as the wrong destination,
+  // because it was.
+  // Mark-off stays reachable but off the main nav. It is the fallback for a
+  // draft happening somewhere Sleeper cannot see -- offline, or another
+  // platform -- so it belongs beside the live draft that could not find one,
+  // not as a top-level tool competing with it.
   {
     path: 'mark-off',
     canActivate: [AuthGuard],
@@ -349,18 +347,21 @@ export const routes: Routes = [
         (m) => m.ManualDraftComponent,
       ),
   },
+
+  {
+    path: 'live-draft',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./pages/draft-history/live/draft-live.component').then(
+        (m) => m.DraftLiveComponent,
+      ),
+  },
+
   {
     path: 'draft-history/:year',
     component: DraftHistoryComponent,
     canActivate: [AuthGuard],
     children: [
-      {
-        path: 'live',
-        loadComponent: () =>
-          import('./pages/draft-history/live/draft-live.component').then(
-            (m) => m.DraftLiveComponent,
-          ),
-      },
       {
         path: 'picks',
         loadComponent: () =>
@@ -383,7 +384,7 @@ export const routes: Routes = [
           ),
       },
       // Default sub-tab: DraftHistoryComponent.ngOnInit redirects per isCurrentSeason
-      { path: '', redirectTo: 'live', pathMatch: 'full' },
+      { path: '', redirectTo: 'picks', pathMatch: 'full' },
     ],
   },
 
