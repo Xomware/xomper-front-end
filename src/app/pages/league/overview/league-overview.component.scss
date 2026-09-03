@@ -165,30 +165,40 @@
   font-size: $text-xs;
 }
 
+// A rail under the whole row, so the active tab's underline sits on a line
+// that exists rather than floating under one word.
 .ov-tabs {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
-  gap: 4px;
+  gap: $spacing-xs;
   margin-bottom: $spacing-md;
   overflow-x: auto;
 }
 
+// One metaphor, not two: every tab is text on the rail. The grey boxes made
+// the inactive tabs read as buttons and the active one as something else.
 .ov-tab {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px 8px 0 0;
+  background: none;
   border: none;
   border-bottom: 2px solid transparent;
   color: $text-secondary;
   cursor: pointer;
   flex: 0 0 auto;
   font: inherit;
-  padding: 8px 14px;
+  margin-bottom: -1px;
+  padding: 9px 4px;
+
+  & + & {
+    margin-left: $spacing-md;
+  }
 
   &:hover {
     color: $text-primary;
   }
 
+  // No fill: the underline already says which one is active, and a tinted
+  // box behind it says it twice.
   &--active {
-    background: rgba($champion-gold, 0.1);
     border-bottom-color: $champion-gold;
     color: $champion-gold;
   }
