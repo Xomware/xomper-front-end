@@ -113,6 +113,9 @@ const ICONS = {
 export const SIDEBAR_ICONS = ICONS
 
 export const SIDEBAR_SECTIONS: SidebarSection[] = [
+  // Seven entries under one heading is a list you scan rather than a menu
+  // you read. Split by what someone is actually doing: looking around the
+  // league, or at a draft.
   {
     title: 'Play',
     entries: [
@@ -131,6 +134,11 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         svg: ICONS.standings,
         route: '/league/standings',
       },
+    ],
+  },
+  {
+    title: 'Week',
+    entries: [
       {
         label: 'Matchups',
         svg: ICONS.matchups,
@@ -141,6 +149,11 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         svg: ICONS.playoffs,
         route: '/league/playoffs',
       },
+    ],
+  },
+  {
+    title: 'Draft',
+    entries: [
       {
         label: 'Live Draft',
         svg: ICONS.liveDraft,
@@ -150,7 +163,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         label: 'Draft History',
         svg: ICONS.draftHistory,
         route: '/draft-history',
-        // s4 restructures
       },
     ],
   },
@@ -171,19 +183,6 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
         label: 'Trades',
         svg: ICONS.trades,
         route: '/trades',
-      },
-    ],
-  },
-  {
-    title: 'League',
-    entries: [
-      {
-        label: 'Draft Order',
-        svg: ICONS.draftOrder,
-        route: '/league/draft-order',
-        // Projected order for a draft that has not happened. Useful to an
-        // admin setting one up, noise for everyone else.
-        adminOnly: true,
       },
     ],
   },
