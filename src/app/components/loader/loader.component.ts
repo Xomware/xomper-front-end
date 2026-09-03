@@ -34,7 +34,7 @@ export class LoaderComponent implements OnChanges, OnDestroy {
   ngOnChanges(): void {
     if (this.loading && !this.holding) {
       this.holding = true
-      this.coordinator.claim(this.token)
+      this.coordinator.claim(this.token, () => this.cdr.markForCheck())
       return
     }
     if (!this.loading && this.holding) {
