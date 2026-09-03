@@ -11,35 +11,38 @@ describe('LoaderCoordinator', () => {
 
   beforeEach(() => (c = new LoaderCoordinator()))
 
-  it('paints only the first claimant', () => {
+  it('paints only the first claimant, once the wait has earned it', fakeAsync(() => {
     const shell = {}
     const child = {}
 
     c.claim(shell)
     c.claim(child)
+    tick(500)
 
     expect(c.isPrimary(shell)).toBe(true)
     expect(c.isPrimary(child)).toBe(false)
-  })
+  }))
 
-  it('promotes the next claimant when the first leaves', () => {
+  it('promotes the next claimant when the first leaves', fakeAsync(() => {
     const shell = {}
     const child = {}
     c.claim(shell)
     c.claim(child)
+    tick(500)
 
     c.release(shell)
 
     // The overlay stays up continuously rather than dropping and returning.
     expect(c.isPrimary(child)).toBe(true)
     expect(c.anyActive).toBe(true)
-  })
+  }))
 
   it('releases a nested claimant immediately', fakeAsync(() => {
     const shell = {}
     const child = {}
     c.claim(shell)
     c.claim(child)
+    tick(500)
     let settled = false
 
     c.releaseSoon(child, () => (settled = true))
@@ -53,6 +56,7 @@ describe('LoaderCoordinator', () => {
   it('holds the overlay briefly when the last claimant leaves', fakeAsync(() => {
     const shell = {}
     c.claim(shell)
+    tick(500)
     let settled = false
 
     c.releaseSoon(shell, () => (settled = true))
@@ -68,6 +72,7 @@ describe('LoaderCoordinator', () => {
     const shell = {}
     const child = {}
     c.claim(shell)
+    tick(500)
     c.releaseSoon(shell, () => undefined)
 
     // This is the handoff: the shell finished a tick before the child route
@@ -84,12 +89,59 @@ describe('LoaderCoordinator', () => {
     expect(c.isPrimary({})).toBe(false)
   })
 
-  it('ignores a repeated claim from the same loader', () => {
+  it('never paints for a wait that resolves quickly', fakeAsync(() => {
+    const page = {}
+
+    c.claim(page)
+    tick(200)
+    c.release(page)
+    tick(500)
+
+    // 500-700ms of full-screen overlay on a league page reads as the screen
+    // flashing, not as work happening.
+    expect(c.anyActive).toBe(false)
+    expect(c.isPrimary(page)).toBe(false)
+  }))
+
+  it('paints for a wait that actually drags', fakeAsync(() => {
+    const page = {}
+
+    c.claim(page)
+    tick(500)
+
+    expect(c.anyActive).toBe(true)
+    expect(c.isPrimary(page)).toBe(true)
+  }))
+
+  it('does not restart the clock on a handoff', fakeAsync(() => {
+    const shell = {}
+    const child = {}
+
+    c.claim(shell)
+    tick(500)
+    c.claim(child)
+
+    // Already visible; a second claimant must not blink it off and on.
+    expect(c.anyActive).toBe(true)
+  }))
+
+  it('tells the caller when it becomes visible', fakeAsync(() => {
+    let shown = false
+
+    c.claim({}, () => (shown = true))
+    expect(shown).toBe(false)
+
+    tick(500)
+    expect(shown).toBe(true)
+  }))
+
+  it('ignores a repeated claim from the same loader', fakeAsync(() => {
     const shell = {}
     c.claim(shell)
     c.claim(shell)
+    tick(500)
     c.release(shell)
 
     expect(c.anyActive).toBe(false)
-  })
+  }))
 })
