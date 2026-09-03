@@ -52,6 +52,8 @@ export class PlayoffsComponent implements OnInit {
           this.losersBracket = losers as PlayoffBracketMatch[]
           this.bracketRounds = this.groupBracketByRound(this.winnersBracket)
           this.loserRounds = this.groupBracketByRound(this.losersBracket)
+          this.winnersPlacements = this.placementsIn(this.winnersBracket)
+          this.losersPlacements = this.placementsIn(this.losersBracket)
           this.playoffsLoaded = true
           this.loading = false
         },
@@ -76,11 +78,36 @@ export class PlayoffsComponent implements OnInit {
     return `Round ${round}`
   }
 
+  /**
+   * A match that decides a placing rather than who advances.
+   *
+   * `p` is the place a match settles: 1 is the championship, 3 and 5 are the
+   * consolation games played alongside it.
+   */
+  private isPlacement(match: PlayoffBracketMatch): boolean {
+    return match.p !== undefined && match.p !== 1
+  }
+
+  /**
+   * Placement games, flattened out of the rounds.
+   *
+   * They used to sit inside the round columns, which is what stopped this
+   * looking like a bracket: a semifinal has to sit centred between the two
+   * quarterfinals feeding it, and a 5th-place game in the same column pushes
+   * everything off that line.
+   */
+  winnersPlacements: PlayoffBracketMatch[] = []
+  losersPlacements: PlayoffBracketMatch[] = []
+
+  private placementsIn(matches: PlayoffBracketMatch[]): PlayoffBracketMatch[] {
+    return matches.filter((m) => this.isPlacement(m)).sort((a, b) => (a.p ?? 0) - (b.p ?? 0))
+  }
+
   private groupBracketByRound(
     matches: PlayoffBracketMatch[],
   ): { round: number; label: string; matches: PlayoffBracketMatch[] }[] {
     const roundMap = new Map<number, PlayoffBracketMatch[]>()
-    matches.forEach((m) => {
+    matches.filter((m) => !this.isPlacement(m)).forEach((m) => {
       if (!roundMap.has(m.r)) roundMap.set(m.r, [])
       roundMap.get(m.r)!.push(m)
     })

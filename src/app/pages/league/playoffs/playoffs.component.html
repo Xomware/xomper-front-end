@@ -71,6 +71,10 @@
     ></ng-container>
   </div>
 
+  <ng-container
+    *ngTemplateOutlet="placementGames; context: { $implicit: winnersPlacements }"
+  ></ng-container>
+
   <ng-container *ngIf="loserRounds.length">
     <h2 class="bracket-title bracket-title--consolation">Consolation</h2>
     <div class="bracket-scroll">
@@ -79,4 +83,21 @@
       ></ng-container>
     </div>
   </ng-container>
+
+  <ng-template #placementGames let-games>
+    <div class="placements" *ngIf="games.length">
+      <div class="placement" *ngFor="let match of games">
+        <span class="placement-label">{{ getBracketMatchLabel(match) }}</span>
+        <div class="placement-teams">
+          <span class="placement-team">{{ getTeamName(match.t1) }}</span>
+          <span class="placement-vs">vs</span>
+          <span class="placement-team">{{ getTeamName(match.t2) }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-container
+    *ngTemplateOutlet="placementGames; context: { $implicit: losersPlacements }"
+  ></ng-container>
 </div>

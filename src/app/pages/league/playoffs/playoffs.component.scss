@@ -138,3 +138,83 @@
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
 }
+
+
+// A bracket reads as a tree only when a match sits centred between the two
+// it feeds from. That works with space-around once the placement games are
+// out of the columns -- they used to sit in here and push everything off the
+// line.
+.round-body {
+  justify-content: space-around;
+}
+
+.match {
+  // Stub out to the right, then the elbow that meets the next round.
+  .round:not(:last-child) &::after {
+    background: rgba(255, 255, 255, 0.18);
+    content: '';
+    height: 1px;
+    left: 100%;
+    position: absolute;
+    top: 50%;
+    width: $spacing-xl;
+  }
+
+  // Stub in from the left on every round after the first.
+  .round:not(:first-child) &::before {
+    background: rgba(255, 255, 255, 0.18);
+    content: '';
+    height: 1px;
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    width: $spacing-xl;
+  }
+}
+
+// The vertical run joining a pair of feeders. Drawn on the round rather than
+// the match so it can span the gap between two of them.
+.round:not(:last-child) .round-body::after {
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  content: '';
+  pointer-events: none;
+  position: absolute;
+}
+
+.round-body {
+  position: relative;
+}
+
+// Games that settle a place rather than who advances. Out of the columns,
+// under the bracket, where they do not distort it.
+.placements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.placement {
+  @include xomper-card;
+  padding: $spacing-sm $spacing-md;
+}
+
+.placement-label {
+  color: $text-secondary;
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.placement-teams {
+  align-items: baseline;
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.placement-vs {
+  color: $text-secondary;
+  font-size: 0.75rem;
+}
