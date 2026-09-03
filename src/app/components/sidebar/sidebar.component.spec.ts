@@ -162,7 +162,11 @@ describe('SidebarComponent account menu', () => {
       build({ profile: profile({ displayName: '', sleeperUsername: '' }) }).component
         .displayName,
     ).toBe('d@x.com')
-    expect(build({ profile: null }).component.displayName).toBe('My Profile')
+    // Empty, not a placeholder: "My Profile" then the real name is two
+    // writes in two seconds, which reads as glitching rather than loading.
+    const c = build({ profile: null }).component
+    expect(c.displayName).toBe('')
+    expect(c.identityReady).toBe(false)
   })
 })
 
@@ -179,7 +183,9 @@ describe('SidebarComponent league switcher', () => {
   }
 
   it('shows a placeholder when no league is selected', () => {
-    expect(build().component.selectedLeagueName).toBe('Select a league')
+    const sidebar = build().component
+    expect(sidebar.selectedLeagueName).toBe('')
+    expect(sidebar.leagueReady).toBe(false)
   })
 
   it('toggles the menu and stops the click reaching the document listener', () => {

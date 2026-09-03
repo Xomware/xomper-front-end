@@ -12,9 +12,11 @@
       >
         <div class="avatar" [ngClass]="{ 'avatar--placeholder': !avatarUrl }">
           <img *ngIf="avatarUrl" [src]="avatarUrl" alt="" />
-          <span *ngIf="!avatarUrl" class="avatar-initials">{{ displayName[0]?.toUpperCase() }}</span>
+          <span *ngIf="!avatarUrl && identityReady" class="avatar-initials">{{ displayName[0]?.toUpperCase() }}</span>
         </div>
-        <span class="profile-name">{{ displayName }}</span>
+        <span class="profile-name" [class.profile-name--waiting]="!identityReady">
+          {{ displayName }}
+        </span>
         <svg class="chevron" [class.chevron--open]="profileMenuOpen" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
         </svg>
@@ -102,7 +104,9 @@
       aria-haspopup="menu"
       aria-label="Switch league"
     >
-      <span class="league-name">{{ selectedLeagueName }}</span>
+      <span class="league-name" [class.league-name--waiting]="!leagueReady">
+        {{ selectedLeagueName }}
+      </span>
       <svg
         *ngIf="followedLeagues.length > 1"
         class="chevron"

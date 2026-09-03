@@ -468,3 +468,14 @@ ul {
     color: $champion-gold;
   }
 }
+
+// Hold the space while identity resolves rather than writing a placeholder
+// that gets replaced a beat later.
+.profile-name--waiting,
+.league-name--waiting {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  color: transparent;
+  min-height: 1em;
+  min-width: 92px;
+}
