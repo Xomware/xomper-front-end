@@ -57,8 +57,24 @@ export class SidebarComponent {
       this.profile?.displayName ||
       this.profile?.sleeperUsername ||
       this.profile?.email ||
-      'My Profile'
+      ''
     )
+  }
+
+  /**
+   * Whether identity has resolved.
+   *
+   * The profile arrives a beat after first paint, so a placeholder name meant
+   * the sidebar wrote "My Profile", then the real name, then the league --
+   * three different things in two seconds, which reads as the page glitching
+   * rather than loading. Hold the space instead.
+   */
+  get identityReady(): boolean {
+    return !!this.displayName
+  }
+
+  get leagueReady(): boolean {
+    return !!this.follows.selectedLeague
   }
 
   get avatarUrl(): string | null {
@@ -81,7 +97,7 @@ export class SidebarComponent {
   }
 
   get selectedLeagueName(): string {
-    return this.follows.selectedLeague?.name ?? 'Select a league'
+    return this.follows.selectedLeague?.name ?? ''
   }
 
   get availableSeasons(): string[] {
