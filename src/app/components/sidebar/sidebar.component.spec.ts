@@ -299,8 +299,9 @@ describe('SidebarComponent switching leagues', () => {
 
     // Angular reuses a component when the route does not change, so the page
     // would keep the old league's rendered data. The throwaway hop forces a
-    // rebuild.
-    expect(router.navigateByUrl.calls.first().args[0]).toBe('/')
+    // rebuild -- through a blank route, since '/' is the signed-out welcome
+    // page and bouncing through it flashed the marketing hero.
+    expect(router.navigateByUrl.calls.first().args[0]).toBe('/_reload')
     expect(router.navigateByUrl.calls.mostRecent().args[0]).toBe('/league/standings')
   })
 
@@ -384,5 +385,57 @@ describe('SidebarComponent season switcher', () => {
     // A new league has its own chain, so keeping the old list would offer
     // seasons it never played.
     expect(seasons.reset).toHaveBeenCalled()
+  })
+})
+
+
+describe('SidebarComponent league switch', () => {
+  function build() {
+    const navigations: string[] = []
+    const component = Object.create(SidebarComponent.prototype) as SidebarComponent
+    const fields = component as never as Record<string, unknown>
+    fields['follows'] = { selectedLeagueId: 'a', select: () => undefined }
+    fields['leagueService'] = { clearForLeagueSwitch: () => undefined }
+    fields['seasons'] = { reset: () => undefined }
+    fields['router'] = {
+      navigateByUrl: (url: string) => {
+        navigations.push(url)
+        return Promise.resolve(true)
+      },
+      url: '/league/standings',
+    }
+    fields['pageToReturnTo'] = () => '/league/standings'
+    fields['onEntryClick'] = () => undefined
+    return { component, navigations }
+  }
+
+  it('never bounces through the welcome page', async () => {
+    const { component, navigations } = build()
+
+    component.selectLeague({ leagueId: 'b' } as never)
+    await Promise.resolve()
+
+    // '/' renders the signed-out marketing hero, so bouncing through it made
+    // every league switch look like being logged out.
+    expect(navigations).not.toContain('/')
+    expect(navigations[0]).toBe('/_reload')
+  })
+
+  it('returns to the page you were on', async () => {
+    const { component, navigations } = build()
+
+    component.selectLeague({ leagueId: 'b' } as never)
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(navigations[1]).toBe('/league/standings')
+  })
+
+  it('does nothing when the league is already selected', () => {
+    const { component, navigations } = build()
+
+    component.selectLeague({ leagueId: 'a' } as never)
+
+    expect(navigations).toEqual([])
   })
 })

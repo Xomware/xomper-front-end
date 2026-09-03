@@ -143,9 +143,12 @@ export class SidebarComponent {
     this.leagueService.clearForLeagueSwitch()
     this.seasons.reset()
 
+    // Bounce through a blank route to remount the page. Going via '/' meant
+    // rendering the signed-out welcome page for a frame, so every switch
+    // flashed the marketing hero.
     const target = this.pageToReturnTo()
     this.router
-      .navigateByUrl('/', { skipLocationChange: true })
+      .navigateByUrl('/_reload', { skipLocationChange: true })
       .then(() => this.router.navigateByUrl(target))
     this.onEntryClick()
   }
