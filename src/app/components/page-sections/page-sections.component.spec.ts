@@ -183,3 +183,56 @@ describe('PageSectionsComponent does not loop', () => {
     expect(component.sections[0].label).toBe('New')
   })
 })
+
+describe('PageSectionsComponent on long pages', () => {
+  let root: HTMLElement
+
+  afterEach(() => root?.remove())
+
+  function collect(html: string, selector: string, scope: string) {
+    root = document.createElement('div')
+    root.className = scope.replace('.', '')
+    root.innerHTML = html
+    document.body.appendChild(root)
+
+    const c = new PageSectionsComponent({
+      nativeElement: { ownerDocument: document },
+    } as never)
+    c.headingSelector = selector
+    c.scope = scope
+    ;(c as never as { collect(): void }).collect()
+    return c
+  }
+
+  it('indexes a roster by group', () => {
+    const c = collect(
+      '<h2 class="group-title">Starters</h2><h2 class="group-title">Bench</h2><h2 class="group-title">Taxi Squad</h2>',
+      '.group-title',
+      '.team-container',
+    )
+
+    expect(c.sections.map((s) => s.label)).toEqual(['Starters', 'Bench', 'Taxi Squad'])
+  })
+
+  it('indexes a draft board by round', () => {
+    const rounds = Array.from(
+      { length: 16 },
+      (_, i) => `<h3 class="round-heading">Round ${i + 1}</h3>`,
+    ).join('')
+    const c = collect(rounds, '.round-heading', '.draft-live')
+
+    // Sixteen rounds is a long scroll mid-draft; jumping to one is the point.
+    expect(c.sections.length).toBe(16)
+    expect(c.sections[15].label).toBe('Round 16')
+  })
+
+  it('drops a group the roster filter emptied', () => {
+    const c = collect(
+      '<h2 class="group-title">Starters</h2>',
+      '.group-title',
+      '.team-container',
+    )
+
+    expect(c.sections.map((s) => s.label)).toEqual(['Starters'])
+  })
+})
