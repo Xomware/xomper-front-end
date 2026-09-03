@@ -14,7 +14,6 @@ import { LeagueService } from 'src/app/services/league.service'
 import { PlayerService } from 'src/app/services/player.service'
 import { NgStyle, NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
 import { LoaderComponent } from '../../components/loader/loader.component';
-import { PlayerModalComponent } from '../../components/player-modal/player-modal.component';
 import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
 import { FormsModule } from '@angular/forms'
 import { PageSectionsComponent } from 'src/app/components/page-sections/page-sections.component'
@@ -34,7 +33,6 @@ import { PageSectionsComponent } from 'src/app/components/page-sections/page-sec
         NgIf,
         NgFor,
         NgTemplateOutlet,
-        PlayerModalComponent,
         RouterLink,
     ],
 })
@@ -50,7 +48,6 @@ export class TeamComponent implements OnInit {
   taxi: PlayerModel[] = []
   teamLeague!: LeagueModel
   loading = false
-  selectedPlayer: PlayerModel | null = null
   POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
 
   /** Free-text filter across the whole roster. */
@@ -71,23 +68,35 @@ export class TeamComponent implements OnInit {
    * actually looking for.
    */
   get formation(): Array<{ label: string; players: PlayerModel[] }> {
+    return this.rowsFor(this.match(this.starters))
+  }
+
+  /** The bench, laid out the same way. A roster reads as one shape or none. */
+  get benchFormation(): Array<{ label: string; players: PlayerModel[] }> {
+    return this.rowsFor(this.match(this.bench))
+  }
+
+  get taxiFormation(): Array<{ label: string; players: PlayerModel[] }> {
+    return this.rowsFor(this.match(this.taxi))
+  }
+
+  private rowsFor(squad: PlayerModel[]): Array<{ label: string; players: PlayerModel[] }> {
     const rows: Array<{ label: string; match: (p: PlayerModel) => boolean }> = [
       { label: 'Backfield', match: (p) => p.position === 'QB' || p.position === 'RB' },
       { label: 'Receivers', match: (p) => p.position === 'WR' || p.position === 'TE' },
       { label: 'Special', match: (p) => p.position === 'K' || p.position === 'DEF' },
     ]
 
-    const starters = this.match(this.starters)
     const placed = new Set<string>()
     const out = rows.map((row) => {
-      const players = starters.filter((p) => row.match(p))
+      const players = squad.filter((p) => row.match(p))
       players.forEach((p) => placed.add(p.player_id))
       return { label: row.label, players }
     })
 
     // Anything the rows do not name still has to appear; an IDP league would
     // otherwise lose half its lineup off the field.
-    const rest = starters.filter((p) => !placed.has(p.player_id))
+    const rest = squad.filter((p) => !placed.has(p.player_id))
     if (rest.length) out.push({ label: 'Other', players: rest })
 
     return out.filter((row) => row.players.length)
@@ -282,14 +291,6 @@ export class TeamComponent implements OnInit {
         queryParams: { leagueId: leagueId, view: view },
       })
     }
-  }
-
-  openPlayerModal(player: PlayerModel, event: MouseEvent): void {
-    this.selectedPlayer = player
-  }
-
-  closePlayerModal(): void {
-    this.selectedPlayer = null
   }
 
   getTeamStyle(team: string | undefined): Record<string, string> {

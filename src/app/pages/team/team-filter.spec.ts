@@ -117,3 +117,71 @@ describe('TeamComponent roster filter', () => {
     expect(c.match(c.starters).length).toBe(1)
   })
 })
+
+/**
+ * "i like the starters veiw but bench should match"
+ *
+ * A roster reads as one shape or none. The bench and taxi were card grids
+ * while the starters were a field.
+ */
+describe('TeamComponent squad layouts', () => {
+  function build(starters: unknown[] = [], bench: unknown[] = [], taxi: unknown[] = []) {
+    const c = Object.create(TeamComponent.prototype) as TeamComponent
+    const f = c as never as Record<string, unknown>
+    f['starters'] = starters
+    f['bench'] = bench
+    f['taxi'] = taxi
+    f['filterText'] = ''
+    f['filterPosition'] = ''
+    return c
+  }
+
+  const p = (name: string, position: string) => ({
+    player_id: name,
+    full_name: name,
+    position,
+    team: 'CHI',
+  })
+
+  it('lays the bench out like the starters', () => {
+    const c = build([p('A', 'QB')], [p('B', 'RB'), p('C', 'WR')])
+
+    expect(c.benchFormation.map((r) => r.label)).toEqual(['Backfield', 'Receivers'])
+  })
+
+  it('lays the taxi squad out the same way', () => {
+    const c = build([], [], [p('D', 'TE')])
+
+    expect(c.taxiFormation.map((r) => r.label)).toEqual(['Receivers'])
+  })
+
+  it('drops rows nobody is standing in', () => {
+    const c = build([], [p('B', 'RB')])
+
+    expect(c.benchFormation.length).toBe(1)
+  })
+
+  it('keeps a position the rows do not name', () => {
+    const c = build([], [p('E', 'LB')])
+
+    // An IDP league would otherwise lose half its bench off the field.
+    expect(c.benchFormation.map((r) => r.label)).toEqual(['Other'])
+  })
+
+  it('applies the roster filter to the bench layout', () => {
+    const c = build([], [p('B', 'RB'), p('C', 'WR')])
+    c.filterPosition = 'WR'
+
+    expect(c.benchFormation.map((r) => r.label)).toEqual(['Receivers'])
+  })
+
+  it('gives an empty bench no rows', () => {
+    expect(build([p('A', 'QB')]).benchFormation).toEqual([])
+  })
+
+  it('still builds the starters formation', () => {
+    const c = build([p('A', 'QB'), p('B', 'WR')])
+
+    expect(c.formation.map((r) => r.label)).toEqual(['Backfield', 'Receivers'])
+  })
+})
