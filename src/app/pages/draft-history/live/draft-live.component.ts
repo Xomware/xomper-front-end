@@ -43,6 +43,7 @@ import {
   StrategyPreset,
 } from 'src/app/services/draft-assistant.service'
 import { ValueBook } from 'src/app/models/value-book.model'
+import { PageSectionsComponent } from 'src/app/components/page-sections/page-sections.component'
 
 type ViewMode = 'rounds' | 'board'
 type PickFilter = 'all' | 'mine'
@@ -85,7 +86,7 @@ const DRAFTABLE_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE'])
   templateUrl: './draft-live.component.html',
   styleUrls: ['./draft-live.component.scss'],
   standalone: true,
-  imports: [NowPanelComponent, LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, DecimalPipe, LowerCasePipe, RouterLink],
+  imports: [PageSectionsComponent, NowPanelComponent, LoaderComponent, NgIf, NgFor, NgClass, AsyncPipe, DecimalPipe, LowerCasePipe, RouterLink],
 })
 export class DraftLiveComponent implements OnInit {
   private destroyRef = inject(DestroyRef)

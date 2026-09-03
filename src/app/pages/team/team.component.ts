@@ -17,6 +17,7 @@ import { LoaderComponent } from '../../components/loader/loader.component';
 import { PlayerModalComponent } from '../../components/player-modal/player-modal.component';
 import { BackLinkComponent } from 'src/app/components/back-link/back-link.component'
 import { FormsModule } from '@angular/forms'
+import { PageSectionsComponent } from 'src/app/components/page-sections/page-sections.component'
 
 @Component({
     selector: 'app-team',
@@ -24,6 +25,7 @@ import { FormsModule } from '@angular/forms'
     styleUrls: ['./team.component.scss'],
     standalone: true,
     imports: [
+        PageSectionsComponent,
         FormsModule,
         BackLinkComponent,
         NgStyle,
