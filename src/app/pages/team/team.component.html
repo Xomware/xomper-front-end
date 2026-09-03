@@ -1,3 +1,35 @@
+<ng-template #fieldRows let-rows>
+  <div class="field">
+        <div class="field-row" *ngFor="let row of rows">
+          <span class="field-row-label">{{ row.label }}</span>
+          <div class="field-slots">
+            <a
+              class="chip"
+              *ngFor="let player of row.players"
+              [routerLink]="['/player', player.player_id]"
+              [attr.data-position]="player.position"
+              [title]="player.full_name"
+            >
+              <img
+                [src]="
+                  player.photoError
+                    ? 'assets/img/luke.PNG'
+                    : 'https://sleepercdn.com/content/nfl/players/thumb/' +
+                      player.player_id + '.jpg'
+                "
+                (error)="player.photoError = true"
+                alt=""
+                class="chip-pic"
+              />
+              <span class="chip-pos">{{ player.position }}</span>
+              <span class="chip-name">{{ player.full_name }}</span>
+              <span class="chip-team">{{ player.team || 'FA' }}</span>
+            </a>
+          </div>
+        </div>
+  </div>
+</ng-template>
+
 <!-- Reusable player card template -->
 <ng-template #playerCard let-player>
   <div
@@ -35,19 +67,33 @@
           />
         </div>
         <p class="player-meta">
-          {{ player.team || 'FA' }} * {{ player.position }} *
-          {{ player.number }}
+          {{ player.team || 'FA' }} · {{ player.position }}
+          <span *ngIf="player.number">· #{{ player.number }}</span>
         </p>
+        <dl class="player-stats">
+          <div class="player-stat" *ngIf="player.age">
+            <dt>Age</dt>
+            <dd>{{ player.age }}</dd>
+          </div>
+          <div class="player-stat" *ngIf="player.years_exp !== undefined && player.years_exp !== null">
+            <dt>Exp</dt>
+            <dd>{{ player.years_exp === 0 ? 'R' : player.years_exp }}</dd>
+          </div>
+          <div class="player-stat" *ngIf="player.injury_status">
+            <dt>Status</dt>
+            <dd class="player-stat--injury">{{ player.injury_status }}</dd>
+          </div>
+        </dl>
       </div>
     </div>
 
-    <button
+    <a
       class="view-more-btn"
       [ngStyle]="getTeamButtonStyle(player.team)"
-      (click)="openPlayerModal(player, $event)"
+      [routerLink]="['/player', player.player_id]"
     >
-      View More
-    </button>
+      Player details
+    </a>
   </div>
 </ng-template>
 
@@ -174,35 +220,11 @@
 
       <!-- Formation: a lineup reads faster as a shape than as a list of
            identical cards. -->
-      <div class="field" *ngIf="view === 'field'">
-        <div class="field-row" *ngFor="let row of formation">
-          <span class="field-row-label">{{ row.label }}</span>
-          <div class="field-slots">
-            <a
-              class="chip"
-              *ngFor="let player of row.players"
-              [routerLink]="['/player', player.player_id]"
-              [attr.data-position]="player.position"
-              [title]="player.full_name"
-            >
-              <img
-                [src]="
-                  player.photoError
-                    ? 'assets/img/luke.PNG'
-                    : 'https://sleepercdn.com/content/nfl/players/thumb/' +
-                      player.player_id + '.jpg'
-                "
-                (error)="player.photoError = true"
-                alt=""
-                class="chip-pic"
-              />
-              <span class="chip-pos">{{ player.position }}</span>
-              <span class="chip-name">{{ player.full_name }}</span>
-              <span class="chip-team">{{ player.team || 'FA' }}</span>
-            </a>
-          </div>
-        </div>
-      </div>
+      <ng-container
+        *ngIf="view === 'field'"
+        [ngTemplateOutlet]="fieldRows"
+        [ngTemplateOutletContext]="{ $implicit: formation }"
+      ></ng-container>
 
       <div class="roster" *ngIf="view === 'list'">
         <ng-container *ngFor="let player of match(starters)">
@@ -214,7 +236,12 @@
     <!-- Bench -->
     <div class="player-group" *ngIf="match(bench).length > 0">
       <h2 class="group-title">Bench</h2>
-      <div class="roster">
+      <ng-container
+        *ngIf="view === 'field'"
+        [ngTemplateOutlet]="fieldRows"
+        [ngTemplateOutletContext]="{ $implicit: benchFormation }"
+      ></ng-container>
+      <div class="roster" *ngIf="view === 'list'">
         <ng-container *ngFor="let player of match(bench)">
           <ng-container *ngTemplateOutlet="playerCard; context: { $implicit: player }"></ng-container>
         </ng-container>
@@ -224,7 +251,12 @@
     <!-- Taxi Squad -->
     <div class="player-group" *ngIf="match(taxi).length > 0">
       <h2 class="group-title">Taxi Squad</h2>
-      <div class="roster">
+      <ng-container
+        *ngIf="view === 'field'"
+        [ngTemplateOutlet]="fieldRows"
+        [ngTemplateOutletContext]="{ $implicit: taxiFormation }"
+      ></ng-container>
+      <div class="roster" *ngIf="view === 'list'">
         <ng-container *ngFor="let player of match(taxi)">
           <ng-container *ngTemplateOutlet="playerCard; context: { $implicit: player }"></ng-container>
         </ng-container>
@@ -233,9 +265,3 @@
   </div>
 </div>
 
-<app-player-modal
-  *ngIf="selectedPlayer"
-  [player]="selectedPlayer"
-  (close)="closePlayerModal()"
->
-</app-player-modal>

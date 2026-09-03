@@ -478,3 +478,41 @@
   color: $text-secondary;
   padding: $spacing-md 0;
 }
+
+// What you actually check when scanning a roster. The card showed a name and
+// a number and nothing you could act on.
+.player-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin: 6px 0 0;
+}
+
+.player-stat {
+  display: flex;
+  gap: 4px;
+
+  dt {
+    color: $text-secondary;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  dd {
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+
+  &--injury {
+    color: $accent-red;
+  }
+}
+
+// Was a button that opened a modal; the page it links to holds more than the
+// modal ever did.
+a.view-more-btn {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}

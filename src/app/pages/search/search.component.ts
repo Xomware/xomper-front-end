@@ -10,7 +10,6 @@ import { PlayerModel } from 'src/app/models/player.model'
 import { User } from 'src/app/models/user.interface'
 import { League } from 'src/app/models/league.interface'
 import { LoaderComponent } from '../../components/loader/loader.component'
-import { PlayerModalComponent } from '../../components/player-modal/player-modal.component'
 import { FormsModule } from '@angular/forms'
 import { NgIf, NgFor } from '@angular/common'
 import { RouterLink } from '@angular/router'
@@ -52,7 +51,6 @@ const MODE_CONFIG: Record<SearchMode, ModeConfig> = {
   standalone: true,
   imports: [
     LoaderComponent,
-    PlayerModalComponent,
     FormsModule,
     NgIf,
     NgFor, RouterLink],
@@ -70,7 +68,6 @@ export class SearchComponent {
   errorMessage = ''
   playerResults: PlayerModel[] = []
 
-  selectedPlayer: PlayerModel | null = null
 
   readonly modeConfig = MODE_CONFIG
 
@@ -94,7 +91,6 @@ export class SearchComponent {
     this.playerResults = []
     this.leagueResults = []
     this.foundUser = null
-    this.selectedPlayer = null
   }
 
   search(): void {
@@ -196,11 +192,4 @@ export class SearchComponent {
     })
   }
 
-  openPlayerModal(player: PlayerModel): void {
-    this.selectedPlayer = player
-  }
-
-  closePlayerModal(): void {
-    this.selectedPlayer = null
-  }
 }
