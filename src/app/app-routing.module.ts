@@ -19,6 +19,13 @@ import { LinkSleeperComponent } from './pages/link-sleeper/link-sleeper.componen
 export const routes: Routes = [
   // Public landing. This used to redirect straight to /home, which is
   // auth-gated, so every unauthenticated visitor hit a bare login form.
+  // Bounce target for the league switch. Renders nothing; see ReloadComponent.
+  {
+    path: '_reload',
+    loadComponent: () =>
+      import('./pages/reload/reload.component').then((m) => m.ReloadComponent),
+  },
+
   {
     path: '',
     pathMatch: 'full',
