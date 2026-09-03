@@ -88,7 +88,6 @@ export class LeagueOverviewComponent implements OnInit {
     { label: 'Standings', hint: 'Records and ranks', route: '/league/standings' },
     { label: 'Matchups', hint: 'Week by week', route: '/league/matchups' },
     { label: 'Playoffs', hint: 'The bracket', route: '/league/playoffs' },
-    { label: 'Draft Order', hint: 'Who picks when', route: '/league/draft-order' },
     { label: 'Team Analyzer', hint: 'Your roster by position', route: '/team-analyzer' },
     { label: 'Trades', hint: 'Grade a deal', route: '/trades' },
   ]

@@ -71,11 +71,25 @@ describe('draft entries', () => {
     expect(live?.route).toBe('/live-draft')
   })
 
-  it('keeps draft order to admins', () => {
-    const order = links.find((e) => e.route === '/league/draft-order')
+  it('has no draft order at all', () => {
+    // A projected order for next season is specific to how one league runs
+    // its draft. It came from the CLT app and belongs in the CLT app.
+    expect(links.find((e) => e.route === '/league/draft-order')).toBeUndefined()
+  })
 
-    // A projected order for a draft that has not happened is useful to an
-    // admin setting one up and noise for everyone else.
-    expect(order?.adminOnly).toBe(true)
+  it('splits play into sections a person can scan', () => {
+    const titles = SIDEBAR_SECTIONS.map((s) => s.title)
+
+    // Seven entries under one heading is a list you scan rather than a menu
+    // you read.
+    expect(titles).toContain('Week')
+    expect(titles).toContain('Draft')
+    expect(SIDEBAR_SECTIONS.find((s) => s.title === 'Play')?.entries.length).toBeLessThanOrEqual(4)
+  })
+
+  it('keeps both draft surfaces together', () => {
+    const draft = SIDEBAR_SECTIONS.find((s) => s.title === 'Draft')
+
+    expect(draft?.entries.map((e) => e.label)).toEqual(['Live Draft', 'Draft History'])
   })
 })
