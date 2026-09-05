@@ -655,6 +655,10 @@ export class DraftLiveComponent implements OnInit {
         next: (picks) => {
           this.lastPollAt = Date.now()
           this.pollError = null
+          if (picks.length > this.pickCount) {
+            this.pickCount = picks.length
+            this.lastPickAt = Date.now()
+          }
           draft.addPicks(picks)
           this.buildRounds(draft, picks)
           if (draft.status === 'complete') {
@@ -677,8 +681,56 @@ export class DraftLiveComponent implements OnInit {
    * Re-derived per tick. Proximity to the user's next pick belongs here too,
    * but that needs nextPickFor (#150) and is not worth duplicating.
    */
+  /**
+   * How long to wait before the next poll.
+   *
+   * `draft.status` is whatever it was when the page loaded, so a board opened
+   * before the draft started still said 'pre_draft' after it began and polled
+   * on the 30s pre-draft cadence through live picks. A pick landing recently
+   * is better evidence that a draft is live than a status read minutes ago.
+   */
+  /** Picks seen so far, to notice a new one without diffing the board. */
+  private pickCount = 0
+  private lastPickAt = 0
+
+  /** Poll now, for when the board is behind and you are on the clock. */
+  refreshNow(): void {
+    const draft = this.draft
+    if (!draft || this.refreshing) return
+
+    this.refreshing = true
+    this.draftService
+      .getDraftPicks(draft)
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (picks) => {
+          this.refreshing = false
+          this.lastPollAt = Date.now()
+          this.pollError = null
+          if (picks.length > this.pickCount) {
+            this.pickCount = picks.length
+            this.lastPickAt = Date.now()
+          }
+          draft.addPicks(picks)
+          this.buildRounds(draft, picks)
+        },
+        error: () => {
+          this.refreshing = false
+          this.pollError = 'Pick feed unreachable — retrying'
+        },
+      })
+  }
+
+  refreshing = false
+
   private pollDelayMs(draft: DraftModel): number {
-    return draft.status === 'drafting' ? 5000 : 30000
+    if (draft.status === 'complete') return 30000
+    return draft.status === 'drafting' || this.recentlyPicked() ? 2000 : 10000
+  }
+
+  /** A pick has landed in the last few minutes. */
+  private recentlyPicked(): boolean {
+    return !!this.lastPickAt && Date.now() - this.lastPickAt < 5 * 60 * 1000
   }
 
   /** Overall pick number the user picks next, for the second-screen panel. */

@@ -22,6 +22,14 @@
         <div class="poll-status" *ngIf="draft.status !== 'complete' && lastUpdatedLabel">
           <span class="updated">Updated {{ lastUpdatedLabel }}</span>
           <span class="poll-error" *ngIf="pollError">{{ pollError }}</span>
+          <button
+            type="button"
+            class="refresh-btn"
+            [disabled]="refreshing"
+            (click)="refreshNow()"
+          >
+            {{ refreshing ? 'Refreshing…' : 'Refresh' }}
+          </button>
         </div>
       </div>
 
